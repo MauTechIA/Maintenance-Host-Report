@@ -9,6 +9,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <!-- togeojson para convertir KML a GeoJSON -->
     <script src="https://cdn.jsdelivr.net/npm/@mapbox/togeojson@0.16.2/togeojson.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root{
             --bg:#f5f5f5; --card:#ffffff; --muted:#6b7280; --primary:#374151; --accent:#475569; --border:#e5e7eb; --shadow: 0 6px 18px rgba(15,23,36,0.04);
@@ -58,11 +60,28 @@
         .spinner{ width:48px; height:48px; border-radius:50%; border:5px solid #e6eef9; border-top-color:var(--primary); animation: spin 1s linear infinite }
         @keyframes spin{ to{ transform: rotate(360deg); } }
 
+        /* Admin Panel */
+        #admin-panel { background:var(--card); padding:20px; border-radius:12px; box-shadow:var(--shadow); margin:20px auto; max-width:900px; }
+        #admin-panel h2 { margin-top:0; color:#0f1724; border-bottom:1px solid var(--border); padding-bottom:10px; }
+        #admin-reports-table { width:100%; border-collapse:collapse; margin-top:15px; }
+        #admin-reports-table th, #admin-reports-table td { padding:10px; text-align:left; border-bottom:1px solid var(--border); font-size:14px; }
+        #admin-reports-table th { background:#f9fafb; font-weight:600; color:var(--muted); }
+        #admin-reports-table tr:hover { background:#f3f4f6; }
+        .admin-btn-view { color:var(--primary); text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
+        .admin-btn-view:hover { text-decoration:underline; }
+
         /* Responsive behavior: move preview to bottom on small screens */
         @media (max-width:1000px){
             #pdf-preview-container{ position:fixed; left:12px; right:12px; bottom:12px; top:auto; width:auto; height:40%; }
             #report-header, #main-title{ padding-right:12px }
             #report-form{ max-width:100%; padding-bottom:120px }
+        }
+
+        /* Mobile adjustments for sidebar */
+        @media (max-width: 768px) {
+            body { padding: 0; }
+            .main-content { padding: 20px; }
+            #pdf-preview-container { left: 10px; right: 10px; }
         }
 
         /* Print rules */
@@ -103,9 +122,215 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
             font-size: 12px;
         }
+
+        /* Login Modal - Aviation Theme */
+        #login-modal {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); /* Deep sky blue */
+            z-index: 20000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        #login-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative top bar */
+        #login-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #007acc, #00d2ff);
+        }
+
+        #login-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: inline-block;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        #login-box h2 {
+            margin: 0 0 8px 0;
+            color: #111827;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        #login-box p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 4px;
+        }
+
+        #login-box input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        #login-box input:focus {
+            border-color: #007acc;
+            box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.1);
+        }
+
+        #login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #0f1724;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 8px;
+        }
+
+        #login-btn:hover {
+            background: #1f2937;
+        }
+
+        #login-btn:active {
+            transform: scale(0.98);
+        }
+
+        #login-error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 16px;
+            font-size: 13px;
+            display: none;
+            border: 1px solid #fecaca;
+        }
+        
+        /* Hide main content initially */
+        body.loading-auth > *:not(#login-modal) {
+            filter: blur(5px);
+        }
+
+        #user-info { position:fixed; top:10px; right:10px; background:white; padding:8px 12px; border-radius:20px; box-shadow:0 2px 10px rgba(0,0,0,0.1); font-size:12px; z-index:100; display:none; align-items:center; gap:8px; }
+        #logout-btn { background:#ef4444; color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px; }
+
+        /* Sidebar */
+        .sidebar { position:fixed; left:0; top:0; width:280px; height:100vh; background:var(--card); border-right:1px solid var(--border); box-shadow:var(--shadow); z-index:50; overflow-y:auto; }
+        .sidebar-tabs { display:flex; flex-direction:column; padding:20px 0; }
+        .sidebar-tab { padding:15px 25px; cursor:pointer; border:none; background:none; text-align:left; font-size:16px; font-weight:600; color:var(--muted); border-left:4px solid transparent; transition:all 0.2s ease; }
+        .sidebar-tab:hover { background:#f9fafb; color:#0f1724; }
+        .sidebar-tab.active { background:#e5e7eb; color:#0f1724; border-left-color:var(--primary); }
+
+        /* Main content area */
+        .main-content { margin-left:280px; padding:28px; min-height:100vh; transition: margin-left 0.25s ease; }
+        /* Cuando la sidebar está oculta */
+        .sidebar-hidden { transform: translateX(-320px); transition: transform 0.25s ease; }
+        .main-content.sidebar-collapsed { margin-left:0; }
+        .content-section { display:none; }
+        .content-section.active { display:block; }
+
+        /* Responsive sidebar */
+        @media (max-width: 768px) {
+            .sidebar { width: 100%; height: auto; position: relative; border-right: none; border-bottom: 1px solid var(--border); }
+            .sidebar-tabs { flex-direction: row; padding: 10px; overflow-x: auto; }
+            .sidebar-tab { padding: 10px 15px; white-space: nowrap; }
+            .main-content { margin-left: 0; padding: 20px; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- Login Modal -->
+    <div id="login-modal">
+        <div id="login-box">
+            <div id="login-icon">✈️</div>
+            <h2>Bienvenido a Bordo</h2>
+            <p>Sistema de Reporte de Mantenimiento</p>
+            
+            <div class="input-group">
+                <label>Correo Institucional</label>
+                <input type="email" id="login-email" placeholder="nombre@aeropuerto.com" autocomplete="email" />
+            </div>
+            
+            <div class="input-group">
+                <label>Contraseña</label>
+                <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+            </div>
+
+            <button id="login-btn">Iniciar Sesión</button>
+            <div id="login-error"></div>
+            
+            <div style="margin-top: 20px; font-size: 11px; color: #9ca3af;">
+                Authorized Personnel Only • SSO Runway Report
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar sidebar-hidden" id="app-sidebar">
+        <div class="sidebar-tabs">
+            <button class="sidebar-tab active" data-tab="revision">📋 Formato de Revisión</button>
+            <button class="sidebar-tab" data-tab="historial">📚 Historial de Reportes</button>
+            <button class="sidebar-tab" data-tab="estadistica">📊 Estadísticas</button>
+        </div>
+    </div>
+
+    <!-- Botón flotante para abrir/cerrar la barra lateral -->
+    <button id="toggle-sidebar-btn" title="Abrir menú" style="position:fixed;left:12px;top:12px;z-index:60;background:var(--primary);color:#fff;border:none;padding:10px 12px;border-radius:8px;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;">☰</button>
+
+    <!-- Main Content -->
+    <div class="main-content">
+
+    <!-- User Info (Top Right) -->
+    <div id="user-info">
+        <span id="user-email"></span>
+        <span id="user-role" style="background:#e5e7eb; padding:2px 6px; border-radius:4px; font-weight:bold;"></span>
+        <button id="logout-btn">Salir</button>
+    </div>
 
     <header class="report-header">
         <div class="left">
@@ -128,6 +353,8 @@
 
     <h1 id="main-title">Formato de Revision del Area de Movimiento</h1>
     
+    <!-- Formato de Revisión Section -->
+    <div id="revision-section" class="content-section active">
         
     <form id="report-form" action="#" method="get">
 
@@ -147,6 +374,12 @@
             <label for="turno_nocturno">Nocturno</label><br>
         </div>
 
+        <h3>🛫 Pista a Revisar</h3>
+        <select id="pista-select" name="pista_revisar" required>
+            <option value="">-- Cargando pistas... --</option>
+        </select>
+        <button type="button" id="cambiar-pista-btn" style="display:none; margin-left:10px; padding:6px 12px; background:#f59e0b; color:white; border:none; border-radius:6px; cursor:pointer; font-size:13px; transition: background-color 0.2s;">Cambiar pista</button>
+
         <h3>🧑‍✈️ Responsable(s) que elaboran el reporte</h3>
         <!-- Select para Responsable: reemplaza la lista de botones -->
         <select id="report-authors-select" name="report_authors">
@@ -158,7 +391,7 @@
             <option value="Israel Montes Sarabia">Israel Montes Sarabia</option>
             <option value="Daniel Cuevas">Daniel Cuevas</option>
             <option value="Mauricio Neos">Mauricio Neos</option>
-            <option value="Isaac Lopéz">Isaac Lopéz</option>
+            <option value="Isaac López">Isaac López</option>
             <option value="Mauro Hernández">Mauro Hernández</option>
             <option value="Daniel Mejía">Daniel Mejía</option>
         </select>
@@ -207,9 +440,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_area_movimiento][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_area_movimiento][codigo]"></label>
@@ -241,9 +474,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_franjas][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_franjas][codigo]"></label>
@@ -273,9 +506,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_iluminacion][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_iluminacion][codigo]"></label>
@@ -305,9 +538,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_marcas][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_marcas][codigo]"></label>
@@ -335,9 +568,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_ayudas][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_ayudas][codigo]"></label>
@@ -368,9 +601,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_obstaculos][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_obstaculos][codigo]"></label>
@@ -400,9 +633,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_combustibles][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_combustibles][codigo]"></label>
@@ -435,9 +668,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_construccion][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_construccion][codigo]"></label>
@@ -466,9 +699,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_ssei][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_ssei][codigo]"></label>
@@ -497,9 +730,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_vehiculos][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_vehiculos][codigo]"></label>
@@ -529,9 +762,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_fauna][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_fauna][codigo]"></label>
@@ -559,9 +792,9 @@
     <label>Prioridad: 
         <select class="priority-select" name="details[tipo_proteccion][prioridad]">
             <option value="">N/A</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
+            <option value="1">Baja / No Urgente</option>
+            <option value="2">Media / Urgencia Moderada</option>
+            <option value="3">Alta / Muy Urgente</option>
         </select>
     </label><br>
         <label>Codigo de Seguimiento: <input type="text" name="details[tipo_proteccion][codigo]"></label>
@@ -573,7 +806,80 @@
         <input type="submit" value="Generar reporte">
     </form>
 
-    </form>
+    </div> <!-- End revision-section -->
+
+    <!-- Historial de Reportes Section -->
+    <div id="historial-section" class="content-section">
+
+        <h1>Historial de Reportes</h1>
+        
+        <!-- Admin Panel -->
+        <div id="admin-panel">
+            <h2>Historial de Reportes (Admin)</h2>
+            <button id="refresh-admin-btn" class="btn btn-ghost" style="margin-bottom:10px;">🔄 Actualizar Lista</button>
+            <div id="admin-reports-container" style="display: flex; flex-direction: column; gap: 20px;">
+                <!-- Los reportes se organizarán por pista aquí -->
+            </div>
+        </div>
+    </div> <!-- End historial-section -->
+
+    <!-- Estadísticas Section -->
+    <div id="estadistica-section" class="content-section">
+
+        <h1>Estadísticas de Reportes</h1>
+        
+        <!-- Estadísticas Panel -->
+        <div id="estadisticas-panel" style="background:var(--card); padding:20px; border-radius:12px; box-shadow:var(--shadow); margin:20px auto; max-width:1200px;">
+            <h2>📊 Panel de Estadísticas</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                <!-- Estadísticas principales -->
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="total-reports">0</h3>
+                    <p style="margin: 0; font-size: 1.1em;">Total de Reportes</p>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="reports-this-month">0</h3>
+                    <p style="margin: 0; font-size: 1.1em;">Reportes este Mes</p>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="avg-priority">0</h3>
+                    <p style="margin: 0; font-size: 1.1em;">Prioridad Promedio</p>
+                </div>
+                
+                <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                    <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="completion-rate">0%</h3>
+                    <p style="margin: 0; font-size: 1.1em;">Tasa de Completitud</p>
+                </div>
+            </div>
+            
+            <!-- Gráficos y detalles -->
+            <div style="margin-top: 30px;">
+                <h3>Distribución por Tipo de Inspección</h3>
+                <div id="inspection-types-chart" style="height: 300px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 20px 0;">
+                    <p style="color: #6b7280;">Cargando datos...</p>
+                </div>
+                
+                <h3 style="margin-top: 30px;">Reportes por Mes</h3>
+                <div id="monthly-reports-chart" style="height: 300px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 20px 0;">
+                    <p style="color: #6b7280;">Cargando datos...</p>
+                </div>
+
+                <h3 style="margin-top: 30px;">Distribución por Pista</h3>
+                <div id="runway-chart" style="height: 300px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 20px 0;">
+                    <p style="color: #6b7280;">Cargando datos...</p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button id="refresh-estadisticas-btn" class="btn btn-ghost" style="padding: 10px 20px;">🔄 Actualizar Estadísticas</button>
+            </div>
+        </div>
+    </div> <!-- End estadistica-section -->
+
+    </div> <!-- End main-content -->
 
         <!-- Scripts: fecha/hora, bloqueo Cargo y comportamiento Turno -->
         <script>
@@ -586,6 +892,10 @@
             var str = date + ' ' + time;
             var el = document.getElementById('report-date');
             if(el) el.textContent = str;
+            var elHistorial = document.getElementById('report-date-historial');
+            if(elHistorial) elHistorial.textContent = str;
+            var elEstadistica = document.getElementById('report-date-estadistica');
+            if(elEstadistica) elEstadistica.textContent = str;
             // Mostrar horario UTC: hora en la primera línea y fecha UTC en la segunda (sin leyenda previa)
             try{
                 var utcHours = pad(d.getUTCHours());
@@ -595,6 +905,10 @@
                 var utcDateStr = pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear();
                 var utcEl = document.getElementById('report-utc');
                 if(utcEl) utcEl.innerHTML = '<div><strong>' + utcStr + ' UTC</strong></div><div style="font-size:12px;color:#6b7280;margin-top:4px">' + utcDateStr + '</div>';
+                var utcElHistorial = document.getElementById('report-utc-historial');
+                if(utcElHistorial) utcElHistorial.innerHTML = '<div><strong>' + utcStr + ' UTC</strong></div><div style="font-size:12px;color:#6b7280;margin-top:4px">' + utcDateStr + '</div>';
+                var utcElEstadistica = document.getElementById('report-utc-estadistica');
+                if(utcElEstadistica) utcElEstadistica.innerHTML = '<div><strong>' + utcStr + ' UTC</strong></div><div style="font-size:12px;color:#6b7280;margin-top:4px">' + utcDateStr + '</div>';
             }catch(e){}
 
             // Bloquear el campo Cargo al seleccionar una opción
@@ -902,6 +1216,22 @@
                     // attach controls to the clone
                     setupItemControlsFor(newId);
 
+                    // attach map picker to the new Lugar input
+                    try{
+                        if(newDet){
+                            var lugarInput = newDet.querySelector('input[name*="lugar"]');
+                            if(lugarInput){
+                                lugarInput.addEventListener('click', function(e){
+                                    e.preventDefault();
+                                    if(window.openMapPicker) window.openMapPicker(lugarInput);
+                                });
+                                lugarInput.style.cursor = 'pointer';
+                                lugarInput.setAttribute('placeholder', 'Click para seleccionar en mapa');
+                                lugarInput.style.pointerEvents = 'auto';
+                            }
+                        }
+                    }catch(e){}
+
                     // also attach hallazgo 'Otro' handler if present
                     try{
                         var hallSelect = document.getElementById('hallazgo_' + newId);
@@ -1061,12 +1391,83 @@
             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
 
             <script>
+                // Funcionalidad para bloqueo/desbloqueo del select de pista
+                document.addEventListener('DOMContentLoaded', function(){
+                    var pistaSelect = document.getElementById('pista-select');
+                    var cambiarPistaBtn = document.getElementById('cambiar-pista-btn');
+                    
+                    if(pistaSelect && cambiarPistaBtn) {
+                        // Función para bloquear el select
+                        function bloquearPista() {
+                            pistaSelect.disabled = true;
+                            pistaSelect.style.backgroundColor = '#f3f4f6';
+                            pistaSelect.style.cursor = 'not-allowed';
+                            cambiarPistaBtn.style.display = 'inline-block';
+                        }
+                        
+                        // Función para desbloquear el select
+                        function desbloquearPista() {
+                            pistaSelect.disabled = false;
+                            pistaSelect.style.backgroundColor = '';
+                            pistaSelect.style.cursor = '';
+                            cambiarPistaBtn.style.display = 'none';
+                            pistaSelect.focus();
+                        }
+                        
+                        // Event listener para cambios en el select: mostrar botón para bloquear/poder cambiar
+                        pistaSelect.addEventListener('change', function(){
+                            if(this.value) {
+                                cambiarPistaBtn.style.display = 'inline-block';
+                                cambiarPistaBtn.textContent = 'Bloquear pista';
+                            } else {
+                                cambiarPistaBtn.style.display = 'none';
+                            }
+                        });
+
+                        // Event listener para el botón cambiar pista: alternar bloqueo
+                        cambiarPistaBtn.addEventListener('click', function(){
+                            if(pistaSelect.disabled) {
+                                // Si está bloqueada, desbloquear
+                                desbloquearPista();
+                            } else {
+                                // Si no está bloqueada, bloquear
+                                bloquearPista();
+                            }
+                        });
+                        
+                        // Efectos hover para el botón
+                        cambiarPistaBtn.addEventListener('mouseenter', function(){
+                            this.style.backgroundColor = '#d97706';
+                        });
+                        cambiarPistaBtn.addEventListener('mouseleave', function(){
+                            this.style.backgroundColor = '#f59e0b';
+                        });
+                        
+                        // Verificar si ya hay una pista seleccionada (por ejemplo, al restaurar estado)
+                        if(pistaSelect.value) {
+                            cambiarPistaBtn.style.display = 'inline-block';
+                            cambiarPistaBtn.textContent = 'Bloquear pista';
+                        }
+                    }
+                });
+
                 // Manejar envío del formulario: compilar datos y generar PDF
                 document.addEventListener('DOMContentLoaded', function(){
                     var form = document.getElementById('report-form');
                     if(!form) return;
-                    form.addEventListener('submit', function(e){
+                    form.addEventListener('submit', async function(e){
                         e.preventDefault();
+                        
+                        // Feedback visual inmediato
+                        var submitBtn = form.querySelector('button[type="submit"]') || form.querySelector('input[type="submit"]');
+                        var originalBtnText = '';
+                        if(submitBtn) {
+                            originalBtnText = submitBtn.textContent || submitBtn.value;
+                            submitBtn.disabled = true;
+                            if(submitBtn.tagName === 'BUTTON') submitBtn.textContent = 'Guardando en base de datos...';
+                            else submitBtn.value = 'Guardando en base de datos...';
+                        }
+
                         // recolectar metadatos
                         var fecha = document.getElementById('report-date') ? document.getElementById('report-date').textContent : '';
                         // Quitar zona horaria si existe en el texto (ej. "dd/mm/yyyy hh:mm:ss (Zona)")
@@ -1097,6 +1498,19 @@
                         // Obtener Turno seleccionado (si aplica)
                         var turnoEl = document.querySelector('input[name="turno"]:checked');
                         var turnoText = turnoEl ? (document.querySelector('label[for="' + turnoEl.id + '"]') ? document.querySelector('label[for="' + turnoEl.id + '"]').textContent.trim() : (turnoEl.value || '')) : '-';
+                        // Obtener Pista seleccionada
+                        var pistaEl = document.getElementById('pista-select');
+                        var pistaText = pistaEl && pistaEl.value ? pistaEl.value : '-';
+                        // Validar que se haya seleccionado una pista
+                        if (!pistaEl || !pistaEl.value) {
+                            alert('Por favor selecciona la pista a revisar.');
+                            if(submitBtn) {
+                                submitBtn.disabled = false;
+                                if(submitBtn.tagName === 'BUTTON') submitBtn.textContent = originalBtnText;
+                                else submitBtn.value = originalBtnText;
+                            }
+                            return;
+                        }
                         // calcular horario UTC (hora) y fecha UTC para mostrar en el PDF
                         function pad(n){ return n.toString().padStart(2,'0'); }
                         var now = new Date();
@@ -1140,6 +1554,151 @@
                             return;
                         }
 
+                        // Guardar en Supabase
+                        var saveToSupabase = async function(pdfUrl) {
+                            console.log('Iniciando guardado en Supabase...');
+                            try {
+                                if (!window.supabaseClient) {
+                                    console.error('Cliente Supabase no inicializado (window.supabaseClient is missing)');
+                                    alert('Error: No hay conexión con la base de datos.');
+                                    return null;
+                                }
+                                
+                                var { data: { session } } = await window.supabaseClient.auth.getSession();
+                                if (!session) {
+                                    console.warn('No hay sesión activa, no se guardará en base de datos.');
+                                    alert('Atención: No has iniciado sesión. El reporte se generará en PDF pero NO se guardará en la base de datos.');
+                                    return null;
+                                }
+
+                                console.log('Sesión activa:', session.user.email);
+
+                                // 1. Insertar reporte principal
+                                var reportPayload = {
+                                    folio: folio,
+                                    fecha_local: fecha,
+                                    fecha_utc: utcDateStr + ' ' + utcTimeStr,
+                                    tipo_inspeccion: tiposText,
+                                    turno: turnoText,
+                                    pista: pistaText,
+                                    responsable: autor,
+                                    cargo: cargo,
+                                    pdf_url: pdfUrl || null
+                                };
+                                console.log('Insertando reporte:', reportPayload);
+
+                                var { data: reportData, error: reportError } = await window.supabaseClient
+                                    .from('reports')
+                                    .insert([reportPayload])
+                                    .select();
+
+                                if (reportError) {
+                                    console.error('Error guardando reporte:', reportError);
+                                    alert('Error guardando en base de datos: ' + reportError.message);
+                                    return null;
+                                }
+
+                                var reportId = reportData[0].id;
+                                console.log('Reporte guardado con ID:', reportId);
+
+                                // 2. Preparar items para insertar
+                                var itemsToInsert = [];
+                                filled.forEach(function(f) {
+                                    var lugarVal = '';
+                                    var hallazgoVal = '';
+                                    var condicionVal = '';
+                                    var observacionesVal = '';
+                                    var prioridadVal = '';
+                                    var codigoVal = '';
+
+                                    f.fields.forEach(function(ff) {
+                                        var k = ff.key.toLowerCase();
+                                        var v = ff.value;
+                                        if (k.includes('lugar')) lugarVal = v;
+                                        else if (k.includes('hallazgo')) hallazgoVal = v;
+                                        else if (k.includes('condici')) condicionVal = v;
+                                        else if (k.includes('observac')) observacionesVal = v;
+                                        else if (k.includes('prioridad')) prioridadVal = v;
+                                        else if (k.includes('codigo') || k.includes('seguimiento')) codigoVal = v;
+                                    });
+
+                                    itemsToInsert.push({
+                                        report_id: reportId,
+                                        categoria: f.name,
+                                        lugar: lugarVal,
+                                        hallazgo: hallazgoVal,
+                                        condicion: condicionVal,
+                                        observaciones: observacionesVal,
+                                        prioridad: prioridadVal,
+                                        codigo_seguimiento: codigoVal
+                                    });
+                                });
+
+                                console.log('Insertando items:', itemsToInsert);
+
+                                // 3. Insertar items
+                                var { error: itemsError } = await window.supabaseClient
+                                    .from('report_items')
+                                    .insert(itemsToInsert);
+
+                                if (itemsError) {
+                                    console.error('Error guardando items:', itemsError);
+                                    alert('Reporte guardado, pero hubo error al guardar los detalles: ' + itemsError.message);
+                                } else {
+                                    console.log('Items guardados exitosamente.');
+                                }
+                                
+                                return reportId;
+
+                            } catch (e) {
+                                console.error('Excepción guardando en Supabase:', e);
+                                alert('Error inesperado al guardar en base de datos: ' + e.message);
+                                return null;
+                            }
+                        };
+                        
+                        // Función para subir PDF
+                        var uploadPdfToSupabase = async function(blob, folio) {
+                            try {
+                                if (!window.supabaseClient) return null;
+                                var { data: { session } } = await window.supabaseClient.auth.getSession();
+                                if (!session) return null;
+
+                                var filename = 'report_' + folio + '_' + new Date().getTime() + '.pdf';
+                                var { data, error } = await window.supabaseClient
+                                    .storage
+                                    .from('reports')
+                                    .upload(filename, blob, {
+                                        cacheControl: '3600',
+                                        upsert: false
+                                    });
+
+                                if (error) {
+                                    console.error('Error subiendo PDF:', error);
+                                    // Manejo específico si el bucket no existe
+                                    var msg = (error && (error.message || error.error_description || JSON.stringify(error))) || 'Error desconocido';
+                                    if (msg.toString().toLowerCase().indexOf('bucket not found') !== -1 || (error && error.status === 404)) {
+                                        var guidance = 'El bucket de almacenamiento "reports" no existe en tu proyecto de Supabase.\n\nPasos sugeridos:\n1) Entra al Dashboard de Supabase -> Storage -> Create new bucket.\n2) Crea un bucket llamado "reports" (temporalmente puedes marcarlo Public para pruebas).\n3) Actualiza las políticas si quieres controlar acceso (ver README).\n\nSi quieres, puedo agregar instrucciones automáticas o intentar usar createSignedUrl si el bucket debe permanecer privado.';
+                                        alert('No se pudo subir el PDF: Bucket not found.\n\n' + guidance);
+                                    } else {
+                                        alert('No se pudo subir el PDF: ' + msg);
+                                    }
+                                    return null;
+                                }
+
+                                // Guardar el path del archivo (no la URL pública, para buckets privados)
+                                return filename;
+                            } catch(e) {
+                                console.error('Excepción subiendo PDF:', e);
+                                alert('Excepción subiendo PDF: ' + (e && e.message ? e.message : JSON.stringify(e)));
+                                return null;
+                            }
+                        };
+
+                        // Modificamos el flujo: Primero generamos PDF (blob), luego subimos, luego guardamos data
+                        // Pero html2pdf es complejo de separar. 
+                        // Estrategia: Usar html2pdf para obtener el blob, luego subir, luego guardar data, luego descargar.
+                        
                         // Construir HTML de resumen
                         var container = document.getElementById('report-summary');
                         var html = '<div style="font-family:Arial,Helvetica,sans-serif;color:#0f1724;">';
@@ -1151,6 +1710,8 @@
                         // Obtener logo (intentar desde header) y membrete
                         var logoSrc = '';
                         try{ var logoEl = document.querySelector('.report-header .left img'); if(logoEl) logoSrc = logoEl.getAttribute('src'); }catch(e){}
+                        // Evitar logos locales (file://) que producen errores CORS al generar el PDF
+                        try{ if(logoSrc && typeof logoSrc === 'string' && logoSrc.indexOf('file:') === 0) { logoSrc = ''; } }catch(e){}
                         // Inline SVG fallback logo (se mostrará si no se puede cargar la imagen externa)
                         var inlineLogo = '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="90" viewBox="0 0 240 90">'
                             + '<rect width="100%" height="100%" fill="#007acc" rx="8" />'
@@ -1185,6 +1746,8 @@
                         if(logoSrc){ html += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 8px">'; }
                         else { html += inlineLogo; }
                         html += '<h2 style="color:#0b66c3;margin:0;font-size:18px;">Reporte de Inspección en Área de Movimiento y Maniobras</h2>';
+                        // Agregar pista en el encabezado - centrado, negritas, tamaño más grande
+                        html += '<div style="text-align:center;margin:8px 0;font-size:16px;font-weight:bold;color:#0f1724;">' + (pistaText || '-') + '</div>';
                         html += '</div>';
 
                         // derecha: UTC time (hora) con fecha debajo, y folio
@@ -1225,7 +1788,8 @@
                             var lugarVal = '';
                             if(f.fields && f.fields.length){
                                 // Mapas de colores para prioridad y condición
-                                var prioColor = { '1': '#28a745', '2': '#ffc107', '3': '#ff8c00' };
+                                var prioColor = { '1': '#28a745', '2': '#ffc107', '3': '#dc3545' };
+                                var prioText = { '1': 'Baja / No Urgente', '2': 'Media / Urgencia Moderada', '3': 'Alta / Muy Urgente' };
                                 var condColor = { 'Satisfactorio': '#28a745', 'No Satisfactorio': '#dc3545', 'N/A': '#6c757d' };
                                 function colorDot(c){ return '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:' + c + ';margin-left:8px;vertical-align:middle;"></span>'; }
                                 infoHtml = '<ul style="margin:6px 0 6px 16px;padding:0;">';
@@ -1245,6 +1809,8 @@
                                     try{
                                         if(/prioridad/i.test(key)){
                                             if(prioColor[val]) dot = colorDot(prioColor[val]);
+                                            // Convertir valor numérico a texto descriptivo para prioridad
+                                            if(prioText[val]) val = prioText[val];
                                         } else if(/condici/i.test(key)){
                                             if(condColor[val]) dot = colorDot(condColor[val]);
                                         }
@@ -1330,19 +1896,112 @@
                                 var spinner = document.getElementById('pdf-spinner');
                                 var preview = document.getElementById('pdf-preview-container');
                                 var submitBtn = form.querySelector('input[type="submit"]');
+                                var tempContainer = null; // Para elemento temporal del PDF
                                 try{ if(spinner) spinner.style.display = 'flex'; if(submitBtn){ submitBtn.disabled = true; } }catch(e){}
 
                                 function finalizePdf(){
                                     try{
-                                        // Generar el PDF y obtener el objeto jsPDF para crear un Blob
-                                        html2pdf().set(opt).from(container).toPdf().get('pdf').then(function(pdf){
-                                        try{ if(spinner) spinner.style.display = 'none'; if(submitBtn) submitBtn.disabled = false; }catch(e){}
+                                        // Crear elemento temporal fuera del DOM para evitar interferencias
+                                        tempContainer = document.createElement('div');
+                                        tempContainer.innerHTML = container.innerHTML;
+                                        // Insertarlo de forma que ocupe layout pero no sea visible: visibility:hidden mantiene el flujo
+                                        tempContainer.style.position = 'fixed';
+                                        tempContainer.style.left = '0';
+                                        tempContainer.style.top = '0';
+                                        tempContainer.style.visibility = 'hidden';
+                                        tempContainer.style.pointerEvents = 'none';
+                                        tempContainer.style.width = '800px';
+                                        tempContainer.style.background = '#fff';
+                                        // Añadir al DOM y calcular altura real para evitar canvas 0px
+                                        document.body.appendChild(tempContainer);
+                                        // Forzar height si lo que se renderiza tiene altura 0
+                                        try{
+                                            var rect = tempContainer.getBoundingClientRect();
+                                            if(!rect.height || rect.height < 10) {
+                                                // usar scrollHeight como fallback
+                                                var h = tempContainer.scrollHeight || (window.innerHeight - 40);
+                                                tempContainer.style.height = (h + 40) + 'px';
+                                            }
+                                        }catch(e){}
+                                        
+                                        // Generar el PDF usando el elemento temporal
+                                        html2pdf().set(opt).from(tempContainer).toPdf().get('pdf').then(async function(pdf){
+                                        
+                                        // Limpiar elemento temporal
+                                        document.body.removeChild(tempContainer);
+                                        
+                                        // Obtener blob
                                         var blob;
                                         try{ blob = pdf.output('blob'); }
                                         catch(e){
                                             try{ var ab = pdf.output('arraybuffer'); blob = new Blob([ab], {type:'application/pdf'}); }
                                             catch(err){ console.error('No se pudo obtener blob del PDF', err); blob = null; }
                                         }
+
+                                        // Subir a Supabase y Guardar Datos
+                                        if(blob) {
+                                            try {
+                                                if(submitBtn) {
+                                                    if(submitBtn.tagName === 'BUTTON') submitBtn.textContent = 'Subiendo reporte...';
+                                                    else submitBtn.value = 'Subiendo reporte...';
+                                                }
+                                                
+                                                var pdfUrl = await uploadPdfToSupabase(blob, folio);
+
+                                                if(submitBtn) {
+                                                    if(submitBtn.tagName === 'BUTTON') submitBtn.textContent = 'Guardando datos...';
+                                                    else submitBtn.value = 'Guardando datos...';
+                                                }
+
+                                                try {
+                                                    // Evitar bloqueo infinito: esperar máximo 10s
+                                                    var savePromise = saveToSupabase(pdfUrl);
+                                                    var timeout = new Promise(function(_, reject){ setTimeout(function(){ reject(new Error('timeout')); }, 10000); });
+                                                    var reportId = await Promise.race([savePromise, timeout]);
+                                                    if(!reportId) {
+                                                        console.warn('saveToSupabase devolvió null o undefined.');
+                                                        alert('Atención: No se pudo guardar el reporte en la base de datos. Revisa la consola para más detalles.');
+                                                    } else {
+                                                        console.log('Reporte guardado con ID:', reportId);
+                                                    }
+                                                } catch(e) {
+                                                    if(e && e.message === 'timeout') {
+                                                        console.error('Timeout guardando en la base de datos.');
+                                                        alert('El guardado en la base de datos tardó demasiado y fue cancelado. El PDF se generó localmente.');
+                                                    } else {
+                                                        console.error('Error guardando en DB:', e);
+                                                        alert('Error guardando en la base de datos: ' + (e && e.message ? e.message : JSON.stringify(e)) );
+                                                    }
+                                                }
+                                                
+                                            } catch(e) {
+                                                console.error('Error en proceso de guardado:', e);
+                                            }
+                                        } else {
+                                            // Fallback si no hay blob, intentar guardar sin PDF URL (con timeout)
+                                            try {
+                                                var savePromise2 = saveToSupabase(null);
+                                                var timeout2 = new Promise(function(_, reject){ setTimeout(function(){ reject(new Error('timeout')); }, 10000); });
+                                                var reportId2 = await Promise.race([savePromise2, timeout2]);
+                                                if(!reportId2) {
+                                                    console.warn('No se guardó el reporte (fallback).');
+                                                }
+                                            } catch(e) {
+                                                console.error('Error guardando sin PDF:', e);
+                                            }
+                                        }
+
+                                        try{ 
+                                            if(spinner) spinner.style.display = 'none'; 
+                                            if(submitBtn) { 
+                                                submitBtn.disabled = false; 
+                                                if(originalBtnText) {
+                                                    if(submitBtn.tagName === 'BUTTON') submitBtn.textContent = originalBtnText;
+                                                    else submitBtn.value = originalBtnText;
+                                                }
+                                            } 
+                                        }catch(e){}
+                                        
                                         if(!blob){ alert('No se pudo generar el PDF correctamente.'); return; }
                                         var url = URL.createObjectURL(blob);
                                         var iframe = document.getElementById('pdf-preview-frame');
@@ -1363,11 +2022,24 @@
                                             preview.style.display = 'none'; iframe.src = ''; try{ if(preview._currentUrl){ URL.revokeObjectURL(preview._currentUrl); delete preview._currentUrl; } }catch(e){}
                                         };
                                     }).catch(function(err){
-                                        try{ if(spinner) spinner.style.display = 'none'; if(submitBtn) submitBtn.disabled = false; }catch(e){}
+                                        // Limpiar elemento temporal si existe
+                                        if(tempContainer && tempContainer.parentNode) document.body.removeChild(tempContainer);
+                                        try{ 
+                                            if(spinner) spinner.style.display = 'none'; 
+                                            if(submitBtn) { 
+                                                submitBtn.disabled = false; 
+                                                if(originalBtnText) {
+                                                    if(submitBtn.tagName === 'BUTTON') submitBtn.textContent = originalBtnText;
+                                                    else submitBtn.value = originalBtnText;
+                                                }
+                                            } 
+                                        }catch(e){}
                                         console.error('Error generando PDF', err);
                                         alert('Ocurrió un error al generar el PDF. Revisa la consola.');
                                     });
                                 }catch(e){
+                                    // Limpiar elemento temporal si existe
+                                    if(tempContainer && tempContainer.parentNode) document.body.removeChild(tempContainer);
                                     try{ if(spinner) spinner.style.display = 'none'; if(submitBtn) submitBtn.disabled = false; }catch(err){}
                                     console.error('Excepción al invocar html2pdf', e);
                                     alert('Ocurrió un error al generar el PDF. Revisa la consola.');
@@ -1548,6 +2220,18 @@
                                 });
                             }
                         }catch(e){ console.error('Error restaurando estado', e); }
+                        
+                        // Después de restaurar el estado, verificar si hay pista seleccionada y bloquear el select
+                        setTimeout(function(){
+                            var pistaSelect = document.getElementById('pista-select');
+                            var cambiarPistaBtn = document.getElementById('cambiar-pista-btn');
+                            if(pistaSelect && cambiarPistaBtn && pistaSelect.value) {
+                                pistaSelect.disabled = true;
+                                pistaSelect.style.backgroundColor = '#f3f4f6';
+                                pistaSelect.style.cursor = 'not-allowed';
+                                cambiarPistaBtn.style.display = 'inline-block';
+                            }
+                        }, 200);
                     }
 
                     // wire save triggers
@@ -1709,6 +2393,7 @@
                 itemIds.forEach(function(id){
                    
                     var other = document.getElementById('hallazgo_other_' + id);
+                    var chk = document.getElementById(id);
                     if(!chk || !other) return;
                     chk.addEventListener('change', function(){
                         if(!chk.checked){ other.style.display = 'none'; other.value = ''; }
@@ -1909,8 +2594,8 @@
 
         <script>
             (function(){
-                // Colorear selects de prioridad: 1=verde, 2=amarillo, 3=naranja
-                var colorMap = { '1': '#28a745', '2': '#ffc107', '3': '#ff8c00' };
+                // Colorear selects de prioridad: 1=verde, 2=amarillo, 3=rojo
+                var colorMap = { '1': '#28a745', '2': '#ffc107', '3': '#dc3545' };
                 function updatePriorityColor(sel){
                     try{
                         var v = sel.value;
@@ -1960,5 +2645,561 @@
             </div>
         </div>
 
+        <!-- Supabase Logic -->
+        <script>
+            (function(){
+                // Configuración de Supabase
+                var SUPABASE_URL = 'https://pwvedjqknrwlebayeodd.supabase.co';
+                var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3dmVkanFrbnJ3bGViYXllb2RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTIwMDcsImV4cCI6MjA4MTY2ODAwN30.PDVUtOTYDdhQk25U9K-i6mZFJ2vIXHksEEQ9z2mMW5o';
+                // ⚠️ ADVERTENCIA: La Service Role Key es secreta y potente. NO la expongas en producción. Úsala solo para pruebas.
+                // Para producción, crea una Edge Function en Supabase para generar signed URLs de forma segura.
+                var SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3dmVkanFrbnJ3bGViYXllb2RkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjA5MjAwNywiZXhwIjoyMDgxNjY4MDA3fQ.j9iwH161MBhjJXlc0eKmvMtUaFHSRQqZXsu4b1SJom4'; // Tu Service Role Key
+                
+                var supabase = null;
+                var serviceSupabase = null; // Cliente con service key para operaciones administrativas
+                try {
+                    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    window.supabaseClient = supabase; // Exponer cliente globalmente
+                    if (SUPABASE_SERVICE_KEY && SUPABASE_SERVICE_KEY !== 'TU_SERVICE_ROLE_KEY_AQUI') {
+                        serviceSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+                    }
+                } catch(e) {
+                    console.error('Error inicializando Supabase:', e);
+                    return;
+                }
+
+                // Función para cargar pistas desde Supabase
+                async function loadPistas() {
+                    try {
+                        const { data: pistas, error } = await supabase
+                            .from('pistas')
+                            .select('id, nombre, codigo')
+                            .eq('activo', true)
+                            .order('codigo');
+
+                        if (error) {
+                            console.error('Error cargando pistas:', error);
+                            // Fallback: opciones por defecto si falla la carga
+                            setDefaultPistas();
+                            return;
+                        }
+
+                        const pistaSelect = document.getElementById('pista-select');
+                        if (!pistaSelect) return;
+
+                        // Limpiar opciones existentes
+                        pistaSelect.innerHTML = '<option value="">-- Seleccionar Pista --</option>';
+
+                        // Agregar opciones desde Supabase
+                        pistas.forEach(pista => {
+                            const option = document.createElement('option');
+                            option.value = pista.nombre;
+                            option.textContent = pista.nombre;
+                            option.dataset.id = pista.id;
+                            option.dataset.codigo = pista.codigo;
+                            pistaSelect.appendChild(option);
+                        });
+
+                        console.log('Pistas cargadas:', pistas.length);
+                    } catch (error) {
+                        console.error('Error en loadPistas:', error);
+                        // Fallback: opciones por defecto
+                        setDefaultPistas();
+                    }
+                }
+
+                // Función fallback para opciones por defecto
+                function setDefaultPistas() {
+                    const pistaSelect = document.getElementById('pista-select');
+                    if (!pistaSelect) return;
+
+                    pistaSelect.innerHTML = `
+                        <option value="">-- Seleccionar Pista --</option>
+                        <option value="RWY 04C-22C">RWY 04C-22C</option>
+                        <option value="RWY 04L-22R">RWY 04L-22R</option>
+                    `;
+                }
+
+                // Cargar pistas al inicializar
+                loadPistas();
+
+                var loginModal = document.getElementById('login-modal');
+                var loginBtn = document.getElementById('login-btn');
+                var emailInput = document.getElementById('login-email');
+                var passInput = document.getElementById('login-password');
+                var errorMsg = document.getElementById('login-error');
+                var userInfo = document.getElementById('user-info');
+                var userEmailSpan = document.getElementById('user-email');
+                var userRoleSpan = document.getElementById('user-role');
+                var logoutBtn = document.getElementById('logout-btn');
+                var reportForm = document.getElementById('report-form');
+                var reportHeader = document.querySelector('.report-header');
+                var mainTitle = document.getElementById('main-title');
+
+                // Ocultar formulario inicialmente
+                if(reportForm) reportForm.style.display = 'none';
+                if(reportHeader) reportHeader.style.display = 'none';
+                if(mainTitle) mainTitle.style.display = 'none';
+                document.body.classList.add('loading-auth');
+
+                async function checkSession() {
+                    var { data: { session } } = await supabase.auth.getSession();
+                    if (session) {
+                        handleUser(session.user);
+                    } else {
+                        showLogin();
+                    }
+                }
+
+                function showLogin() {
+                    if(loginModal) loginModal.style.display = 'flex';
+                    if(userInfo) userInfo.style.display = 'none';
+                    if(reportForm) reportForm.style.display = 'none';
+                    if(reportHeader) reportHeader.style.display = 'none';
+                    if(mainTitle) mainTitle.style.display = 'none';
+                    document.body.classList.add('loading-auth');
+                }
+
+                async function handleUser(user) {
+                    if(loginModal) loginModal.style.display = 'none';
+                    if(userInfo) userInfo.style.display = 'flex';
+                    if(userEmailSpan) userEmailSpan.textContent = user.email;
+                    
+                    // Mostrar contenido principal
+                    if(reportHeader) reportHeader.style.display = 'flex';
+                    if(mainTitle) mainTitle.style.display = 'block';
+                    document.body.classList.remove('loading-auth');
+
+                    // Obtener rol del usuario
+                    // Intentamos obtenerlo de 'user_metadata' primero, o de una tabla 'profiles'
+                    var role = 'viewer'; // default
+                    
+                    // 1. Check metadata
+                    if (user.user_metadata && user.user_metadata.role) {
+                        role = user.user_metadata.role;
+                    } else {
+                        // 2. Check profiles table (asumiendo tabla 'profiles' con columna 'role')
+                        var { data, error } = await supabase
+                            .from('profiles')
+                            .select('role')
+                            .eq('id', user.id)
+                            .single();
+                        
+                        if (data && data.role) {
+                            role = data.role;
+                        }
+                    }
+
+                    if(userRoleSpan) userRoleSpan.textContent = role;
+
+                    // Lógica de permisos basada en rol
+                    // Roles permitidos para editar: 'admin', 'editor', 'inspector'
+                    var allowedRoles = ['admin', 'editor', 'inspector', 'superuser'];
+                    
+                    if (allowedRoles.includes(role.toLowerCase())) {
+                        if(reportForm) reportForm.style.display = 'block';
+                    } else {
+                        alert('Tu usuario (' + role + ') no tiene permisos para llenar reportes.');
+                        // Opcional: mostrar solo vista de lectura o mensaje
+                    }
+
+                    // Mostrar panel de admin si corresponde
+                    if (role.toLowerCase() === 'admin' || role.toLowerCase() === 'superuser') {
+                        var adminPanel = document.getElementById('admin-panel');
+                        if(adminPanel) {
+                            adminPanel.style.display = 'block';
+                            loadAdminReports();
+                        }
+                    }
+                }
+
+                async function loadAdminReports() {
+                    var container = document.getElementById('admin-reports-container');
+                    if(!container) return;
+                    container.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">Cargando...</div>';
+                    
+                    var { data, error } = await supabase
+                        .from('reports')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .limit(100);
+                    
+                    if(error) {
+                        console.error('Error cargando reportes:', error);
+                        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">Error cargando reportes</div>';
+                        return;
+                    }
+
+                    container.innerHTML = '';
+                    if(!data || data.length === 0) {
+                        container.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">No hay reportes registrados.</div>';
+                        return;
+                    }
+
+                    // Agrupar reportes por pista
+                    var reportsByRunway = {};
+                    data.forEach(function(r) {
+                        var pista = r.pista || 'No especificada';
+                        if (!reportsByRunway[pista]) {
+                            reportsByRunway[pista] = [];
+                        }
+                        reportsByRunway[pista].push(r);
+                    });
+
+                    // Crear secciones para cada pista
+                    Object.keys(reportsByRunway).sort().forEach(async function(pista) {
+                        var reports = reportsByRunway[pista];
+                        
+                        // Crear contenedor de pista
+                        var pistaSection = document.createElement('div');
+                        pistaSection.style.cssText = 'background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 20px;';
+                        
+                        // Header de la pista
+                        var pistaHeader = document.createElement('div');
+                        pistaHeader.style.cssText = 'background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 20px; font-weight: bold; font-size: 16px;';
+                        pistaHeader.innerHTML = '🛫 PISTA ' + pista + ' <span style="font-size: 14px; font-weight: normal;">(' + reports.length + ' reportes)</span>';
+                        pistaSection.appendChild(pistaHeader);
+                        
+                        // Contenedor de reportes
+                        var reportsContainer = document.createElement('div');
+                        reportsContainer.style.cssText = 'padding: 0;';
+                        
+                        // Procesar cada reporte de esta pista
+                        for (var r of reports) {
+                            var reportCard = document.createElement('div');
+                            reportCard.style.cssText = 'border-bottom: 1px solid #e5e7eb; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;';
+                            
+                            var reportInfo = document.createElement('div');
+                            reportInfo.style.cssText = 'flex: 1;';
+                            reportInfo.innerHTML = '<div style="font-weight: 600; color: #0f1724;">' + (r.fecha_local || '-') + '</div>' +
+                                                  '<div style="font-size: 13px; color: #6b7280;">Folio: ' + (r.folio || '-') + ' | Responsable: ' + (r.responsable || '-') + '</div>';
+                            
+                            var pdfLink = '<span style="color:#9ca3af;font-size:13px;">Cargando...</span>';
+                            
+                            if (r.pdf_url && serviceSupabase) {
+                                        try {
+                                            // Normalizar r.pdf_url: si contiene una URL pública completa, extraer solo el path dentro del bucket
+                                            var pdfPath = r.pdf_url || '';
+                                            try{
+                                                if(pdfPath.indexOf('http') === 0){
+                                                    var parsed = new URL(pdfPath);
+                                                    // buscar la porción /reports/<filename>
+                                                    var idx = parsed.pathname.indexOf('/reports/');
+                                                    if(idx !== -1) pdfPath = parsed.pathname.slice(idx + '/reports/'.length);
+                                                    else pdfPath = parsed.pathname.replace(/^\//,'');
+                                                }
+                                            }catch(e){}
+
+                                            var { data: signedData, error: signedError } = await serviceSupabase
+                                                .storage
+                                                .from('reports')
+                                                .createSignedUrl(pdfPath, 3600);
+                                    
+                                    if (signedError) {
+                                        console.error('Error generando signed URL:', signedError);
+                                        pdfLink = '<span style="color:#ef4444;font-size:13px;">Error generando enlace</span>';
+                                    } else if (signedData && signedData.signedUrl) {
+                                        pdfLink = '<a href="' + signedData.signedUrl + '" target="_blank" class="admin-btn-view" style="font-size:13px;">📄 Ver PDF</a>';
+                                    } else {
+                                        pdfLink = '<span style="color:#9ca3af;font-size:13px;">No disponible</span>';
+                                    }
+                                } catch(e) {
+                                    console.error('Excepción generando signed URL:', e);
+                                    pdfLink = '<span style="color:#ef4444;font-size:13px;">Error</span>';
+                                }
+                            } else if (r.pdf_url) {
+                                // Si r.pdf_url contiene URL pública completa, extraer path
+                                var pubPath = r.pdf_url || '';
+                                try{ if(pubPath.indexOf('http')===0){ var p = new URL(pubPath); var idx = p.pathname.indexOf('/reports/'); if(idx!==-1) pubPath = p.pathname.slice(idx + '/reports/'.length); else pubPath = p.pathname.replace(/^\//,''); } }catch(e){}
+                                var { data: publicData } = supabase
+                                    .storage
+                                    .from('reports')
+                                    .getPublicUrl(pubPath);
+                                pdfLink = publicData && publicData.publicUrl 
+                                    ? '<a href="' + publicData.publicUrl + '" target="_blank" class="admin-btn-view" style="font-size:13px;">📄 Ver PDF</a>' 
+                                    : '<span style="color:#9ca3af;font-size:13px;">No disponible</span>';
+                            } else {
+                                pdfLink = '<span style="color:#9ca3af;font-size:13px;">No disponible</span>';
+                            }
+                            
+                            var pdfContainer = document.createElement('div');
+                            pdfContainer.innerHTML = pdfLink;
+                            
+                            reportCard.appendChild(reportInfo);
+                            reportCard.appendChild(pdfContainer);
+                            reportsContainer.appendChild(reportCard);
+                        }
+                        
+                        pistaSection.appendChild(reportsContainer);
+                        container.appendChild(pistaSection);
+                    });
+                }
+
+                var refreshBtn = document.getElementById('refresh-admin-btn');
+                if(refreshBtn) refreshBtn.addEventListener('click', loadAdminReports);
+
+                if(loginBtn) {
+                    loginBtn.addEventListener('click', async function() {
+                        var email = emailInput.value;
+                        var password = passInput.value;
+                        errorMsg.style.display = 'none';
+                        loginBtn.disabled = true;
+                        loginBtn.textContent = 'Entrando...';
+
+                        var { data, error } = await supabase.auth.signInWithPassword({
+                            email: email,
+                            password: password
+                        });
+
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Entrar';
+
+                        if (error) {
+                            errorMsg.textContent = 'Error: ' + error.message;
+                            errorMsg.style.display = 'block';
+                        } else {
+                            handleUser(data.user);
+                        }
+                    });
+                }
+
+                if(logoutBtn) {
+                    logoutBtn.addEventListener('click', async function() {
+                        await supabase.auth.signOut();
+                        location.reload();
+                    });
+                }
+
+                // Iniciar chequeo
+                checkSession();
+
+                // Tab switching functionality
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Hide admin panel by default
+                    var adminPanel = document.getElementById('admin-panel');
+                    if(adminPanel) adminPanel.style.display = 'none';
+
+                    const tabs = document.querySelectorAll('.sidebar-tab');
+                    const sections = document.querySelectorAll('.content-section');
+
+                    tabs.forEach(tab => {
+                        tab.addEventListener('click', function() {
+                            const targetTab = this.getAttribute('data-tab');
+                            
+                            // Remove active class from all tabs
+                            tabs.forEach(t => t.classList.remove('active'));
+                            // Add active class to clicked tab
+                            this.classList.add('active');
+                            
+                            // Hide all sections
+                            sections.forEach(section => section.classList.remove('active'));
+                            // Show target section
+                            const targetSection = document.getElementById(targetTab + '-section');
+                            if (targetSection) {
+                                targetSection.classList.add('active');
+                                
+                                // Load statistics when statistics tab is activated
+                                if (targetTab === 'estadistica') {
+                                    loadEstadisticas();
+                                }
+                            }
+                        });
+                    });
+
+                    // Toggle sidebar button behaviour
+                    (function(){
+                        var toggleBtn = document.getElementById('toggle-sidebar-btn');
+                        var sidebarEl = document.getElementById('app-sidebar');
+                        var mainEl = document.querySelector('.main-content');
+
+                        function setCollapsed(collapsed){
+                            try{
+                                if(sidebarEl){
+                                    if(collapsed) sidebarEl.classList.add('sidebar-hidden');
+                                    else sidebarEl.classList.remove('sidebar-hidden');
+                                }
+                                if(mainEl){
+                                    if(collapsed) mainEl.classList.add('sidebar-collapsed');
+                                    else mainEl.classList.remove('sidebar-collapsed');
+                                }
+                            }catch(e){console.error(e)}
+                        }
+
+                        if(toggleBtn){
+                            toggleBtn.addEventListener('click', function(e){
+                                e.stopPropagation();
+                                try{
+                                    if(sidebarEl) {
+                                        var nowHidden = sidebarEl.classList.toggle('sidebar-hidden');
+                                        if(mainEl){
+                                            if(nowHidden) mainEl.classList.add('sidebar-collapsed');
+                                            else mainEl.classList.remove('sidebar-collapsed');
+                                        }
+                                    }
+                                }catch(err){console.error(err)}
+                            });
+                        }
+
+                        // Start collapsed
+                        setCollapsed(true);
+                    })();
+                });
+
+                // Función para cargar estadísticas
+                async function loadEstadisticas() {
+                    try {
+                        // Obtener todos los reportes
+                        const { data: reports, error } = await supabase
+                            .from('reports')
+                            .select('*')
+                            .order('created_at', { ascending: false });
+
+                        if (error) {
+                            console.error('Error loading statistics:', error);
+                            return;
+                        }
+
+                        // Calcular estadísticas
+                        const totalReports = reports.length;
+                        const currentMonth = new Date().getMonth();
+                        const currentYear = new Date().getFullYear();
+                        
+                        const reportsThisMonth = reports.filter(report => {
+                            const reportDate = new Date(report.created_at);
+                            return reportDate.getMonth() === currentMonth && reportDate.getFullYear() === currentYear;
+                        }).length;
+
+                        // Calcular prioridad promedio
+                        let totalPriority = 0;
+                        let priorityCount = 0;
+                        reports.forEach(report => {
+                            if (report.details) {
+                                Object.values(report.details).forEach(detail => {
+                                    if (detail.prioridad && detail.prioridad !== 'N/A') {
+                                        totalPriority += parseInt(detail.prioridad);
+                                        priorityCount++;
+                                    }
+                                });
+                            }
+                        });
+                        const avgPriority = priorityCount > 0 ? (totalPriority / priorityCount).toFixed(1) : 0;
+
+                        // Calcular tasa de completitud (reportes con PDF generado)
+                        const completedReports = reports.filter(report => report.pdf_url).length;
+                        const completionRate = totalReports > 0 ? Math.round((completedReports / totalReports) * 100) : 0;
+
+                        // Actualizar elementos del DOM
+                        document.getElementById('total-reports').textContent = totalReports;
+                        document.getElementById('reports-this-month').textContent = reportsThisMonth;
+                        document.getElementById('avg-priority').textContent = avgPriority;
+                        document.getElementById('completion-rate').textContent = completionRate + '%';
+
+                        // Crear gráficos simples (simulados)
+                        createInspectionTypesChart(reports);
+                        createMonthlyReportsChart(reports);
+                        createRunwayChart(reports);
+
+                    } catch (error) {
+                        console.error('Error in loadEstadisticas:', error);
+                    }
+                }
+
+                // Función para crear gráfico de tipos de inspección
+                function createInspectionTypesChart(reports) {
+                    const chartContainer = document.getElementById('inspection-types-chart');
+                    if (!chartContainer) return;
+
+                    // Contar tipos de inspección
+                    const inspectionTypes = {};
+                    reports.forEach(report => {
+                        if (report.tipo_inspeccion) {
+                            var types = [];
+                            if (Array.isArray(report.tipo_inspeccion)) types = report.tipo_inspeccion;
+                            else if (typeof report.tipo_inspeccion === 'string') types = report.tipo_inspeccion.split(',').map(s=>s.trim()).filter(Boolean);
+                            types.forEach(type => {
+                                inspectionTypes[type] = (inspectionTypes[type] || 0) + 1;
+                            });
+                        }
+                    });
+
+                    // Crear representación simple
+                    let html = '<div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">';
+                    Object.entries(inspectionTypes).forEach(([type, count]) => {
+                        const percentage = reports.length > 0 ? Math.round((count / reports.length) * 100) : 0;
+                        html += `
+                            <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-width: 120px;">
+                                <div style="font-size: 2em; font-weight: bold; color: #667eea;">${count}</div>
+                                <div style="font-size: 0.9em; color: #6b7280; margin: 5px 0;">${percentage}%</div>
+                                <div style="font-size: 0.8em; color: #374151;">${type}</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    chartContainer.innerHTML = html;
+                }
+
+                // Función para crear gráfico de reportes mensuales
+                function createMonthlyReportsChart(reports) {
+                    const chartContainer = document.getElementById('monthly-reports-chart');
+                    if (!chartContainer) return;
+
+                    // Agrupar por mes
+                    const monthlyData = {};
+                    reports.forEach(report => {
+                        const date = new Date(report.created_at);
+                        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                        monthlyData[monthKey] = (monthlyData[monthKey] || 0) + 1;
+                    });
+
+                    // Crear representación simple
+                    let html = '<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">';
+                    Object.entries(monthlyData).slice(-6).forEach(([month, count]) => {
+                        const height = Math.max(count * 20, 40); // Altura mínima de 40px
+                        html += `
+                            <div style="text-align: center;">
+                                <div style="width: 40px; height: ${height}px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); border-radius: 4px 4px 0 0; margin: 0 auto 5px; display: flex; align-items: end; justify-content: center; color: white; font-weight: bold;">${count}</div>
+                                <div style="font-size: 0.8em; color: #6b7280;">${month}</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    chartContainer.innerHTML = html;
+                }
+
+                // Función para crear gráfico de distribución por pista
+                function createRunwayChart(reports) {
+                    const chartContainer = document.getElementById('runway-chart');
+                    if (!chartContainer) return;
+
+                    // Contar reportes por pista
+                    const runwayData = {};
+                    reports.forEach(report => {
+                        const pista = report.pista || 'No especificada';
+                        runwayData[pista] = (runwayData[pista] || 0) + 1;
+                    });
+
+                    // Crear representación simple
+                    let html = '<div style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center;">';
+                    Object.entries(runwayData).forEach(([pista, count]) => {
+                        const percentage = reports.length > 0 ? Math.round((count / reports.length) * 100) : 0;
+                        html += `
+                            <div style="text-align: center; padding: 15px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); min-width: 120px;">
+                                <div style="font-size: 2em; font-weight: bold; color: #667eea;">${count}</div>
+                                <div style="font-size: 0.9em; color: #6b7280; margin: 5px 0;">${percentage}%</div>
+                                <div style="font-size: 0.8em; color: #374151;">${pista}</div>
+                            </div>
+                        `;
+                    });
+                    html += '</div>';
+                    
+                    chartContainer.innerHTML = html;
+                }
+
+                // Event listener para el botón de actualizar estadísticas
+                document.getElementById('refresh-estadisticas-btn')?.addEventListener('click', loadEstadisticas);
+            })();
+        </script>
     </body>
 </html>
