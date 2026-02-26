@@ -599,6 +599,72 @@
             font-size: 12px;
         }
 
+        /* Evidencias fotográficas */
+        .photo-upload-area {
+            margin: 8px 0;
+        }
+        .photo-upload-label {
+            display: inline-block;
+            cursor: pointer;
+            background: #f0f6ff;
+            border: 2px dashed #93c5fd;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            color: #1e40af;
+            transition: background 0.2s, border-color 0.2s;
+            max-width: 420px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .photo-upload-label:hover {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+        .photo-upload-input {
+            display: none;
+        }
+        .photo-previews {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+            max-width: 420px;
+        }
+        .photo-thumb-wrapper {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+        .photo-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            display: block;
+        }
+        .photo-thumb-remove {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 13px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
+
         /* Login Modal - Aviation Theme */
         /* ===== LOGIN MODAL — SPLIT SCREEN ===== */
         #login-modal {
@@ -2108,6 +2174,178 @@
         })();
     </script>
 
+    <!-- ─── Script: Evidencias Fotográficas por Item ─── -->
+    <script>
+    (function () {
+        // Almacén global: { [itemId]: [{dataURL, name}, ...] }
+        window.itemPhotos = window.itemPhotos || {};
+
+        /**
+         * Inyecta el campo de fotos en el panel de detalles de un item.
+         * Se inserta después del <br> que sigue al label de Condición.
+         */
+        function injectPhotoField(det) {
+            if (!det || det.querySelector('.photo-upload-area')) return; // ya existe
+            var condSelect = det.querySelector('.condicion-select');
+            if (!condSelect) return;
+
+            // Buscar el <br> inmediato después del label/select de condición
+            var condLabel = condSelect.closest ? condSelect.closest('label') : condSelect.parentElement;
+            var refNode = null;
+            // Recorrer desde condLabel buscando un <br> hermano siguiente
+            var sibling = (condLabel || condSelect).nextSibling;
+            while (sibling) {
+                if (sibling.nodeName === 'BR') { refNode = sibling.nextSibling; break; }
+                sibling = sibling.nextSibling;
+            }
+
+            // Crear el campo de foto
+            var wrapper = document.createElement('div');
+            wrapper.className = 'photo-upload-area';
+            wrapper.innerHTML =
+                '<label class="photo-upload-label">📷 Evidencias fotográficas (opcional)<input type="file" class="photo-upload-input" accept="image/*" multiple></label>' +
+                '<div class="photo-previews"></div>';
+            var br = document.createElement('br');
+
+            if (refNode) {
+                det.insertBefore(wrapper, refNode);
+                det.insertBefore(br, refNode);
+            } else {
+                // Insertar antes de Observaciones si no hay referencia
+                var obsLabel = null;
+                var children = det.childNodes;
+                for (var i = 0; i < children.length; i++) {
+                    var n = children[i];
+                    if (n.nodeName === 'LABEL' && n.textContent && /observac/i.test(n.textContent)) {
+                        obsLabel = n; break;
+                    }
+                }
+                if (obsLabel) {
+                    det.insertBefore(br, obsLabel);
+                    det.insertBefore(wrapper, br);
+                } else {
+                    det.appendChild(wrapper);
+                }
+            }
+        }
+
+        /** Obtiene el itemId a partir del panel de detalles */
+        function getItemId(det) {
+            if (!det || !det.id) return null;
+            return det.id.replace(/^details_/, '');
+        }
+
+        /** Renderiza las miniaturas en el container de previews */
+        function renderPreviews(det) {
+            var itemId = getItemId(det);
+            if (!itemId) return;
+            var previewsDiv = det.querySelector('.photo-previews');
+            if (!previewsDiv) return;
+            previewsDiv.innerHTML = '';
+            var photos = window.itemPhotos[itemId] || [];
+            photos.forEach(function (photo, idx) {
+                var wrapper = document.createElement('div');
+                wrapper.className = 'photo-thumb-wrapper';
+                var img = document.createElement('img');
+                img.src = photo.dataURL;
+                img.className = 'photo-thumb';
+                img.alt = photo.name || ('Foto ' + (idx + 1));
+                var removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'photo-thumb-remove';
+                removeBtn.title = 'Eliminar foto';
+                removeBtn.textContent = '×';
+                removeBtn.setAttribute('data-item-id', itemId);
+                removeBtn.setAttribute('data-photo-idx', idx);
+                wrapper.appendChild(img);
+                wrapper.appendChild(removeBtn);
+                previewsDiv.appendChild(wrapper);
+            });
+        }
+
+        /** Maneja el cambio en un input de archivo */
+        function handleFileChange(input) {
+            var det = input.closest ? input.closest('.item-details') : null;
+            if (!det) { var p = input.parentElement; while (p && !p.classList.contains('item-details')) p = p.parentElement; det = p; }
+            if (!det) return;
+            var itemId = getItemId(det);
+            if (!itemId) return;
+            window.itemPhotos[itemId] = window.itemPhotos[itemId] || [];
+            var files = Array.prototype.slice.call(input.files || []);
+            var pending = files.length;
+            if (!pending) return;
+            files.forEach(function (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    window.itemPhotos[itemId].push({ dataURL: e.target.result, name: file.name });
+                    pending--;
+                    if (pending === 0) {
+                        renderPreviews(det);
+                        input.value = ''; // reset para permitir re-seleccionar misma imagen
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Delegación de eventos: cambio en file input de fotos
+        document.addEventListener('change', function (e) {
+            if (e.target && e.target.classList && e.target.classList.contains('photo-upload-input')) {
+                handleFileChange(e.target);
+            }
+        });
+
+        // Delegación de eventos: eliminar foto
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.classList && e.target.classList.contains('photo-thumb-remove')) {
+                var itemId = e.target.getAttribute('data-item-id');
+                var idx = parseInt(e.target.getAttribute('data-photo-idx'), 10);
+                if (itemId && !isNaN(idx) && window.itemPhotos[itemId]) {
+                    window.itemPhotos[itemId].splice(idx, 1);
+                    // re-render previews
+                    var det = document.getElementById('details_' + itemId);
+                    if (det) renderPreviews(det);
+                }
+            }
+        });
+
+        // Inyectar campo de fotos en todos los item-details al cargar
+        document.addEventListener('DOMContentLoaded', function () {
+            var dets = document.querySelectorAll('.item-details');
+            Array.prototype.forEach.call(dets, function (det) { injectPhotoField(det); });
+        });
+
+        // Parchear duplicateItem para inyectar fotos en el clon
+        var originalSetup = null;
+        var checkPatch = setInterval(function () {
+            if (window.mhr && window.mhr.duplicateItem) {
+                clearInterval(checkPatch);
+                var origDup = window.mhr.duplicateItem;
+                window.mhr.duplicateItem = function (origId) {
+                    origDup(origId);
+                    // El clon se inserta en el DOM; encontrarlo y agregarle fotos
+                    setTimeout(function () {
+                        var counters = window.mhr.counters || {};
+                        var suffix = '_dup' + (counters[origId] || 1);
+                        var newDetId = 'details_' + origId + suffix;
+                        var newDet = document.getElementById(newDetId);
+                        if (newDet) {
+                            // Eliminar campo de fotos clonado (vendrá con valores del clon) y reinsertar limpio
+                            var existingArea = newDet.querySelector('.photo-upload-area');
+                            if (existingArea) existingArea.parentNode && existingArea.parentNode.removeChild(existingArea);
+                            injectPhotoField(newDet);
+                        }
+                    }, 50);
+                };
+            }
+        }, 200);
+
+        // Exponer helper para el PDF
+        window.mhr = window.mhr || {};
+        window.mhr.getItemPhotos = function (itemId) { return window.itemPhotos[itemId] || []; };
+    })();
+    </script>
+
     <!-- contenedor oculto para generar el PDF -->
     <div id="report-summary"
         style="display:none; padding:18px; background:#fff; max-width:900px; margin:0 auto; border-radius:6px;"></div>
@@ -2677,6 +2915,72 @@
                                         }
                                     } catch (mapErr) { console.warn('Error agregando página de mapa landscape:', mapErr); }
                                     // ─── fin mapa landscape ───
+
+                                    // ─── Página de Evidencias Fotográficas ───
+                                    try {
+                                        var photoPageItems = [];
+                                        filled.forEach(function (f, idx) {
+                                            var photos = (window.mhr && window.mhr.getItemPhotos) ? window.mhr.getItemPhotos(f.id) : [];
+                                            if (photos && photos.length > 0) {
+                                                photoPageItems.push({ f: f, itemNum: idx + 1, photos: photos });
+                                            }
+                                        });
+                                        if (photoPageItems.length > 0) {
+                                            pdf.addPage([210, 297], 'p'); // A4 portrait
+                                            var MARGIN_P = 14;
+                                            var PAGE_H = 287;
+                                            var PHOTO_W = 82;
+                                            var PHOTO_H = 60;
+                                            var COL_GAP = 8;
+                                            var COLS_P = 2;
+                                            // Encabezado de página
+                                            pdf.setFontSize(15); pdf.setFont('helvetica', 'bold');
+                                            pdf.setTextColor(23, 50, 90);
+                                            pdf.text('Evidencias Fotogr\u00E1ficas', 105, 18, { align: 'center' });
+                                            pdf.setFontSize(9); pdf.setFont('helvetica', 'normal');
+                                            pdf.setTextColor(110, 110, 110);
+                                            pdf.text('Fotograf\u00EDas adjuntas por \u00EDtem de inspecci\u00F3n', 105, 26, { align: 'center' });
+                                            var yP = 36;
+                                            var colXP = [MARGIN_P, MARGIN_P + PHOTO_W + COL_GAP];
+                                            photoPageItems.forEach(function (item) {
+                                                // Encabezado del item
+                                                if (yP > PAGE_H - 30) { pdf.addPage([210, 297], 'p'); yP = 20; }
+                                                pdf.setFontSize(11); pdf.setFont('helvetica', 'bold');
+                                                pdf.setTextColor(23, 50, 90);
+                                                pdf.text('Item ' + item.itemNum + ': ' + item.f.name, MARGIN_P, yP);
+                                                pdf.setDrawColor(210, 228, 248); pdf.setLineWidth(0.4);
+                                                pdf.line(MARGIN_P, yP + 2, 196, yP + 2);
+                                                yP += 10;
+                                                var col = 0;
+                                                var rowH = 0;
+                                                item.photos.forEach(function (photo, pIdx) {
+                                                    if (yP + PHOTO_H + 14 > PAGE_H - 8) {
+                                                        if (col > 0) { yP += rowH + 4; col = 0; rowH = 0; }
+                                                        pdf.addPage([210, 297], 'p'); yP = 20;
+                                                        pdf.setFontSize(9); pdf.setFont('helvetica', 'italic');
+                                                        pdf.setTextColor(100, 100, 100);
+                                                        pdf.text('Item ' + item.itemNum + ' \u2013 ' + item.f.name + ' (cont.)', MARGIN_P, yP); yP += 8;
+                                                    }
+                                                    try {
+                                                        var fmt = 'JPEG';
+                                                        if (photo.dataURL && photo.dataURL.indexOf('data:image/png') === 0) fmt = 'PNG';
+                                                        pdf.addImage(photo.dataURL, fmt, colXP[col], yP, PHOTO_W, PHOTO_H, '', 'MEDIUM');
+                                                        pdf.setFontSize(7.5); pdf.setFont('helvetica', 'normal');
+                                                        pdf.setTextColor(90, 90, 90);
+                                                        var photoLabel = 'Foto ' + (pIdx + 1);
+                                                        if (photo.name) photoLabel += ' \u2013 ' + photo.name.substring(0, 32);
+                                                        pdf.text(photoLabel, colXP[col], yP + PHOTO_H + 4.5);
+                                                        rowH = Math.max(rowH, PHOTO_H + 8);
+                                                    } catch (imgE) { console.warn('Error imagen en PDF:', imgE); }
+                                                    col++;
+                                                    if (col >= COLS_P) { col = 0; yP += rowH + 4; rowH = 0; }
+                                                });
+                                                if (col > 0) { yP += rowH + 4; }
+                                                yP += 10;
+                                            });
+                                        }
+                                    } catch (photoErr) { console.warn('Error generando p\u00E1gina de evidencias:', photoErr); }
+                                    // ─── fin evidencias fotográficas ───
 
                                     // ─── Página extra: Ubicaciones con enlaces clickeables ───
                                     try {
