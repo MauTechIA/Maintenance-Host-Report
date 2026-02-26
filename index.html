@@ -2644,6 +2644,66 @@
                             console.log('Items guardados exitosamente.');
                         }
 
+                        // 4. Subir evidencias fotográficas a Storage e insertar en item_photos
+                        try {
+                            var photosToInsert = [];
+                            for (var fi = 0; fi < filled.length; fi++) {
+                                var f = filled[fi];
+                                var photos = (window.mhr && window.mhr.getItemPhotos) ? window.mhr.getItemPhotos(f.id) : [];
+                                if (!photos || photos.length === 0) continue;
+                                for (var pi = 0; pi < photos.length; pi++) {
+                                    var photo = photos[pi];
+                                    try {
+                                        // Convertir dataURL a Blob
+                                        var arr = photo.dataURL.split(',');
+                                        var mime = (arr[0].match(/:(.*?);/) || [])[1] || 'image/jpeg';
+                                        var bstr = atob(arr[1]);
+                                        var n = bstr.length;
+                                        var u8arr = new Uint8Array(n);
+                                        while (n--) u8arr[n] = bstr.charCodeAt(n);
+                                        var photoBlob = new Blob([u8arr], { type: mime });
+
+                                        // Nombre de archivo único
+                                        var ext = mime.split('/')[1] || 'jpg';
+                                        var photoFilename = 'photos/' + folio + '_item' + (fi + 1) + '_' + pi + '_' + Date.now() + '.' + ext;
+
+                                        // Subir al bucket 'photos'
+                                        var { data: photoData, error: photoUploadErr } = await window.supabaseClient
+                                            .storage.from('photos')
+                                            .upload(photoFilename, photoBlob, { cacheControl: '3600', upsert: false });
+
+                                        if (photoUploadErr) {
+                                            console.warn('Error subiendo foto:', photoUploadErr);
+                                        } else {
+                                            photosToInsert.push({
+                                                report_id: reportId,
+                                                item_id: f.id,
+                                                item_categoria: f.name,
+                                                item_numero: fi + 1,
+                                                photo_url: photoFilename,
+                                                photo_name: photo.name || (photoFilename)
+                                            });
+                                        }
+                                    } catch (photoErr) {
+                                        console.warn('Error procesando foto ' + pi + ' del item ' + f.id + ':', photoErr);
+                                    }
+                                }
+                            }
+
+                            if (photosToInsert.length > 0) {
+                                var { error: photosDbErr } = await window.supabaseClient
+                                    .from('item_photos')
+                                    .insert(photosToInsert);
+                                if (photosDbErr) {
+                                    console.warn('Error guardando referencias de fotos en DB:', photosDbErr);
+                                } else {
+                                    console.log('Evidencias fotográficas guardadas:', photosToInsert.length, 'foto(s).');
+                                }
+                            }
+                        } catch (allPhotosErr) {
+                            console.warn('Error general en subida de evidencias:', allPhotosErr);
+                        }
+
                         return reportId;
 
                     } catch (e) {
