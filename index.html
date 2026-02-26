@@ -603,8 +603,17 @@
         .photo-upload-area {
             margin: 8px 0;
         }
+        .photo-upload-btns {
+            display: flex;
+            gap: 8px;
+            max-width: 420px;
+            flex-wrap: wrap;
+        }
         .photo-upload-label {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
             cursor: pointer;
             background: #f0f6ff;
             border: 2px dashed #93c5fd;
@@ -613,14 +622,23 @@
             font-size: 13px;
             color: #1e40af;
             transition: background 0.2s, border-color 0.2s;
-            max-width: 420px;
-            width: 100%;
+            flex: 1;
+            min-width: 140px;
             box-sizing: border-box;
             text-align: center;
         }
         .photo-upload-label:hover {
             background: #dbeafe;
             border-color: #3b82f6;
+        }
+        .photo-camera-label {
+            background: #f0fdf4;
+            border-color: #6ee7b7;
+            color: #065f46;
+        }
+        .photo-camera-label:hover {
+            background: #dcfce7;
+            border-color: #34d399;
         }
         .photo-upload-input {
             display: none;
@@ -2203,7 +2221,11 @@
             var wrapper = document.createElement('div');
             wrapper.className = 'photo-upload-area';
             wrapper.innerHTML =
-                '<label class="photo-upload-label">📷 Evidencias fotográficas (opcional)<input type="file" class="photo-upload-input" accept="image/*" multiple></label>' +
+                '<div style="font-size:13px;color:#374151;margin-bottom:4px;">📷 Evidencias fotográficas (opcional)</div>' +
+                '<div class="photo-upload-btns">' +
+                '<label class="photo-upload-label">📁 Adjuntar archivo<input type="file" class="photo-upload-input" accept="image/*" multiple></label>' +
+                '<label class="photo-upload-label photo-camera-label">📸 Tomar foto<input type="file" class="photo-upload-input" accept="image/*" capture="environment"></label>' +
+                '</div>' +
                 '<div class="photo-previews"></div>';
             var br = document.createElement('br');
 
