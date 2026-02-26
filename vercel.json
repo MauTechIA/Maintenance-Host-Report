@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/Maintenance Host Report.html" }
+    { "source": "/", "destination": "/index.html" }
   ]
 }
