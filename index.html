@@ -275,15 +275,130 @@
             border-color: var(--blue);
         }
 
-        /* ===== ITEM DETAILS CARDS ===== */
+        /* ===== ITEMS GRID ===== */
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 16px 0 24px;
+        }
+
+        @media (max-width: 640px) {
+            .items-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .item-chip-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        /* Hide native checkbox — keep it functional */
+        .items-grid input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            height: 0;
+        }
+
+        .item-chip-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 10px 14px;
+            border: 2px solid #d1dbe9;
+            border-radius: 14px;
+            cursor: pointer;
+            background: #f8fafd;
+            transition: all 0.18s ease;
+            text-align: center;
+            position: relative;
+            user-select: none;
+            min-height: 90px;
+            box-shadow: 0 1px 4px rgba(12,30,62,0.05);
+        }
+
+        .item-chip-label:hover {
+            border-color: var(--blue-mid);
+            background: #eff4ff;
+            box-shadow: 0 4px 14px rgba(29,78,216,0.1);
+            transform: translateY(-2px);
+        }
+
+        .item-chip-icon {
+            font-size: 26px;
+            line-height: 1;
+        }
+
+        .item-chip-name {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #475569;
+            line-height: 1.3;
+        }
+
+        .item-chip-check {
+            display: none;
+            position: absolute;
+            top: 7px;
+            right: 8px;
+            background: var(--blue);
+            color: white;
+            border-radius: 50%;
+            width: 19px;
+            height: 19px;
+            font-size: 11px;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            box-shadow: 0 2px 6px rgba(29,78,216,0.4);
+        }
+
+        /* Selected state */
+        .items-grid input[type="checkbox"]:checked + .item-chip-label {
+            border-color: var(--blue);
+            background: linear-gradient(135deg, #eff4ff 0%, #dbeafe 100%);
+            box-shadow: 0 0 0 3px rgba(29,78,216,0.15), 0 4px 14px rgba(29,78,216,0.12);
+            transform: translateY(-2px);
+        }
+
+        .items-grid input[type="checkbox"]:checked + .item-chip-label .item-chip-name {
+            color: var(--blue);
+            font-weight: 700;
+        }
+
+        .items-grid input[type="checkbox"]:checked + .item-chip-label .item-chip-check {
+            display: flex;
+        }
+
+        .item-chip-actions {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            flex-wrap: wrap;
+            min-height: 0;
+        }
+
+        .item-chip-actions .item-done,
+        .item-chip-actions .item-update {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            flex: 1;
+        }
+
+        /* ===== ITEM DETAILS SECTION ===== */
         .item-details {
             background: linear-gradient(135deg, #f0f6ff 0%, #f8faff 100%);
             border: 1px solid #c7d9f5;
             border-left: 4px solid var(--blue);
             padding: 16px 18px;
             border-radius: 0 10px 10px 0;
-            margin-bottom: 12px;
-            margin-top: 8px;
+            margin-bottom: 16px;
+            margin-top: 0;
         }
 
         .item-details small {
@@ -1507,18 +1622,158 @@
                 <input type="text" id="report-role-other" name="report_role_other" placeholder="Especifique otro cargo"
                     style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px;" />
 
-                <h3>🔧📚📋 Item:</h3>
-                <!-- Per-item Done/Update buttons will appear next to each item -->
+                <h3>🔧📚📋 Items de Inspección</h3>
+                <p style="font-size:12px; color:var(--muted); margin:-8px 0 14px;">Selecciona uno o más ítems para registrar hallazgos.</p>
+                <div class="items-grid">
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_area_movimiento" name="tipo_reporte" value="Área de Movimiento">
+                        <label for="tipo_area_movimiento" class="item-chip-label">
+                            <span class="item-chip-icon">🛣️</span>
+                            <span class="item-chip-name">Área de Movimiento</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_area_movimiento" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_area_movimiento" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_franjas" name="tipo_reporte" value="Franjas de seguridad (Pistas y Rodados)">
+                        <label for="tipo_franjas" class="item-chip-label">
+                            <span class="item-chip-icon">🟩</span>
+                            <span class="item-chip-name">Franjas de Seguridad</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_franjas" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_franjas" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_iluminacion" name="tipo_reporte" value="Iluminación">
+                        <label for="tipo_iluminacion" class="item-chip-label">
+                            <span class="item-chip-icon">💡</span>
+                            <span class="item-chip-name">Iluminación</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_iluminacion" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_iluminacion" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_marcas" name="tipo_reporte" value="Marcas y Señalística">
+                        <label for="tipo_marcas" class="item-chip-label">
+                            <span class="item-chip-icon">🚦</span>
+                            <span class="item-chip-name">Marcas y Señales</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_marcas" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_marcas" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_ayudas" name="tipo_reporte" value="Ayudas a la Navegación">
+                        <label for="tipo_ayudas" class="item-chip-label">
+                            <span class="item-chip-icon">🧭</span>
+                            <span class="item-chip-name">Ayudas a la Navegación</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_ayudas" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_ayudas" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_obstaculos" name="tipo_reporte" value="Obstáculos">
+                        <label for="tipo_obstaculos" class="item-chip-label">
+                            <span class="item-chip-icon">⛔</span>
+                            <span class="item-chip-name">Obstáculos</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_obstaculos" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_obstaculos" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_combustibles" name="tipo_reporte" value="Operaciones de Combustibles">
+                        <label for="tipo_combustibles" class="item-chip-label">
+                            <span class="item-chip-icon">⛽</span>
+                            <span class="item-chip-name">Op. Combustibles</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_combustibles" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_combustibles" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_construccion" name="tipo_reporte" value="Construcción">
+                        <label for="tipo_construccion" class="item-chip-label">
+                            <span class="item-chip-icon">🏗️</span>
+                            <span class="item-chip-name">Construcción</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_construccion" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_construccion" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_ssei" name="tipo_reporte" value="SSEI">
+                        <label for="tipo_ssei" class="item-chip-label">
+                            <span class="item-chip-icon">🚒</span>
+                            <span class="item-chip-name">SSEI</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_ssei" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_ssei" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_vehiculos" name="tipo_reporte" value="Vehículos Terrestres">
+                        <label for="tipo_vehiculos" class="item-chip-label">
+                            <span class="item-chip-icon">🚗</span>
+                            <span class="item-chip-name">Vehículos Terrestres</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_vehiculos" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_vehiculos" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_fauna" name="tipo_reporte" value="Fauna">
+                        <label for="tipo_fauna" class="item-chip-label">
+                            <span class="item-chip-icon">🦅</span>
+                            <span class="item-chip-name">Control de Fauna</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_fauna" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_fauna" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                    <div class="item-chip-row">
+                        <input type="checkbox" id="tipo_proteccion" name="tipo_reporte" value="Protección Pública">
+                        <label for="tipo_proteccion" class="item-chip-label">
+                            <span class="item-chip-icon">🛡️</span>
+                            <span class="item-chip-name">Protección Pública</span>
+                            <span class="item-chip-check">✓</span>
+                        </label>
+                        <div class="item-chip-actions">
+                            <button type="button" id="done_tipo_proteccion" class="item-done" style="display:none;">Done</button>
+                            <button type="button" id="update_tipo_proteccion" class="item-update" style="display:none;">Update</button>
+                        </div>
+                    </div>
+                </div><!-- /items-grid -->
 
-                <input type="checkbox" id="tipo_area_movimiento" name="tipo_reporte" value="Área de Movimiento">
-                <label for="tipo_area_movimiento">Área de Movimiento</label>
-                <button type="button" id="done_tipo_area_movimiento" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_area_movimiento" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
+                <!-- Detalles de cada ítem (se muestran al seleccionar) -->
                 <div class="item-details" id="details_tipo_area_movimiento"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_area_movimiento][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_area_movimiento" name="details[tipo_area_movimiento][hallazgo]">
@@ -1558,16 +1813,8 @@
                             name="details[tipo_area_movimiento][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_franjas" name="tipo_reporte"
-                    value="Franjas de seguridad (Pistas y Rodados)">
-                <label for="tipo_franjas">Franjas de seguridad</label>
-                <button type="button" id="done_tipo_franjas" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_franjas" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_franjas"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_franjas][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_franjas" name="details[tipo_franjas][hallazgo]">
@@ -1604,15 +1851,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_franjas][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_iluminacion" name="tipo_reporte" value="Iluminación">
-                <label for="tipo_iluminacion">Iluminación</label>
-                <button type="button" id="done_tipo_iluminacion" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_iluminacion" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_iluminacion"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_iluminacion][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_iluminacion" name="details[tipo_iluminacion][hallazgo]">
@@ -1647,15 +1887,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_iluminacion][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_marcas" name="tipo_reporte" value="Marcas y Señalística">
-                <label for="tipo_marcas">Marcas y Señales</label>
-                <button type="button" id="done_tipo_marcas" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_marcas" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_marcas"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_marcas][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_marcas" name="details[tipo_marcas][hallazgo]">
@@ -1690,15 +1923,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_marcas][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_ayudas" name="tipo_reporte" value="Ayudas a la Navegación">
-                <label for="tipo_ayudas">Ayudas a la Navegación</label>
-                <button type="button" id="done_tipo_ayudas" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_ayudas" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_ayudas"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_ayudas][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_ayudas" name="details[tipo_ayudas][hallazgo]">
@@ -1731,15 +1957,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_ayudas][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_obstaculos" name="tipo_reporte" value="Obstáculos">
-                <label for="tipo_obstaculos">Obstáculos</label>
-                <button type="button" id="done_tipo_obstaculos" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_obstaculos" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_obstaculos"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_obstaculos][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_obstaculos" name="details[tipo_obstaculos][hallazgo]">
@@ -1775,15 +1994,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_obstaculos][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_combustibles" name="tipo_reporte" value="Operaciones de Combustibles">
-                <label for="tipo_combustibles">Operaciones de Combustibles</label>
-                <button type="button" id="done_tipo_combustibles" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_combustibles" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_combustibles"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_combustibles][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_combustibles" name="details[tipo_combustibles][hallazgo]">
@@ -1818,15 +2030,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_combustibles][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_construccion" name="tipo_reporte" value="Construcción">
-                <label for="tipo_construccion">Construcción</label>
-                <button type="button" id="done_tipo_construccion" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_construccion" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_construccion"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_construccion][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_construccion" name="details[tipo_construccion][hallazgo]">
@@ -1864,15 +2069,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_construccion][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_ssei" name="tipo_reporte" value="SSEI">
-                <label for="tipo_ssei">SSEI</label>
-                <button type="button" id="done_tipo_ssei" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_ssei" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_ssei"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_ssei][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_ssei" name="details[tipo_ssei][hallazgo]">
@@ -1906,15 +2104,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_ssei][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_vehiculos" name="tipo_reporte" value="Vehículos Terrestres">
-                <label for="tipo_vehiculos">Vehículos Terrestres</label>
-                <button type="button" id="done_tipo_vehiculos" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_vehiculos" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_vehiculos"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_vehiculos][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_vehiculos" name="details[tipo_vehiculos][hallazgo]">
@@ -1948,15 +2139,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_vehiculos][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_fauna" name="tipo_reporte" value="Fauna">
-                <label for="tipo_fauna">Control de Fauna</label>
-                <button type="button" id="done_tipo_fauna" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_fauna" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_fauna"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_fauna][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_fauna" name="details[tipo_fauna][hallazgo]">
@@ -1991,15 +2175,8 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_fauna][codigo]"></label>
                 </div>
 
-                <input type="checkbox" id="tipo_proteccion" name="tipo_reporte" value="Protección Pública">
-                <label for="tipo_proteccion">Protección Pública</label>
-                <button type="button" id="done_tipo_proteccion" class="item-done"
-                    style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="update_tipo_proteccion" class="item-update"
-                    style="display:none; margin-left:6px;">Update</button>
-                <br>
                 <div class="item-details" id="details_tipo_proteccion"
-                    style="display:none; margin-left:18px; margin-bottom:10px;">
+                    style="display:none; margin-bottom:12px;">
                     <label>Lugar: <input type="text" name="details[tipo_proteccion][lugar]"></label><br>
                     <label>Hallazgo:
                         <select id="hallazgo_tipo_proteccion" name="details[tipo_proteccion][hallazgo]">
