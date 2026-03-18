@@ -1,3 +1,29 @@
+-- 0. Tabla de aeropuertos
+-- ─────────────────────────────────────────────────────────────
+create table if not exists aeropuertos (
+    id      uuid primary key default gen_random_uuid(),
+    iata    char(3)  unique,          -- código IATA (ej. "EZE")
+    icao    char(4)  unique,          -- código ICAO (ej. "SAEZ")
+    nombre  text     not null,        -- nombre completo del aeropuerto
+    pais    text     not null,        -- país
+    ciudad  text,                     -- ciudad / localidad
+    tipo    text                      -- tipo: internacional, nacional, etc.
+);
+
+-- Row Level Security
+alter table aeropuertos enable row level security;
+
+create policy "Todos pueden ver aeropuertos"
+on aeropuertos for select
+to authenticated
+using (true);
+
+create policy "Solo admins pueden modificar aeropuertos"
+on aeropuertos for insert
+to authenticated
+with check (true);
+
+-- ─────────────────────────────────────────────────────────────
 -- 1. Crear bucket de almacenamiento para reportes (PDFs)
 -- Nota: Esto debe hacerse desde el Dashboard de Supabase si no tienes permisos de superadmin SQL, 
 -- pero aquí está el comando si es posible ejecutarlo.
