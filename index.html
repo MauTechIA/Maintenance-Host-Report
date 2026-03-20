@@ -75,13 +75,13 @@
         }
 
         .report-header img {
-            height: 110px;
+            height: 140px;
             width: auto;
             object-fit: contain;
             border-radius: 10px;
-            background: #fff;
-            padding: 8px 14px;
-            box-shadow: 0 2px 14px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.12);
+            background: transparent;
+            padding: 4px 8px;
+            box-shadow: 0 2px 14px rgba(55, 65, 241, 0.25);
         }
 
         .report-header .meta {
@@ -117,7 +117,8 @@
         }
 
         /* ===== FORM CARD ===== */
-        #report-form {
+        #report-form,
+        #fauna-form {
             background: var(--card);
             padding: 32px 36px;
             border-radius: 18px;
@@ -163,6 +164,46 @@
             font-weight: 500;
         }
 
+        /* ===== PISTA SELECT BAR ===== */
+        .pista-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .pista-option {
+            flex: 1;
+            border: 1px solid rgba(100, 116, 139, 0.35);
+            border-radius: 999px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            font-size: 14px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .pista-option input {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .pista-option:has(input:checked) {
+            background: rgba(29, 78, 216, 0.18);
+            border-color: rgba(29, 78, 216, 0.8);
+            font-weight: 600;
+        }
+        .pista-option:hover {
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .pista-option.selected {
+            background: rgba(29, 78, 216, 0.18);
+            border-color: rgba(29, 78, 216, 0.8);
+            font-weight: 600;
+        }
+
         /* ===== TEXT INPUTS, SELECTS, TEXTAREAS ===== */
         input[type="text"],
         input[type="email"],
@@ -190,6 +231,45 @@
             border-color: var(--blue);
             background: #fff;
             box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.12);
+        }
+
+        /* Filtros multi-select: oculto hasta ser activado */
+        .filter-multi {
+            position: relative;
+        }
+
+        .filter-multi .filter-multi-toggle {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(100,116,139,0.35);
+            background: #f5f8fc;
+            cursor: pointer;
+            color: #0f172a;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .filter-multi .filter-multi-toggle:focus {
+            outline: 2px solid var(--blue);
+        }
+
+        .filter-multi .filter-multi-select {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            max-height: 220px;
+            overflow-y: auto;
+            margin-top: 6px;
+            background: #fff;
+            z-index: 30;
+        }
+
+        .filter-multi.open .filter-multi-select {
+            display: block;
         }
 
         textarea {
@@ -395,6 +475,113 @@
             max-width: 420px;
         }
 
+        /* ===== FIRMA PAD ===== */
+        .firma-section {
+            background: linear-gradient(135deg, #f0f6ff 0%, #f8faff 100%);
+            border: 1px solid #c7d9f5;
+            padding: 16px 18px;
+            border-radius: 10px;
+            margin-top: 16px;
+            margin-bottom: 16px;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.4s ease;
+        }
+        
+        .firma-section.visible {
+            max-height: 1000px;
+            opacity: 1;
+            padding: 16px 18px;
+        }
+        
+        .firma-toggle-btn {
+            padding: 9px 16px;
+            margin: 16px 0;
+            background: linear-gradient(135deg, #0f766e, #14b8a6);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 14px rgba(15, 118, 110, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .firma-toggle-btn:hover {
+            background: linear-gradient(135deg, #0d665c, #15a896);
+            box-shadow: 0 6px 18px rgba(15, 118, 110, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        .firma-toggle-btn:active {
+            transform: translateY(0);
+        }
+        
+        .firma-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .firma-pad {
+            flex: 1;
+            min-width: 200px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            cursor: crosshair;
+            display: block;
+            touch-action: none;
+        }
+        
+        .firma-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--navy);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .firma-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .firma-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: 1.5px solid var(--border);
+            background: #f5f8fc;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.15s ease;
+        }
+        
+        .firma-btn:hover {
+            background: #eff4ff;
+            border-color: var(--blue);
+        }
+        
+        .firma-btn-clear {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+        
+        .firma-btn-clear:hover {
+            background: #fee2e2;
+        }
+
         /* ===== PDF PREVIEW ===== */
         #pdf-preview-container {
             position: fixed;
@@ -555,7 +742,8 @@
                 padding-right: 12px;
             }
 
-            #report-form {
+            #report-form,
+            #fauna-form {
                 max-width: 100%;
                 padding-bottom: 120px;
             }
@@ -1413,6 +1601,7 @@
         </div>
         <div class="sidebar-tabs">
             <button class="sidebar-tab active" data-tab="revision">📋 Formato de Revisión</button>
+            <button class="sidebar-tab" data-tab="fauna">🦁 Fauna</button>
             <button class="sidebar-tab" data-tab="historial">📚 Historial de Reportes</button>
             <button class="sidebar-tab" data-tab="estadistica">📊 Estadísticas</button>
         </div>
@@ -1475,6 +1664,19 @@
                     <label for="turno_nocturno">Nocturno</label><br>
                 </div>
 
+                <div id="pista-section" style="margin-top:8px;">
+                    <h3>Pista</h3>
+                    <div class="pista-options" style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <label class="pista-option" style="flex:1;">
+                            <input type="radio" name="pista" value="04C - 22C"> 04C - 22C
+                        </label>
+                        <label class="pista-option" style="flex:1;">
+                            <input type="radio" name="pista" value="04L - 22R"> 04L - 22R
+                        </label>
+                    </div>
+                    <button type="button" id="pista-change-btn" style="display:none; margin-top:6px;">Cambiar pista</button>
+                </div>
+
                 <h3>🧑‍✈️ Responsable(s) que elaboran el reporte</h3>
                 <!-- Select para Responsable: reemplaza la lista de botones -->
                 <select id="report-authors-select" name="report_authors" title="Seleccionar Responsable">
@@ -1507,7 +1709,21 @@
                 <input type="text" id="report-role-other" name="report_role_other" placeholder="Especifique otro cargo"
                     style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px;" />
 
-                <h3>🔧📚📋 Item:</h3>
+                <h3>👤 Representante AFAC (Supervisor)</h3>
+                <input type="text" id="report-afac-name" name="report_afac_name" placeholder="Nombre del representante AFAC" style="margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" />
+
+                <h3>� Representante de Área</h3>
+                <select id="report-area-rep" name="report_area_rep" style="max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
+                    <option value="">-- Seleccionar representante de área --</option>
+                    <option value="N/A">N/A</option>
+                    <option value="Ingeniería Civil">Ingeniería Civil</option>
+                    <option value="Ingeniería Electromecánica">Ingeniería Electromecánica</option>
+                    <option value="Protección Civil">Protección Civil</option>
+                    <option value="Fauna">Fauna</option>
+                </select>
+                <input type="text" id="report-area-rep-name" name="report_area_rep_name" placeholder="Nombre del representante de área" style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px;" />
+
+                <h3>�🔧📚📋 Item:</h3>
                 <!-- Per-item Done/Update buttons will appear next to each item -->
 
                 <input type="checkbox" id="tipo_area_movimiento" name="tipo_reporte" value="Área de Movimiento">
@@ -2032,13 +2248,279 @@
                     <label>Código de Seguimiento: <input type="text" name="details[tipo_proteccion][codigo]"></label>
                 </div>
 
-
-
+                <h3>✍️ Firmas</h3>
+                <button type="button" id="firma-toggle-btn" class="firma-toggle-btn">📝 Mostrar Firmas</button>
+                <div class="firma-section">
+                    <label class="firma-label">Firma - Representante de Área</label>
+                    <canvas id="firma-area" class="firma-pad" width="300" height="120"></canvas>
+                    <div class="firma-buttons">
+                        <button type="button" class="firma-btn" onclick="guardarFirma('area')">✓ Guardar firma</button>
+                        <button type="button" class="firma-btn firma-btn-clear" onclick="limpiarFirma('area')">Limpiar firma</button>
+                        <span id="status-area" style="font-size:12px;color:#22c55e;margin-left:8px;display:none;">✓ Guardada</span>
+                    </div>
+                    
+                    <label class="firma-label" style="margin-top: 14px;">Firma - AIFA (Responsable)</label>
+                    <canvas id="firma-aifa" class="firma-pad" width="300" height="120"></canvas>
+                    <div class="firma-buttons">
+                        <button type="button" class="firma-btn" onclick="guardarFirma('aifa')">✓ Guardar firma</button>
+                        <button type="button" class="firma-btn firma-btn-clear" onclick="limpiarFirma('aifa')">Limpiar firma</button>
+                        <span id="status-aifa" style="font-size:12px;color:#22c55e;margin-left:8px;display:none;">✓ Guardada</span>
+                    </div>
+                    
+                    <label class="firma-label" style="margin-top: 14px;">Firma - AFAC (Supervisor)</label>
+                    <canvas id="firma-afac" class="firma-pad" width="300" height="120"></canvas>
+                    <div class="firma-buttons">
+                        <button type="button" class="firma-btn" onclick="guardarFirma('afac')">✓ Guardar firma</button>
+                        <button type="button" class="firma-btn firma-btn-clear" onclick="limpiarFirma('afac')">Limpiar firma</button>
+                        <span id="status-afac" style="font-size:12px;color:#22c55e;margin-left:8px;display:none;">✓ Guardada</span>
+                    </div>
+                </div>
 
                 <input type="submit" value="Generar reporte">
             </form>
 
         </div> <!-- End revision-section -->
+
+        <!-- Fauna Section -->
+        <div id="fauna-section" class="content-section">
+
+            <form id="fauna-form" action="#" method="get">
+
+                <h3>⚠️ Tipo de Registro</h3>
+
+                <div class="pista-options" style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <label class="pista-option" style="flex:1;">
+                        <input type="radio" name="fauna_tipo_reporte_inspeccion" value="Impacto"> Impacto
+                    </label>
+                    <label class="pista-option" style="flex:1;">
+                        <input type="radio" name="fauna_tipo_reporte_inspeccion" value="Posible Impacto"> Posible Impacto
+                    </label>
+                </div>
+                <button type="button" id="fauna_tipo_reporte-change-btn" style="display:none; margin-top:6px;">Cambiar Tipo de Registro</button>
+
+                <div id="fauna_turno-section" style="display:none; margin-top:8px;">
+                    <h3>Turno</h3>
+                    <input type="radio" id="fauna_turno_diurno" name="fauna_turno" value="Diurna">
+                    <label for="fauna_turno_diurno">Diurno</label><br>
+                    <input type="radio" id="fauna_turno_nocturno" name="fauna_turno" value="Nocturna">
+                    <label for="fauna_turno_nocturno">Nocturno</label><br>
+                </div>
+
+                <div id="fauna_pista-section" style="margin-top:8px;">
+                    <h3>Pista</h3>
+                    <div class="pista-options" style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <label class="pista-option" style="flex:1;">
+                            <input type="radio" name="fauna_pista" value="04C - 22C"> 04C - 22C
+                        </label>
+                        <label class="pista-option" style="flex:1;">
+                            <input type="radio" name="fauna_pista" value="04L - 22R"> 04L - 22R
+                        </label>
+                    </div>
+                    <button type="button" id="fauna_pista-change-btn" style="display:none; margin-top:6px;">Cambiar pista</button>
+                </div>
+
+                <div id="fauna_fase_vuelo-section" style="margin-top:8px;">
+                    <h3>✈️ Fase de Vuelo</h3>
+                    <div class="pista-options" style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <label class="pista-option" style="flex:1;">
+                            <input type="radio" name="fauna_fase_vuelo" value="Aterrizaje"> Aterrizaje
+                        </label>
+                        <label class="pista-option" style="flex:1;">
+                            <input type="radio" name="fauna_fase_vuelo" value="Despegue"> Despegue
+                        </label>
+                    </div>
+                    <button type="button" id="fauna_fase_vuelo-change-btn" style="display:none; margin-top:6px;">Cambiar Fase de Vuelo</button>
+                </div>
+
+                <h3>🧑‍✈️ Responsable(s) que elaboran el reporte</h3>
+                <select id="fauna_report-authors-select" name="fauna_report_authors" title="Seleccionar Responsable">
+                    <option value="">-- Seleccionar Responsable --</option>
+                    <option value="Daniel Mejia">Daniel Mejia</option>
+                    <option value="Cesar Cisneros">Cesar Cisneros</option>
+                    <option value="Alejandro Jimenez">Alejandro Jimenez</option>
+                    <option value="Daniela Hernandez">Daniela Hernandez</option>
+                </select>
+                <button type="button" id="fauna_report-authors-reset" style="display:none; margin-top:6px;">Cambiar responsable</button>
+
+                <h3>🪪 Cargo</h3>
+                <select id="fauna_report-role" name="fauna_report_role" title="Seleccionar Cargo">
+                    <option value="Coordinador de Fauna">Coordinador de Fauna</option>
+                    <option value="Supervisor de Fauna">Supervisor de Fauna</option>
+                    <option value="Otro">Otro</option>
+                </select>
+                <button type="button" id="fauna_report-role-reset" style="display:none; margin-top:6px;">Cambiar cargo</button>
+                <input type="text" id="fauna_report-role-other" name="fauna_report_role_other" placeholder="Especifique otro cargo"
+                    style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px;" />
+
+                <h3>👤 Representante AFAC (Supervisor)</h3>
+                <input type="text" id="fauna_report-afac-name" name="fauna_report_afac_name" placeholder="Nombre del representante AFAC" style="margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" />
+
+                <h3>✈️ Aerolinea</h3>
+                <select id="fauna_report-aerolinea" name="fauna_report_aerolinea" title="Seleccionar Aerolinea" style="max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc; margin-top:6px;">
+                    <option value="">-- Seleccionar Aerolinea --</option>
+                    <option value="Aeromexico">Aeromexico</option>
+                    <option value="Aerounion">Aerounion</option>
+                    <option value="Aerus">Aerus</option>
+                    <option value="Air Canada">Air Canada</option>
+                    <option value="Air China">Air China</option>
+                    <option value="Air France">Air France</option>
+                    <option value="AM Costera">AM Costera</option>
+                    <option value="Arajet">Arajet</option>
+                    <option value="Atlas Air">Atlas Air</option>
+                    <option value="Cargojet">Cargojet</option>
+                    <option value="Cathay Pacific">Cathay Pacific</option>
+                    <option value="China Southern">China Southern</option>
+                    <option value="DHL Guatemala">DHL Guatemala</option>
+                    <option value="Emirates">Emirates</option>
+                    <option value="Estafeta">Estafeta</option>
+                    <option value="Ethiopian">Ethiopian</option>
+                    <option value="Kalitta Air">Kalitta Air</option>
+                    <option value="Lufthansa">Lufthansa</option>
+                    <option value="Mas Air">Mas Air</option>
+                    <option value="Mexicana">Mexicana</option>
+                    <option value="Otra">Otra</option>
+                    <option value="Qatar Airways">Qatar Airways</option>
+                    <option value="UPS">UPS</option>
+                    <option value="Viva">Viva</option>
+                    <option value="Volaris">Volaris</option>
+                </select>
+                <input type="text" id="fauna_report-aerolinea-other" name="fauna_report_aerolinea_other" placeholder="Especifique otra aerolinea" style="display:none; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" />
+
+                <h3>📍 Ubicación</h3>
+                <select id="fauna_report-ubicacion" name="fauna_report_ubicacion" title="Seleccionar Ubicación" style="max-width:420px; width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
+                    <option value="">-- Seleccionar Ubicación --</option>
+                    <optgroup label="Sector A">
+                        <option value="A3 - A5">A3 - A5</option>
+                        <option value="A5 - A6">A5 - A6</option>
+                        <option value="A6 - A10">A6 - A10</option>
+                        <option value="A10 - A11">A10 - A11</option>
+                    </optgroup>
+                    <optgroup label="Sector K">
+                        <option value="K3 - K6">K3 - K6</option>
+                        <option value="K6 - K7">K6 - K7</option>
+                        <option value="K7 - K11">K7 - K11</option>
+                        <option value="K11 - K14">K11 - K14</option>
+                    </optgroup>
+                </select>
+
+                <h3>🦁 Informe</h3>
+
+                <input type="checkbox" id="fauna_avistamiento" name="fauna_tipo_reporte" value="Avistamiento de Aves">
+                <label for="fauna_avistamiento">Avistamiento de Aves</label>
+                <button type="button" id="fauna_done_avistamiento" class="item-done" style="display:none; margin-left:6px;">Done</button>
+                <button type="button" id="fauna_update_avistamiento" class="item-update" style="display:none; margin-left:6px;">Update</button>
+                <br>
+                <div class="item-details" id="fauna_details_avistamiento" style="display:none; margin-left:18px; margin-bottom:10px;">
+                    <label>Ubicación: <input type="text" name="fauna_details[avistamiento][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
+                    <label>Especie:
+                        <select name="fauna_details[avistamiento][especie]" class="fauna-especie-select">
+                            <option value="">-- Seleccionar Especie --</option>
+                            <option value="Alondra cornuda (Eremophila alpestris)">Alondra cornuda (Eremophila alpestris)</option>
+                            <option value="Bisbita norteamericana (Anthus rubescens)">Bisbita norteamericana (Anthus rubescens)</option>
+                            <option value="Tecolote llanero (Athene cunicularia)">Tecolote llanero (Athene cunicularia)</option>
+                            <option value="Playero blanco (Calidris alba)">Playero blanco (Calidris alba)</option>
+                            <option value="Playero de Baird (Calidris bairdii)">Playero de Baird (Calidris bairdii)</option>
+                            <option value="Chorlo tildío (Charadrius vociferus)">Chorlo tildío (Charadrius vociferus)</option>
+                            <option value="Cernicalo americano (Falco sparverius)">Cernicalo americano (Falco sparverius)</option>
+                            <option value="Pinzón mexicano (Haemorhous mexicanus)">Pinzón mexicano (Haemorhous mexicanus)</option>
+                            <option value="Golondrina tijereta (Hirundo rustica)">Golondrina tijereta (Hirundo rustica)</option>
+                            <option value="Liebre cola negra (Lepus californicus)">Liebre cola negra (Lepus californicus)</option>
+                            <option value="Gorrión común (Passer domesticus)">Gorrión común (Passer domesticus)</option>
+                            <option value="Gorrión sabanero (Passerculus sandwichensis)">Gorrión sabanero (Passerculus sandwichensis)</option>
+                            <option value="Zacatonero de Boterii (Peucaea botterii)">Zacatonero de Boterii (Peucaea botterii)</option>
+                            <option value="Zanate mexicano (Quiscalus mexicanus)">Zanate mexicano (Quiscalus mexicanus)</option>
+                            <option value="Pradero tortillaconchile (Sturnella magna)">Pradero tortillaconchile (Sturnella magna)</option>
+                            <option value="Lechuza de campanario (Tyto furcata)">Lechuza de campanario (Tyto furcata)</option>
+                            <option value="Tordo cabeza amarilla (Xanthocephalus xanthochephalus)">Tordo cabeza amarilla (Xanthocephalus xanthochephalus)</option>
+                            <option value="Huilota común (Zenaida macroura)">Huilota común (Zenaida macroura)</option>
+                            <option value="Otra">Otra (especificar)</option>
+                        </select>
+                    </label><br>
+                    <input type="text" name="fauna_details[avistamiento][especie_otra]" placeholder="Especifique la especie" style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px; border-radius:4px; border:1px solid #c8d8ee;">
+                    <br>
+                    <label>Cantidad: <input type="number" name="fauna_details[avistamiento][cantidad]"></label><br>
+                    <label>Condición del Daño:
+                        <select class="condicion-select" name="fauna_details[avistamiento][condicion]">
+                            <option value="">--</option>
+                            <option value="Daño Menor">Daño Menor</option>
+                            <option value="Daño Mayor">Daño Mayor</option>
+                            <option value="Daño Severo">Daño Severo</option>
+                            <option value="Daño Catastrofico">Daño Catastrofico</option>
+                        </select>
+                    </label><br>
+                    <label>Observaciones:<br><textarea name="fauna_details[avistamiento][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
+                    <label>Prioridad:
+                        <select class="priority-select" name="fauna_details[avistamiento][prioridad]">
+                            <option value="">N/A</option>
+                            <option value="1">Baja</option>
+                            <option value="2">Media</option>
+                            <option value="3">Alta</option>
+                        </select>
+                    </label><br>
+                </div>
+
+                <input type="checkbox" id="fauna_presencia" name="fauna_tipo_reporte" value="Presencia de Animales">
+                <label for="fauna_presencia">Presencia de Animales</label>
+                <button type="button" id="fauna_done_presencia" class="item-done" style="display:none; margin-left:6px;">Done</button>
+                <button type="button" id="fauna_update_presencia" class="item-update" style="display:none; margin-left:6px;">Update</button>
+                <br>
+                <div class="item-details" id="fauna_details_presencia" style="display:none; margin-left:18px; margin-bottom:10px;">
+                    <label>Ubicación: <input type="text" name="fauna_details[presencia][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
+                    <label>Tipo de Animal: <input type="text" name="fauna_details[presencia][tipo_animal]"></label><br>
+                    <label>Riesgo/Amenaza:
+                        <select name="fauna_details[presencia][riesgo]">
+                            <option value="">--</option>
+                            <option>Bajo</option>
+                            <option>Medio</option>
+                            <option>Alto</option>
+                        </select>
+                    </label><br>
+                    <label>Observaciones:<br><textarea name="fauna_details[presencia][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
+                </div>
+
+                <input type="checkbox" id="fauna_daino" name="fauna_tipo_reporte" value="Daño a Infraestructura">
+                <label for="fauna_daino">Daño a Infraestructura</label>
+                <button type="button" id="fauna_done_daino" class="item-done" style="display:none; margin-left:6px;">Done</button>
+                <button type="button" id="fauna_update_daino" class="item-update" style="display:none; margin-left:6px;">Update</button>
+                <br>
+                <div class="item-details" id="fauna_details_daino" style="display:none; margin-left:18px; margin-bottom:10px;">
+                    <label>Ubicación: <input type="text" name="fauna_details[daino][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
+                    <label>Descripción del Daño: <input type="text" name="fauna_details[daino][descripcion]"></label><br>
+                    <label>Severidad:
+                        <select name="fauna_details[daino][severidad]">
+                            <option value="">--</option>
+                            <option>Leve</option>
+                            <option>Moderada</option>
+                            <option>Severa</option>
+                        </select>
+                    </label><br>
+                    <label>Observaciones:<br><textarea name="fauna_details[daino][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
+                </div>
+
+                <h3>✍️ Firmas</h3>
+                <button type="button" id="fauna_firma-toggle-btn" class="firma-toggle-btn">📝 Mostrar Firmas</button>
+                <div class="firma-section">
+                    <label class="firma-label">Firma - AIFA (Responsable)</label>
+                    <canvas id="fauna_firma-aifa" class="firma-pad" width="300" height="120"></canvas>
+                    <div class="firma-buttons">
+                        <button type="button" class="firma-btn" onclick="guardarFirma('fauna_aifa')">✓ Guardar firma</button>
+                        <button type="button" class="firma-btn firma-btn-clear" onclick="limpiarFirma('fauna_aifa')">Limpiar firma</button>
+                        <span id="fauna_status-aifa" style="font-size:12px;color:#22c55e;margin-left:8px;display:none;">✓ Guardada</span>
+                    </div>
+                    
+                    <label class="firma-label" style="margin-top: 14px;">Firma - AFAC (Supervisor)</label>
+                    <canvas id="fauna_firma-afac" class="firma-pad" width="300" height="120"></canvas>
+                    <div class="firma-buttons">
+                        <button type="button" class="firma-btn" onclick="guardarFirma('fauna_afac')">✓ Guardar firma</button>
+                        <button type="button" class="firma-btn firma-btn-clear" onclick="limpiarFirma('fauna_afac')">Limpiar firma</button>
+                        <span id="fauna_status-afac" style="font-size:12px;color:#22c55e;margin-left:8px;display:none;">✓ Guardada</span>
+                    </div>
+                </div>
+
+                <input type="submit" value="Generar reporte">
+            </form>
+
+        </div> <!-- End fauna-section -->
 
         <!-- Historial de Reportes Section -->
         <div id="historial-section" class="content-section">
@@ -2046,14 +2528,53 @@
 
             <!-- Admin Panel -->
             <div id="admin-panel" style="display:none;">
-                <button id="refresh-admin-btn" class="btn btn-ghost" style="margin-bottom:10px;">🔄 Actualizar
-                    Lista</button>
+                <div id="reports-filter-bar" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:14px;">
+                    <div style="flex:1;min-width:180px;">
+                        <label style="font-size:12px;color:#334155;display:block;margin-bottom:4px;">Folio</label>
+                        <input id="filter-folio" type="text" placeholder="Buscar folio..." style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(100,116,139,0.35);">
+                    </div>
+                    <div style="flex:1;min-width:180px;">
+                        <label style="font-size:12px;color:#334155;display:block;margin-bottom:4px;">Fecha desde</label>
+                        <input id="filter-fecha-desde" type="date" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(100,116,139,0.35);">
+                    </div>
+                    <div style="flex:1;min-width:180px;">
+                        <label style="font-size:12px;color:#334155;display:block;margin-bottom:4px;">Fecha hasta</label>
+                        <input id="filter-fecha-hasta" type="date" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(100,116,139,0.35);">
+                    </div>
+                    <div style="flex:1;min-width:180px;" class="filter-multi">
+                        <label style="font-size:12px;color:#334155;display:block;margin-bottom:4px;">Responsable</label>
+                        <div class="filter-multi-toggle" tabindex="0" data-target="filter-responsable">Seleccionar responsable</div>
+                        <select id="filter-responsable" multiple size="4" class="filter-multi-select" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(100,116,139,0.35);background:#fff;"></select>
+                    </div>
+                    <div style="flex:1;min-width:180px;" class="filter-multi">
+                        <label style="font-size:12px;color:#334155;display:block;margin-bottom:4px;">Tipo inspección</label>
+                        <div class="filter-multi-toggle" tabindex="0" data-target="filter-tipo">Seleccionar tipo</div>
+                        <select id="filter-tipo" multiple size="4" class="filter-multi-select" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(100,116,139,0.35);background:#fff;"></select>
+                    </div>
+                    <div style="flex:1;min-width:180px;" class="filter-multi">
+                        <label style="font-size:12px;color:#334155;display:block;margin-bottom:4px;">Turno</label>
+                        <div class="filter-multi-toggle" tabindex="0" data-target="filter-turno">Seleccionar turno</div>
+                        <select id="filter-turno" multiple size="4" class="filter-multi-select" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(100,116,139,0.35);background:#fff;"></select>
+                    </div>
+                    <div style="flex:1;min-width:180px;" class="filter-multi">
+                        <label style="font-size:12px;color:#334155;display:block;margin-bottom:4px;">RWY</label>
+                        <div class="filter-multi-toggle" tabindex="0" data-target="filter-pista">Seleccionar RWY</div>
+                        <select id="filter-pista" multiple size="4" class="filter-multi-select" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(100,116,139,0.35);background:#fff;"></select>
+                    </div>
+                    <div style="display:flex;gap:8px;">
+                        <button id="filter-apply-btn" class="btn btn-primary" style="padding:8px 12px;">Filtrar</button>
+                        <button id="filter-clear-btn" class="btn btn-ghost" style="padding:8px 12px;">Limpiar</button>
+                    </div>
+                </div>
+
+                <button id="refresh-admin-btn" class="btn btn-ghost" style="margin-bottom:10px;">🔄 Actualizar Lista</button>
                 <table id="admin-reports-table">
                     <thead>
                         <tr>
                             <th>Fecha</th>
                             <th>Folio</th>
                             <th>Responsable</th>
+                            <th>Representante de Área</th>
                             <th>PDF</th>
                         </tr>
                     </thead>
@@ -2074,7 +2595,7 @@
                 <h2>📊 Panel de Estadísticas</h2>
 
                 <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 20px;">
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 20px;">
                     <!-- Estadísticas principales -->
                     <div class="stat-card"
                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
@@ -2084,22 +2605,38 @@
 
                     <div class="stat-card"
                         style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="reports-this-month">0
-                        </h3>
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="reports-this-month">0</h3>
                         <p style="margin: 0; font-size: 1.1em;">Reportes este Mes</p>
                     </div>
 
                     <div class="stat-card"
-                        style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="avg-priority">0</h3>
-                        <p style="margin: 0; font-size: 1.1em;">Prioridad Promedio</p>
+                        style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="report-diurnos">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Reportes Diurnos</p>
                     </div>
 
                     <div class="stat-card"
-                        style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="completion-rate">0%
-                        </h3>
-                        <p style="margin: 0; font-size: 1.1em;">Tasa de Completitud</p>
+                        style="background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="report-nocturnos">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Reportes Nocturnos</p>
+                    </div>
+
+                    <div class="stat-card"
+                        style="background: linear-gradient(135deg, #facc15 0%, #eab308 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="report-primarios">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Reportes Primarios</p>
+                    </div>
+
+                    <div class="stat-card"
+                        style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="report-secundarios">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Reportes Secundarios</p>
+                    </div>
+
+                    <div id="reportes-por-pista" class="stat-card"
+                        style="background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <div style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px;">Reportes por Pista</div>
+                        <div id="report-pista-cards" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:130px;overflow:auto;padding-top:6px"></div>
                     </div>
                 </div>
 
@@ -2115,6 +2652,21 @@
                     <div id="monthly-reports-chart"
                         style="height: 300px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 20px 0;">
                         <p style="color: #6b7280;">Cargando datos...</p>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Reportes por Responsable</h3>
+                    <div id="responsable-table" style="background:#f9fafb;border-radius:8px;padding:14px;">
+                        <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left;padding:10px;border-bottom:1px solid #e5e7eb;">Responsable</th>
+                                    <th style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb;"># Reportes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="responsable-table-body">
+                                <tr><td colspan="2" style="padding:12px;color:#6b7280;text-align:center;">Cargando datos...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -2185,6 +2737,20 @@
                 }
                 Array.prototype.slice.call(tipoEls).forEach(function (el) { el.addEventListener('change', updateTurno); });
                 updateTurno();
+            }
+
+            // Mostrar/ocultar campo nombre representante de área
+            var areaRepSelect = document.getElementById('report-area-rep');
+            var areaRepNameInput = document.getElementById('report-area-rep-name');
+            if (areaRepSelect && areaRepNameInput) {
+                areaRepSelect.addEventListener('change', function () {
+                    if (this.value && this.value !== 'N/A') {
+                        areaRepNameInput.style.display = 'block';
+                    } else {
+                        areaRepNameInput.style.display = 'none';
+                        areaRepNameInput.value = '';
+                    }
+                });
             }
 
             // Wiring para campos Lugar: agregar click para abrir mapa
@@ -2703,6 +3269,254 @@
     })();
     </script>
 
+    <!-- Script: Captura de Firmas en Canvas -->
+    <script>
+        (function() {
+            // Variables globales para las firmas
+            window.firmaPads = {
+                area: null,
+                aifa: null,
+                afac: null,
+                fauna_aifa: null,
+                fauna_afac: null
+            };
+            window.firmaData = {
+                area: null,
+                aifa: null,
+                afac: null,
+                fauna_aifa: null,
+                fauna_afac: null
+            };
+            window.firmaGuardada = {
+                area: false,
+                aifa: false,
+                afac: false,
+                fauna_aifa: false,
+                fauna_afac: false
+            };
+
+            function initFirmaPad(padId) {
+                var canvas = document.getElementById('firma-' + padId);
+                if (!canvas) return;
+
+                var ctx = canvas.getContext('2d');
+                var drawing = false;
+                var lastX = 0, lastY = 0;
+
+                // Fondo blanco
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                canvas.addEventListener('mousedown', function(e) {
+                    drawing = true;
+                    var rect = canvas.getBoundingClientRect();
+                    lastX = (e.clientX - rect.left) * (canvas.width / rect.width);
+                    lastY = (e.clientY - rect.top) * (canvas.height / rect.height);
+                });
+
+                canvas.addEventListener('mousemove', function(e) {
+                    if (!drawing) return;
+                    var rect = canvas.getBoundingClientRect();
+                    var x = (e.clientX - rect.left) * (canvas.width / rect.width);
+                    var y = (e.clientY - rect.top) * (canvas.height / rect.height);
+
+                    ctx.strokeStyle = '#1d4ed8';
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+
+                    lastX = x;
+                    lastY = y;
+                });
+
+                canvas.addEventListener('mouseup', function() {
+                    drawing = false;
+                });
+
+                canvas.addEventListener('mouseleave', function() {
+                    drawing = false;
+                });
+
+                // Soporte touch para móviles
+                canvas.addEventListener('touchstart', function(e) {
+                    e.preventDefault();
+                    drawing = true;
+                    var rect = canvas.getBoundingClientRect();
+                    var touch = e.touches[0];
+                    lastX = (touch.clientX - rect.left) * (canvas.width / rect.width);
+                    lastY = (touch.clientY - rect.top) * (canvas.height / rect.height);
+                });
+
+                canvas.addEventListener('touchmove', function(e) {
+                    e.preventDefault();
+                    if (!drawing) return;
+                    var rect = canvas.getBoundingClientRect();
+                    var touch = e.touches[0];
+                    var x = (touch.clientX - rect.left) * (canvas.width / rect.width);
+                    var y = (touch.clientY - rect.top) * (canvas.height / rect.height);
+
+                    ctx.strokeStyle = '#1d4ed8';
+                    ctx.lineWidth = 2;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.beginPath();
+                    ctx.moveTo(lastX, lastY);
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+
+                    lastX = x;
+                    lastY = y;
+                });
+
+                canvas.addEventListener('touchend', function() {
+                    drawing = false;
+                });
+
+                window.firmaPads[padId] = canvas;
+            }
+
+            // Función global para limpiar firma
+            window.limpiarFirma = function(padId) {
+                var canvas = window.firmaPads[padId];
+                if (!canvas) return;
+                var ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                window.firmaData[padId] = null;
+                window.firmaGuardada[padId] = false;
+                
+                // Ocultar indicador de guardado
+                var statusEl = document.getElementById('status-' + padId);
+                if (statusEl) {
+                    statusEl.style.display = 'none';
+                }
+            };
+
+            // Función global para guardar firma explícitamente
+            window.guardarFirma = function(padId) {
+                var canvas = window.firmaPads[padId];
+                if (!canvas) return;
+                
+                // Capturar el contenido del canvas
+                window.firmaData[padId] = canvas.toDataURL('image/png');
+                window.firmaGuardada[padId] = true;
+                
+                // Mostrar indicador de guardado
+                var statusEl = document.getElementById('status-' + padId);
+                if (statusEl) {
+                    statusEl.style.display = 'inline-block';
+                }
+                
+                console.log('Firma ' + padId + ' guardada');
+            };
+
+            // Obtener firmas para incluir en PDF
+            window.obtenerFirmas = function() {
+                return {
+                    area: window.firmaData.area,
+                    aifa: window.firmaData.aifa,
+                    afac: window.firmaData.afac
+                };
+            };
+
+            // Obtener firmas de fauna para incluir en PDF
+            window.obtenerFirmasFauna = function() {
+                return {
+                    aifa: window.firmaData.fauna_aifa,
+                    afac: window.firmaData.fauna_afac
+                };
+            };
+
+            // Función global para toggle la visibilidad de las firmas
+            window.toggleFirmas = function() {
+                var firmaSection = document.querySelector('#revision-section .firma-section');
+                var toggleBtn = document.getElementById('firma-toggle-btn');
+                
+                if (!firmaSection || !toggleBtn) return;
+                
+                firmaSection.classList.toggle('visible');
+                
+                // Cambiar el texto del botón
+                if (firmaSection.classList.contains('visible')) {
+                    toggleBtn.textContent = '📋 Ocultar Firmas';
+                } else {
+                    toggleBtn.textContent = '📝 Mostrar Firmas';
+                }
+            };
+
+            // Función global para toggle la visibilidad de las firmas de Fauna
+            window.toggleFirmasFauna = function() {
+                var firmaSection = document.querySelector('#fauna-section .firma-section');
+                var toggleBtn = document.getElementById('fauna_firma-toggle-btn');
+                
+                if (!firmaSection || !toggleBtn) return;
+                
+                firmaSection.classList.toggle('visible');
+                
+                // Cambiar el texto del botón
+                if (firmaSection.classList.contains('visible')) {
+                    toggleBtn.textContent = '📋 Ocultar Firmas';
+                } else {
+                    toggleBtn.textContent = '📝 Mostrar Firmas';
+                }
+            };
+
+            // Inicializar canvas al cargar
+            document.addEventListener('DOMContentLoaded', function() {
+                // Agregar event listener al botón de toggle
+                var toggleBtn = document.getElementById('firma-toggle-btn');
+                if (toggleBtn) {
+                    toggleBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        window.toggleFirmas();
+                    });
+                }
+
+                // Agregar event listener al botón de toggle de Fauna
+                var faunaTriggleBtn = document.getElementById('fauna_firma-toggle-btn');
+                if (faunaTriggleBtn) {
+                    faunaTriggleBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        window.toggleFirmasFauna();
+                    });
+                }
+                
+                setTimeout(function() {
+                    initFirmaPad('area');
+                    initFirmaPad('aifa');
+                    initFirmaPad('afac');
+                    initFirmaPad('fauna_aifa');
+                    initFirmaPad('fauna_afac');
+                }, 100);
+            });
+
+            // Si el DOM ya está cargado, inicializar directamente
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    setTimeout(function() {
+                        initFirmaPad('area');
+                        initFirmaPad('aifa');
+                        initFirmaPad('afac');
+                        initFirmaPad('fauna_aifa');
+                        initFirmaPad('fauna_afac');
+                    }, 100);
+                });
+            } else {
+                setTimeout(function() {
+                    initFirmaPad('area');
+                    initFirmaPad('aifa');
+                    initFirmaPad('afac');
+                    initFirmaPad('fauna_aifa');
+                    initFirmaPad('fauna_afac');
+                }, 100);
+            }
+        })();
+    </script>
+
     <!-- contenedor oculto para generar el PDF -->
     <div id="report-summary"
         style="display:none; padding:18px; background:#fff; max-width:900px; margin:0 auto; border-radius:6px;"></div>
@@ -2796,6 +3610,14 @@
                     if (roleSel) { roleSel.selectedIndex = 0; roleSel.disabled = false; }
                     if (roleReset) roleReset.style.display = 'none';
                     if (roleOther) { roleOther.value = ''; roleOther.style.display = 'none'; }
+
+                    // Reset pista selection (incluye el botón de cambiar pista)
+                    var pistaBtn = document.getElementById('pista-change-btn');
+                    if (pistaBtn) pistaBtn.style.display = 'none';
+                    Array.prototype.slice.call(document.querySelectorAll('label.pista-option')).forEach(function (lbl) { try { lbl.classList.remove('selected'); } catch (e) { } });
+                    Array.prototype.slice.call(document.querySelectorAll('input[name="pista"]')).forEach(function (r) {
+                        try { r.checked = false; r.disabled = false; } catch (e) { }
+                    });
                 } catch (e) { }
 
                 // 4) Limpieza visual adicional: ocultar detalles que puedan no haberse limpiado
@@ -2822,6 +3644,77 @@
         document.addEventListener('DOMContentLoaded', function () {
             var form = document.getElementById('report-form');
             if (!form) return;
+
+            // Bloqueo de selección de pista (una vez elegida se deshabilita hasta pulsar "Cambiar pista")
+            (function () {
+                var pistaRadios = Array.prototype.slice.call(form.querySelectorAll('input[name="pista"]'));
+                var pistaChangeBtn = document.getElementById('pista-change-btn');
+
+                function updatePistaState() {
+                    try {
+                        var checked = pistaRadios.find(function (r) { return r.checked; });
+                        if (checked) {
+                            pistaRadios.forEach(function (r) {
+                                r.disabled = true;
+                                var lbl = r.closest('label');
+                                if (lbl) lbl.classList.remove('selected');
+                            });
+                            var lbl = checked.closest('label');
+                            if (lbl) lbl.classList.add('selected');
+                            if (pistaChangeBtn) pistaChangeBtn.style.display = 'inline-block';
+                        } else {
+                            pistaRadios.forEach(function (r) {
+                                r.disabled = false;
+                                var lbl = r.closest('label');
+                                if (lbl) lbl.classList.remove('selected');
+                            });
+                            if (pistaChangeBtn) pistaChangeBtn.style.display = 'none';
+                        }
+                    } catch (e) { }
+                }
+
+                pistaRadios.forEach(function (r) {
+                    r.addEventListener('change', function () { updatePistaState(); });
+                });
+
+                if (pistaChangeBtn) {
+                    pistaChangeBtn.addEventListener('click', function () {
+                        pistaRadios.forEach(function (r) { r.disabled = false; r.checked = false; });
+                        pistaChangeBtn.style.display = 'none';
+                        pistaRadios.forEach(function (r) {
+                            var lbl = r.closest('label');
+                            if (lbl) lbl.classList.remove('selected');
+                        });
+                    });
+                }
+
+                updatePistaState();
+            })();
+
+            // Manejar fauna tipo reporte (similar a pista)
+            (function () {
+                var faunaRadios = Array.prototype.slice.call(form.querySelectorAll('input[name="fauna_tipo_reporte_inspeccion"]'));
+                
+                function updateFaunaReporteState() {
+                    try {
+                        faunaRadios.forEach(function (r) {
+                            var lbl = r.closest('label');
+                            if (r.checked && lbl) {
+                                lbl.classList.add('selected');
+                            } else if (lbl) {
+                                lbl.classList.remove('selected');
+                            }
+                        });
+                    } catch (e) { }
+                }
+
+                faunaRadios.forEach(function (r) {
+                    r.addEventListener('change', function () { updateFaunaReporteState(); });
+                });
+
+                updateFaunaReporteState();
+            })();
+
             form.addEventListener('submit', async function (e) {
                 e.preventDefault();
 
@@ -2865,6 +3758,27 @@
                         if (other && other.value.trim()) cargo = other.value.trim();
                     }
                 }
+
+                // Obtener representante de área
+                var areaRep = '';
+                var areaEl = document.getElementById('report-area-rep');
+                if (areaEl && areaEl.value && areaEl.value !== 'N/A') {
+                    areaRep = (areaEl.options[areaEl.selectedIndex] || {}).text || areaEl.value || '';
+                    // Si el texto es 'N/A', no consider como representante de área
+                    if (areaRep === 'N/A') areaRep = '';
+                }
+                // Obtener nombre del representante de área
+                var areaRepName = '';
+                var areaRepNameEl = document.getElementById('report-area-rep-name');
+                if (areaRepNameEl && areaRep) {
+                    areaRepName = areaRepNameEl.value.trim();
+                }
+                // Obtener nombre del representante AFAC
+                var afacName = '';
+                var afacNameEl = document.getElementById('report-afac-name');
+                if (afacNameEl) {
+                    afacName = afacNameEl.value.trim();
+                }
                 // Obtener Tipo(s) de Inspección seleccionadas
                 var tipos = Array.prototype.slice.call(document.querySelectorAll('input[name="tipo_inspeccion"]'))
                     .filter(function (i) { return i.checked; })
@@ -2876,6 +3790,9 @@
                 // Obtener Turno seleccionado (si aplica)
                 var turnoEl = document.querySelector('input[name="turno"]:checked');
                 var turnoText = turnoEl ? (document.querySelector('label[for="' + turnoEl.id + '"]') ? document.querySelector('label[for="' + turnoEl.id + '"]').textContent.trim() : (turnoEl.value || '')) : '-';
+                // Obtener Pista seleccionada
+                var pistaEl = document.querySelector('input[name="pista"]:checked');
+                var pistaText = pistaEl ? (pistaEl.value || '-') : '-';
                 // calcular horario UTC (hora) y fecha UTC para mostrar en el PDF
                 function pad(n) { return n.toString().padStart(2, '0'); }
                 var now = new Date();
@@ -2945,8 +3862,11 @@
                             fecha_utc: utcDateStr + ' ' + utcTimeStr,
                             tipo_inspeccion: tiposText,
                             turno: turnoText,
+                            pista: pistaText,
                             responsable: autor,
                             cargo: cargo,
+                            area_representante: areaRep,
+                            area_representante_nombre: areaRepName,
                             pdf_url: pdfUrl || null
                         };
                         console.log('Insertando reporte:', reportPayload);
@@ -2955,6 +3875,28 @@
                             .from('reports')
                             .insert([reportPayload])
                             .select();
+                        
+                        // Si falla porque las columnas no existen, intentar sin ellas
+                        if (reportError && reportError.message && (reportError.message.includes('area_representante') || reportError.message.includes('schema'))) {
+                            console.warn('Reintentando sin columnas area_representante...', reportError);
+                            var reportPayloadBasic = {
+                                folio: folio,
+                                fecha_local: fecha,
+                                fecha_utc: utcDateStr + ' ' + utcTimeStr,
+                                tipo_inspeccion: tiposText,
+                                turno: turnoText,
+                                pista: pistaText,
+                                responsable: autor,
+                                cargo: cargo,
+                                pdf_url: pdfUrl || null
+                            };
+                            var result = await window.supabaseClient
+                                .from('reports')
+                                .insert([reportPayloadBasic])
+                                .select();
+                            reportData = result.data;
+                            reportError = result.error;
+                        }
 
                         if (reportError) {
                             console.error('Error guardando reporte:', reportError);
@@ -3183,9 +4125,10 @@
 
                 // centro: logo sobre título (centrado)
                 html += '<div style="flex:1;text-align:center;padding:0 12px">';
-                if (logoSrc) { html += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 8px">'; }
+                if (logoSrc) { html += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">'; }
                 else { html += inlineLogo; }
-                html += '<h2 style="color:#0b66c3;margin:0;font-size:18px;">Reporte de Inspección en Área de Movimiento y Maniobras</h2>';
+                html += '<h2 style="color:#0b66c3;margin:0;font-size:20px;">Reporte de Inspección en Área de Movimiento y Maniobras</h2>';
+                html += '<div style="margin-top:6px;font-size:14px;color:#111;font-weight:700;">RWY: ' + (pistaText || '-') + '</div>';
                 html += '</div>';
 
                 // derecha: UTC time (hora) con fecha debajo, y folio
@@ -3204,9 +4147,13 @@
                 html += sep;
                 html += '<div style="min-width:120px;text-align:center;font-size:13px;color:#374151">Turno<br><strong>' + (turnoText || '-') + '</strong></div>';
                 html += sep;
+                html += '<div style="min-width:140px;text-align:center;font-size:13px;color:#374151">Pista<br><strong>' + (pistaText || '-') + '</strong></div>';
+                html += sep;
                 html += '<div style="min-width:140px;text-align:center;font-size:13px;color:#374151">Responsable<br><strong>' + (autor || '-') + '</strong></div>';
                 html += sep;
                 html += '<div style="min-width:140px;text-align:center;font-size:13px;color:#374151">Cargo<br><strong>' + (cargo || '-') + '</strong></div>';
+                html += sep;
+                html += '<div style="min-width:160px;text-align:center;font-size:13px;color:#374151">Representante de Área<br><strong>' + (areaRep || '-') + (areaRepName ? '<br>' + areaRepName : '') + '</strong></div>';
                 html += sep;
                 html += '<div style="min-width:120px;text-align:center;font-size:13px;color:#374151">Fecha<br><strong>' + fecha + '</strong></div>';
                 html += '</div>';
@@ -3264,20 +4211,78 @@
                 });
                 html += '</tbody></table>';
 
-                // Recuadros de firma: AIFA y AFAC (AIFA muestra Responsable)
-                html += '<div style="display:flex;justify-content:space-between;gap:24px;margin-top:22px">';
-                html += '<div style="flex:1;border:1px solid #e6eef9;padding:14px;border-radius:6px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between">';
-                html += '<div style="font-size:13px;color:#17325a;text-align:center;font-weight:700">AIFA</div>';
-                html += '<div>';
-                html += '<div style="border-top:1px solid #cbdcec;margin-bottom:6px;padding-top:4px;text-align:center;color:#17325a">Firma</div>';
-                html += '<div style="font-size:12px;color:#374151;text-align:center;font-weight:600">' + (autor || '-') + '</div>';
-                html += '<div style="font-size:11px;color:#6b7280;text-align:center">' + (cargo || '-') + '</div>';
-                html += '</div>';
-                html += '</div>';
-                html += '<div style="flex:1;border:1px solid #e6eef9;padding:14px;border-radius:6px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between">';
-                html += '<div style="font-size:13px;color:#17325a;text-align:center;font-weight:700">AFAC</div>';
-                html += '<div style="border-top:1px solid #cbdcec;margin-top:10px;padding-top:8px;text-align:center;color:#17325a">Firma</div>';
-                html += '</div>';
+                // Obtener firmas capturadas
+                var firmas = (window.obtenerFirmas && window.obtenerFirmas()) || {};
+
+                // Recuadros de firma: orden depende de si hay representante de área
+                html += '<div style="display:flex;justify-content:space-around;gap:24px;margin-top:22px">';
+                
+                if (areaRep && areaRepName) {
+                    // Tres firmas: Área | AIFA | AFAC
+                    html += '<div style="flex:1;border:1px solid #e6eef9;padding:14px;border-radius:6px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between">';
+                    html += '<div style="font-size:13px;color:#17325a;text-align:center;font-weight:700">' + (areaRep || 'Área') + '</div>';
+                    html += '<div>';
+                    if (firmas && firmas.area) {
+                        html += '<div style="height:40px;margin:4px 0;display:flex;align-items:center;justify-content:center"><img src="' + firmas.area + '" style="max-height:50px;max-width:100%;object-fit:contain;"></div>';
+                    } else {
+                        html += '<div style="border-top:1px solid #cbdcec;margin-bottom:6px;padding-top:4px;text-align:center;color:#17325a">Firma</div>';
+                    }
+                    html += '<div style="font-size:12px;color:#374151;text-align:center;font-weight:600">' + (areaRepName || '-') + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '<div style="flex:1;border:1px solid #e6eef9;padding:14px;border-radius:6px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between">';
+                    html += '<div style="font-size:13px;color:#17325a;text-align:center;font-weight:700">AIFA</div>';
+                    html += '<div>';
+                    if (firmas && firmas.aifa) {
+                        html += '<div style="height:40px;margin:4px 0;display:flex;align-items:center;justify-content:center"><img src="' + firmas.aifa + '" style="max-height:50px;max-width:100%;object-fit:contain;"></div>';
+                    } else {
+                        html += '<div style="border-top:1px solid #cbdcec;margin-bottom:6px;padding-top:4px;text-align:center;color:#17325a">Firma</div>';
+                    }
+                    html += '<div style="flex:12px;color:#374151;text-align:center;font-weight:600">' + (autor || '-') + '</div>';
+                    html += '<div style="font-size:11px;color:#6b7280;text-align:center">' + (cargo || '-') + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '<div style="flex:1;border:1px solid #e6eef9;padding:14px;border-radius:6px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between">';
+                    html += '<div style="font-size:13px;color:#17325a;text-align:center;font-weight:700">AFAC</div>';
+                    html += '<div>';
+                    if (firmas && firmas.afac) {
+                        html += '<div style="height:40px;margin:4px 0;display:flex;align-items:center;justify-content:center"><img src="' + firmas.afac + '" style="max-height:50px;max-width:100%;object-fit:contain;"></div>';
+                    } else {
+                        html += '<div style="border-top:1px solid #cbdcec;margin-top:10px;padding-top:8px;text-align:center;color:#17325a">Firma</div>';
+                    }
+                    html += '<div style="font-size:12px;color:#374151;text-align:center;font-weight:600">' + (afacName || '-') + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                } else {
+                    // Dos firmas: AFAC a la izquierda | AIFA a la derecha (en medio)
+                    html += '<div style="flex:1;border:1px solid #e6eef9;padding:14px;border-radius:6px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between">';
+                    html += '<div style="font-size:13px;color:#17325a;text-align:center;font-weight:700">AFAC</div>';
+                    html += '<div>';
+                    if (firmas && firmas.afac) {
+                        html += '<div style="height:40px;margin:4px 0;display:flex;align-items:center;justify-content:center"><img src="' + firmas.afac + '" style="max-height:50px;max-width:100%;object-fit:contain;"></div>';
+                    } else {
+                        html += '<div style="border-top:1px solid #cbdcec;margin-top:10px;padding-top:8px;text-align:center;color:#17325a">Firma</div>';
+                    }
+                    html += '<div style="font-size:12px;color:#374151;text-align:center;font-weight:600">' + (afacName || '-') + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    html += '<div style="flex:1.2;border:1px solid #e6eef9;padding:14px;border-radius:6px;min-height:120px;display:flex;flex-direction:column;justify-content:space-between">';
+                    html += '<div style="font-size:13px;color:#17325a;text-align:center;font-weight:700">AIFA</div>';
+                    html += '<div>';
+                    if (firmas && firmas.aifa) {
+                        html += '<div style="height:40px;margin:4px 0;display:flex;align-items:center;justify-content:center"><img src="' + firmas.aifa + '" style="max-height:50px;max-width:100%;object-fit:contain;"></div>';
+                    } else {
+                        html += '<div style="border-top:1px solid #cbdcec;margin-bottom:6px;padding-top:4px;text-align:center;color:#17325a">Firma</div>';
+                    }
+                    html += '<div style="font-size:12px;color:#374151;text-align:center;font-weight:600">' + (autor || '-') + '</div>';
+                    html += '<div style="font-size:11px;color:#6b7280;text-align:center">' + (cargo || '-') + '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                }
+                
                 html += '</div>';
 
                 html += '<p style="margin-top:18px;font-size:12px;color:#6b7280">Generado desde el formulario interno.</p>';
@@ -3596,6 +4601,15 @@
                                     ctx2d.fillStyle = '#ffffff'; ctx2d.font = 'bold 14px Arial';
                                     ctx2d.textAlign = 'center'; ctx2d.textBaseline = 'middle';
                                     ctx2d.fillText(String(p.num), px.x, px.y);
+                                    
+                                    // Etiqueta del item directamente en el mapa
+                                    ctx2d.save();
+                                    ctx2d.shadowColor = 'rgba(0,0,0,0.5)'; ctx2d.shadowBlur = 6; ctx2d.shadowOffsetX = 1; ctx2d.shadowOffsetY = 2;
+                                    ctx2d.fillStyle = '#ffffff'; ctx2d.font = 'bold 11px Arial';
+                                    ctx2d.textAlign = 'center'; ctx2d.textBaseline = 'top';
+                                    var labelYOffset = px.y + 26; // Posicionar etiqueta debajo del marcador
+                                    ctx2d.fillText(p.name, px.x, labelYOffset);
+                                    ctx2d.restore();
                                 });
                                 // Leyenda en banda semitransparente al fondo del canvas
                                 if (apPoints.length > 0) {
@@ -4341,28 +5355,81 @@
                 }
             }
 
-            async function loadAdminReports() {
+            async function loadAdminReports(filters) {
+                filters = filters || {};
                 var list = document.getElementById('admin-reports-list');
+                var selResponsable = document.getElementById('filter-responsable');
+                var selTipo = document.getElementById('filter-tipo');
+                var selTurno = document.getElementById('filter-turno');
+                var selPista = document.getElementById('filter-pista');
                 if (!list) return;
-                list.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
+                list.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
 
-                var { data, error } = await supabase
+                var query = supabase
                     .from('reports')
                     .select('*')
                     .order('created_at', { ascending: false })
-                    .limit(50);
+                    .limit(200);
+
+                // Aplicar filtros
+                if (filters.folio) query = query.ilike('folio', '%' + filters.folio + '%');
+                if (filters.fecha_desde) query = query.gte('created_at', filters.fecha_desde + 'T00:00:00.000Z');
+                if (filters.fecha_hasta) query = query.lte('created_at', filters.fecha_hasta + 'T23:59:59.999Z');
+                if (Array.isArray(filters.responsable) && filters.responsable.length) query = query.in('responsable', filters.responsable);
+                if (Array.isArray(filters.tipo_inspeccion) && filters.tipo_inspeccion.length) query = query.in('tipo_inspeccion', filters.tipo_inspeccion);
+                if (Array.isArray(filters.turno) && filters.turno.length) query = query.in('turno', filters.turno);
+                if (Array.isArray(filters.pista) && filters.pista.length) query = query.in('pista', filters.pista);
+
+                var { data, error } = await query;
 
                 if (error) {
                     console.error('Error cargando reportes:', error);
-                    list.innerHTML = '<tr><td colspan="4" style="color:red">Error cargando reportes</td></tr>';
+                    list.innerHTML = '<tr><td colspan="5" style="color:red">Error cargando reportes</td></tr>';
                     return;
                 }
 
                 list.innerHTML = '';
                 if (!data || data.length === 0) {
-                    list.innerHTML = '<tr><td colspan="4">No hay reportes registrados.</td></tr>';
+                    list.innerHTML = '<tr><td colspan="5">No hay reportes registrados.</td></tr>';
+                    // Vaciar las opciones de los select si no hay reportes
+                    if (selResponsable) selResponsable.innerHTML = '';
+                    if (selTipo) selTipo.innerHTML = '';
+                    if (selTurno) selTurno.innerHTML = '';
+                    if (selPista) selPista.innerHTML = '';
                     return;
                 }
+
+                // Actualizar opciones de filtros basadas en resultados (para rangos dependientes)
+                function updateSelectOptions(sel, values, currentSelected) {
+                    if (!sel) return;
+                    var current = (currentSelected || []).slice();
+                    // Eliminar duplicados y ordenar
+                    var unique = Array.from(new Set(values.filter(Boolean))).sort();
+                    sel.innerHTML = '';
+                    unique.forEach(function (v) {
+                        var opt = document.createElement('option');
+                        opt.value = v;
+                        opt.textContent = v;
+                        if (current.indexOf(v) !== -1) opt.selected = true;
+                        sel.appendChild(opt);
+                    });
+                }
+
+                var responsables = data.map(function (r) { return r.responsable; });
+                var tipos = data.map(function (r) { return r.tipo_inspeccion; });
+                var turnos = data.map(function (r) { return r.turno; });
+                var pistas = data.map(function (r) { return r.pista; });
+
+                updateSelectOptions(selResponsable, responsables, currentAdminFilters.responsable);
+                updateSelectOptions(selTipo, tipos, currentAdminFilters.tipo_inspeccion);
+                updateSelectOptions(selTurno, turnos, currentAdminFilters.turno);
+                updateSelectOptions(selPista, pistas, currentAdminFilters.pista);
+
+                // Actualizar textos de toggles luego de regenerar opciones
+                updateFilterToggleText('filter-responsable');
+                updateFilterToggleText('filter-tipo');
+                updateFilterToggleText('filter-turno');
+                updateFilterToggleText('filter-pista');
 
                 for (const r of data) {
                     var tr = document.createElement('tr');
@@ -4400,13 +5467,131 @@
                     tr.innerHTML = '<td>' + (r.fecha_local || (r.created_at ? r.created_at.slice(0,10).split('-').reverse().join('/') + ' ' + r.created_at.slice(11,19) : '-')) + '</td>' +
                         '<td>' + (r.folio || '-') + '</td>' +
                         '<td>' + (r.responsable || '-') + '</td>' +
+                        '<td>' + (r.area_representante || '-') + '</td>' +
                         '<td>' + pdfLink + '</td>';
                     list.appendChild(tr);
                 }
             }
 
+            // Filtros de Historial de Reportes
+            var currentAdminFilters = {};
+            function getSelectValues(id) {
+                var sel = document.getElementById(id);
+                if (!sel || !sel.options) return [];
+                return Array.prototype.slice.call(sel.options)
+                    .filter(function (opt) { return opt.selected && opt.value; })
+                    .map(function (opt) { return opt.value; });
+            }
+
+            function readAdminFilters() {
+                return {
+                    folio: (document.getElementById('filter-folio') || {}).value || '',
+                    fecha_desde: (document.getElementById('filter-fecha-desde') || {}).value || '',
+                    fecha_hasta: (document.getElementById('filter-fecha-hasta') || {}).value || '',
+                    responsable: getSelectValues('filter-responsable'),
+                    tipo_inspeccion: getSelectValues('filter-tipo'),
+                    turno: getSelectValues('filter-turno'),
+                    pista: getSelectValues('filter-pista')
+                };
+            }
+
+            var applyFilterBtn = document.getElementById('filter-apply-btn');
+            var clearFilterBtn = document.getElementById('filter-clear-btn');
+
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', function () {
+                    currentAdminFilters = readAdminFilters();
+                    loadAdminReports(currentAdminFilters);
+                });
+            }
+
+            if (clearFilterBtn) {
+                clearFilterBtn.addEventListener('click', function () {
+                    var input = document.getElementById('filter-folio');
+                    if (input) input.value = '';
+                    var desde = document.getElementById('filter-fecha-desde');
+                    if (desde) desde.value = '';
+                    var hasta = document.getElementById('filter-fecha-hasta');
+                    if (hasta) hasta.value = '';
+                    ['filter-responsable', 'filter-tipo', 'filter-turno', 'filter-pista'].forEach(function (id) {
+                        var sel = document.getElementById(id);
+                        if (sel && sel.options) {
+                            Array.prototype.slice.call(sel.options).forEach(function (opt) { opt.selected = false; });
+                        }
+                    });
+                    currentAdminFilters = {};
+                    loadAdminReports();
+                });
+            }
+
+            // Actualizar resultados al cambiar selección de filtros (multi-select y fechas)
+            ['filter-responsable', 'filter-tipo', 'filter-turno', 'filter-pista'].forEach(function (id) {
+                var sel = document.getElementById(id);
+                if (sel) {
+                    sel.addEventListener('change', function () {
+                        currentAdminFilters = readAdminFilters();
+                        loadAdminReports(currentAdminFilters);
+                        updateFilterToggleText(id);
+                    });
+                }
+            });
+
+            // Para inputs de fecha
+            ['filter-fecha-desde', 'filter-fecha-hasta'].forEach(function (id) {
+                var inp = document.getElementById(id);
+                if (inp) {
+                    inp.addEventListener('change', function () {
+                        currentAdminFilters = readAdminFilters();
+                        loadAdminReports(currentAdminFilters);
+                    });
+                }
+            });
+
+            // Mostrar / ocultar multi-selects al presionar el toggle
+            document.querySelectorAll('.filter-multi-toggle').forEach(function (toggle) {
+                toggle.addEventListener('click', function () {
+                    var targetId = toggle.getAttribute('data-target');
+                    var wrapper = toggle.closest('.filter-multi');
+                    if (!wrapper) return;
+                    var isOpen = wrapper.classList.contains('open');
+                    // Cerrar todos primero
+                    document.querySelectorAll('.filter-multi.open').forEach(function (w) { w.classList.remove('open'); });
+                    if (!isOpen) {
+                        wrapper.classList.add('open');
+                    }
+                });
+            });
+
+            // Cerrar selects al hacer click fuera
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('.filter-multi')) return;
+                document.querySelectorAll('.filter-multi.open').forEach(function (w) { w.classList.remove('open'); });
+            });
+
+            // Mostrar texto actualizado en el toggle (número seleccionado)
+            function updateFilterToggleText(selectId) {
+                var sel = document.getElementById(selectId);
+                if (!sel) return;
+                var selected = Array.prototype.slice.call(sel.selectedOptions).map(function (o) { return o.textContent; });
+                var toggle = document.querySelector('.filter-multi-toggle[data-target="' + selectId + '"]');
+                if (!toggle) return;
+                if (selected.length === 0) {
+                    toggle.textContent = toggle.getAttribute('data-target') === 'filter-pista' ? 'Seleccionar RWY' : 'Seleccionar';
+                    if (selectId === 'filter-responsable') toggle.textContent = 'Seleccionar responsable';
+                    if (selectId === 'filter-tipo') toggle.textContent = 'Seleccionar tipo';
+                    if (selectId === 'filter-turno') toggle.textContent = 'Seleccionar turno';
+                } else if (selected.length === 1) {
+                    toggle.textContent = selected[0];
+                } else {
+                    toggle.textContent = selected.length + ' seleccionados';
+                }
+            }
+
+            // Inicializar texto de toggles (vacíos)
+            ['filter-responsable', 'filter-tipo', 'filter-turno', 'filter-pista'].forEach(updateFilterToggleText);
+
             var refreshBtn = document.getElementById('refresh-admin-btn');
-            if (refreshBtn) refreshBtn.addEventListener('click', loadAdminReports);
+            if (refreshBtn) refreshBtn.addEventListener('click', function () { loadAdminReports(currentAdminFilters); });
 
             if (loginBtn) {
                 loginBtn.addEventListener('click', async function () {
@@ -4463,6 +5648,20 @@
                         const targetSection = document.getElementById(targetTab + '-section');
                         if (targetSection) {
                             targetSection.classList.add('active');
+
+                            // Cambiar título según la pestaña
+                            const mainTitle = document.getElementById('main-title');
+                            if (mainTitle) {
+                                if (targetTab === 'revision') {
+                                    mainTitle.textContent = 'Formato de Revisión del Área de Movimiento';
+                                } else if (targetTab === 'fauna') {
+                                    mainTitle.textContent = 'Registro de Impacto o Posible Impacto';
+                                } else if (targetTab === 'historial') {
+                                    mainTitle.textContent = 'Historial de Reportes';
+                                } else if (targetTab === 'estadistica') {
+                                    mainTitle.textContent = 'Estadísticas';
+                                }
+                            }
 
                             // Load statistics when statistics tab is activated
                             if (targetTab === 'estadistica') {
@@ -4540,15 +5739,111 @@
                     const completedReports = reports.filter(function(r){ return r.pdf_url; }).length;
                     const completionRate = totalReports > 0 ? Math.round((completedReports / totalReports) * 100) : 0;
 
+                    // Contar por turno
+                    const diurnos = reports.filter(function(r) {
+                        return r.turno && r.turno.toString().toLowerCase().includes('diurna');
+                    }).length;
+                    const nocturnos = reports.filter(function(r) {
+                        return r.turno && r.turno.toString().toLowerCase().includes('noct');
+                    }).length;
+
+                    // Contar por tipo de inspección
+                    const primarios = reports.filter(function(r) {
+                        return r.tipo_inspeccion && r.tipo_inspeccion.toString().toLowerCase().includes('primaria');
+                    }).length;
+                    const secundarios = reports.filter(function(r) {
+                        return r.tipo_inspeccion && r.tipo_inspeccion.toString().toLowerCase().includes('secundaria');
+                    }).length;
+
+                    // Contar por pista (rwys)
+                    const pistaCounts = {};
+                    reports.forEach(function(r) {
+                        var p = (r.pista || '').toString().trim();
+                        if (!p) return;
+                        pistaCounts[p] = (pistaCounts[p] || 0) + 1;
+                    });
+                    var pistaDisplay = '-';
+                    if (Object.keys(pistaCounts).length > 0) {
+                        pistaDisplay = Object.entries(pistaCounts)
+                            .sort(function(a,b){ return b[1] - a[1]; })
+                            .map(function(entry){ return entry[0] + ': ' + entry[1]; })
+                            .slice(0, 3)
+                            .join(' · ');
+                    }
+
                     // Actualizar tarjetas de resumen
                     var elTotal = document.getElementById('total-reports');
                     var elMonth = document.getElementById('reports-this-month');
+                    var elDiurnos = document.getElementById('report-diurnos');
+                    var elNocturnos = document.getElementById('report-nocturnos');
+                    var elPrimarios = document.getElementById('report-primarios');
+                    var elSecundarios = document.getElementById('report-secundarios');
+                    var elPistaCards = document.getElementById('report-pista-cards');
                     var elAvg   = document.getElementById('avg-priority');
                     var elRate  = document.getElementById('completion-rate');
                     if (elTotal) elTotal.textContent = totalReports;
                     if (elMonth) elMonth.textContent = reportsThisMonth;
+                    if (elDiurnos) elDiurnos.textContent = diurnos;
+                    if (elNocturnos) elNocturnos.textContent = nocturnos;
+                    if (elPrimarios) elPrimarios.textContent = primarios;
+                    if (elSecundarios) elSecundarios.textContent = secundarios;
                     if (elAvg)   elAvg.textContent   = avgPriority;
                     if (elRate)  elRate.textContent   = completionRate + '%';
+
+                    if (elPistaCards) {
+                        elPistaCards.innerHTML = '';
+                        var entries = Object.entries(pistaCounts).sort(function(a,b){ return b[1]-a[1]; });
+                        if (entries.length === 0) {
+                            elPistaCards.innerHTML = '<span style="font-size:13px;color:rgba(255,255,255,0.85);">Sin datos</span>';
+                        } else {
+                            entries.forEach(function(entry) {
+                                var label = entry[0];
+                                var count = entry[1];
+                                var card = document.createElement('div');
+                                card.style.padding = '6px 10px';
+                                card.style.borderRadius = '999px';
+                                card.style.background = 'rgba(255,255,255,0.18)';
+                                card.style.color = '#fff';
+                                card.style.fontWeight = '700';
+                                card.style.fontSize = '13px';
+                                card.style.display = 'inline-flex';
+                                card.style.alignItems = 'center';
+                                card.style.gap = '8px';
+                                card.textContent = label + ':';
+                                var badge = document.createElement('span');
+                                badge.textContent = count;
+                                badge.style.background = 'rgba(0,0,0,0.25)';
+                                badge.style.borderRadius = '999px';
+                                badge.style.padding = '2px 8px';
+                                badge.style.fontSize = '12px';
+                                badge.style.fontWeight = '700';
+                                card.appendChild(badge);
+                                elPistaCards.appendChild(card);
+                            });
+                        }
+                    }
+
+                    // Tabla de responsables (conteo)
+                    var responsableTable = document.getElementById('responsable-table-body');
+                    if (responsableTable) {
+                        var counts = {};
+                        reports.forEach(function(r) {
+                            var name = (r.responsable || '').toString().trim() || 'Sin responsable';
+                            counts[name] = (counts[name] || 0) + 1;
+                        });
+                        var entries = Object.entries(counts).sort(function(a,b){ return b[1]-a[1]; });
+                        if (entries.length === 0) {
+                            responsableTable.innerHTML = '<tr><td colspan="2" style="padding:12px;color:#6b7280;text-align:center;">Sin datos</td></tr>';
+                        } else {
+                            responsableTable.innerHTML = '';
+                            entries.forEach(function(entry) {
+                                var tr = document.createElement('tr');
+                                tr.innerHTML = '<td style="padding:10px;border-bottom:1px solid #e5e7eb;">' + entry[0] + '</td>' +
+                                               '<td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">' + entry[1] + '</td>';
+                                responsableTable.appendChild(tr);
+                            });
+                        }
+                    }
 
                     createInspectionTypesChart(reports);
                     createMonthlyReportsChart(reports);
@@ -4826,7 +6121,7 @@
             }
 
             return {
-                folio: folio, fecha: fecha, autor: autor, cargo: cargo,
+                folio: folio, fecha: fecha, autor: autor, cargo: cargo, areaRep: areaRep, areaRepName: areaRepName,
                 tiposText: tiposText, turnoText: turnoText,
                 utcDateStr: utcDateStr, utcTimeStr: utcTimeStr,
                 filled: filled, photos: photos
@@ -4868,10 +6163,31 @@
                 turno:           record.turnoText,
                 responsable:     record.autor,
                 cargo:           record.cargo,
+                area_representante: record.areaRep,
+                area_representante_nombre: record.areaRepName,
                 user_id:         userId,
                 pdf_url:         null
             };
             var { data: reportData, error: reportError } = await sc.from('reports').insert([reportPayload]).select().single();
+            
+            // Si falla porque las columnas no existen, intentar sin ellas
+            if (reportError && reportError.message && (reportError.message.includes('area_representante') || reportError.message.includes('schema'))) {
+                console.warn('Reintentando sin columnas area_representante en upload pendiente...', reportError);
+                var reportPayloadBasic = {
+                    folio:           record.folio,
+                    fecha_local:     record.fecha,
+                    fecha_utc:       record.utcDateStr + ' ' + record.utcTimeStr,
+                    tipo_inspeccion: record.tiposText,
+                    turno:           record.turnoText,
+                    responsable:     record.autor,
+                    cargo:           record.cargo,
+                    user_id:         userId,
+                    pdf_url:         null
+                };
+                var result = await sc.from('reports').insert([reportPayloadBasic]).select().single();
+                reportData = result.data;
+                reportError = result.error;
+            }
             if (reportError) throw reportError;
             var reportId = reportData.id;
 
@@ -4975,6 +6291,298 @@
 
         window.addEventListener('offline', function () {
             showOfflineBanner('📡 Sin conexión a Internet', 'offline');
+        });
+
+        // ─── Handler para Fauna Form ───
+        document.addEventListener('DOMContentLoaded', function () {
+            var faunaForm = document.getElementById('fauna-form');
+            if (!faunaForm) return;
+
+            // Manejar fauna tipo reporte (similar a pista en revision form) con bloqueo de selecciones
+            (function () {
+                var faunaRadios = Array.prototype.slice.call(faunaForm.querySelectorAll('input[name="fauna_tipo_reporte_inspeccion"]'));
+                var faunaChangeBtn = document.getElementById('fauna_tipo_reporte-change-btn');
+                
+                function updateFaunaReporteState() {
+                    try {
+                        var checked = faunaRadios.find(function (r) { return r.checked; });
+                        if (checked) {
+                            // Bloquear todos los radios
+                            faunaRadios.forEach(function (r) {
+                                r.disabled = true;
+                                var lbl = r.closest('label');
+                                if (lbl) lbl.classList.remove('selected');
+                            });
+                            // Marcar el seleccionado
+                            var lbl = checked.closest('label');
+                            if (lbl) lbl.classList.add('selected');
+                            // Mostrar botón para cambiar
+                            if (faunaChangeBtn) faunaChangeBtn.style.display = 'inline-block';
+                        } else {
+                            // Desbloquear todos
+                            faunaRadios.forEach(function (r) {
+                                r.disabled = false;
+                                var lbl = r.closest('label');
+                                if (lbl) lbl.classList.remove('selected');
+                            });
+                            // Ocultar botón
+                            if (faunaChangeBtn) faunaChangeBtn.style.display = 'none';
+                        }
+                    } catch (e) { }
+                }
+
+                faunaRadios.forEach(function (r) {
+                    r.addEventListener('change', function () { updateFaunaReporteState(); });
+                });
+
+                // Botón para cambiar tipo de reporte
+                if (faunaChangeBtn) {
+                    faunaChangeBtn.addEventListener('click', function () {
+                        faunaRadios.forEach(function (r) { r.disabled = false; r.checked = false; });
+                        faunaChangeBtn.style.display = 'none';
+                        faunaRadios.forEach(function (r) {
+                            var lbl = r.closest('label');
+                            if (lbl) lbl.classList.remove('selected');
+                        });
+                    });
+                }
+
+                updateFaunaReporteState();
+            })();
+
+            // Mostrar/ocultar Turno cuando se seleccione tipo de reporte
+            (function () {
+                var faunaTypeRadios = faunaForm.querySelectorAll('input[name="fauna_tipo_reporte_inspeccion"]');
+                var turnoSection = faunaForm.querySelector('#fauna_turno-section');
+                if (!faunaTypeRadios || !turnoSection) return;
+                
+                function updateTurnoVisibility() {
+                    var anyChecked = Array.prototype.slice.call(faunaTypeRadios).some(function (r) { return r.checked; });
+                    turnoSection.style.display = anyChecked ? 'block' : 'none';
+                    if (!anyChecked) {
+                        var turnoInputs = faunaForm.querySelectorAll('input[name="fauna_turno"]');
+                        Array.prototype.slice.call(turnoInputs).forEach(function (r) { r.checked = false; });
+                    }
+                }
+                
+                Array.prototype.slice.call(faunaTypeRadios).forEach(function (r) {
+                    r.addEventListener('change', updateTurnoVisibility);
+                });
+                updateTurnoVisibility();
+            })();
+
+            // Manejar fauna pista con bloqueo de selección (similar a pista en revision form)
+            (function () {
+                var faunaPistaRadios = Array.prototype.slice.call(faunaForm.querySelectorAll('input[name="fauna_pista"]'));
+                var faunaPistaChangeBtn = document.getElementById('fauna_pista-change-btn');
+                
+                function updateFaunaPistaState() {
+                    try {
+                        var checked = faunaPistaRadios.find(function (r) { return r.checked; });
+                        if (checked) {
+                            // Bloquear todos los radios
+                            faunaPistaRadios.forEach(function (r) {
+                                r.disabled = true;
+                                var lbl = r.closest('label');
+                                if (lbl) lbl.classList.remove('selected');
+                            });
+                            // Marcar el seleccionado
+                            var lbl = checked.closest('label');
+                            if (lbl) lbl.classList.add('selected');
+                            // Mostrar botón para cambiar
+                            if (faunaPistaChangeBtn) faunaPistaChangeBtn.style.display = 'inline-block';
+                        } else {
+                            // Desbloquear todos
+                            faunaPistaRadios.forEach(function (r) {
+                                r.disabled = false;
+                                var lbl = r.closest('label');
+                                if (lbl) lbl.classList.remove('selected');
+                            });
+                            // Ocultar botón
+                            if (faunaPistaChangeBtn) faunaPistaChangeBtn.style.display = 'none';
+                        }
+                    } catch (e) { }
+                }
+
+                faunaPistaRadios.forEach(function (r) {
+                    r.addEventListener('change', function () { updateFaunaPistaState(); });
+                });
+
+                // Botón para cambiar pista
+                if (faunaPistaChangeBtn) {
+                    faunaPistaChangeBtn.addEventListener('click', function () {
+                        faunaPistaRadios.forEach(function (r) { r.disabled = false; r.checked = false; });
+                        faunaPistaChangeBtn.style.display = 'none';
+                        faunaPistaRadios.forEach(function (r) {
+                            var lbl = r.closest('label');
+                            if (lbl) lbl.classList.remove('selected');
+                        });
+                    });
+                }
+
+                updateFaunaPistaState();
+            })();
+
+            // Manejar fauna fase de vuelo con bloqueo de selección (similar a pista en revision form)
+            (function () {
+                var faunaFaseVueloRadios = Array.prototype.slice.call(faunaForm.querySelectorAll('input[name="fauna_fase_vuelo"]'));
+                var faunaFaseVueloChangeBtn = document.getElementById('fauna_fase_vuelo-change-btn');
+                
+                function updateFaunaFaseVueloState() {
+                    try {
+                        var checked = faunaFaseVueloRadios.find(function (r) { return r.checked; });
+                        if (checked) {
+                            // Bloquear todos los radios
+                            faunaFaseVueloRadios.forEach(function (r) {
+                                r.disabled = true;
+                                var lbl = r.closest('label');
+                                if (lbl) lbl.classList.remove('selected');
+                            });
+                            // Marcar el seleccionado
+                            var lbl = checked.closest('label');
+                            if (lbl) lbl.classList.add('selected');
+                            // Mostrar botón para cambiar
+                            if (faunaFaseVueloChangeBtn) faunaFaseVueloChangeBtn.style.display = 'inline-block';
+                        } else {
+                            // Desbloquear todos
+                            faunaFaseVueloRadios.forEach(function (r) {
+                                r.disabled = false;
+                                var lbl = r.closest('label');
+                                if (lbl) lbl.classList.remove('selected');
+                            });
+                            // Ocultar botón
+                            if (faunaFaseVueloChangeBtn) faunaFaseVueloChangeBtn.style.display = 'none';
+                        }
+                    } catch (e) { }
+                }
+
+                faunaFaseVueloRadios.forEach(function (r) {
+                    r.addEventListener('change', function () { updateFaunaFaseVueloState(); });
+                });
+
+                // Botón para cambiar fase de vuelo
+                if (faunaFaseVueloChangeBtn) {
+                    faunaFaseVueloChangeBtn.addEventListener('click', function () {
+                        faunaFaseVueloRadios.forEach(function (r) { r.disabled = false; r.checked = false; });
+                        faunaFaseVueloChangeBtn.style.display = 'none';
+                        faunaFaseVueloRadios.forEach(function (r) {
+                            var lbl = r.closest('label');
+                            if (lbl) lbl.classList.remove('selected');
+                        });
+                    });
+                }
+
+                updateFaunaFaseVueloState();
+            })();
+
+            // Manejar checkboxes de items en fauna form (similar a revision form)
+            (function () {
+                var itemIds = ['fauna_avistamiento', 'fauna_presencia', 'fauna_daino'];
+                
+                itemIds.forEach(function (id) {
+                    var chk = faunaForm.querySelector('input#' + id);
+                    var det = faunaForm.querySelector('div#' + id.replace(/^fauna_/, 'fauna_details_'));
+                    if (!chk || !det) return;
+                    
+                    chk.addEventListener('change', function () {
+                        if (chk.checked) { det.style.display = 'block'; }
+                        else {
+                            det.style.display = 'none';
+                            // Limpiar campos
+                            Array.prototype.slice.call(det.querySelectorAll('input, textarea, select')).forEach(function (el) {
+                                try {
+                                    if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+                                    else {
+                                        el.value = '';
+                                        if (el.classList && el.classList.contains('priority-select')) el.style.backgroundColor = '';
+                                        if (el.classList && el.classList.contains('condicion-select')) el.style.backgroundColor = '';
+                                    }
+                                } catch (e) { }
+                            });
+                        }
+                    });
+                });
+            })();
+
+            // Manejar color de selects en fauna form
+            (function () {
+                try {
+                    var prioSelects = faunaForm.querySelectorAll('select.priority-select');
+                    var condSelects = faunaForm.querySelectorAll('select.condicion-select');
+                    
+                    Array.prototype.forEach.call(prioSelects, function (sel) {
+                        sel.addEventListener('change', function () {
+                            var colorMap = { '1': '#28a745', '2': '#ffc107', '3': '#ff8c00' };
+                            sel.style.backgroundColor = colorMap[sel.value] || '';
+                        });
+                    });
+                    
+                    Array.prototype.forEach.call(condSelects, function (sel) {
+                        sel.addEventListener('change', function () {
+                            var condMap = { 'Daño Menor': '#28a745', 'Daño Mayor': '#ffc107', 'Daño Severo': '#ff8c00', 'Daño Catastrofico': '#dc3545', 'Satisfactorio': '#28a745', 'No Satisfactorio': '#dc3545', 'N/A': '#6c757d' };
+                            sel.style.backgroundColor = condMap[sel.value] || '';
+                        });
+                    });
+                } catch (e) { }
+            })();
+
+            // Manejar mapa picker para campos de ubicación/lugar en fauna
+            (function () {
+                setTimeout(function () {
+                    try {
+                        var lugarInputs = faunaForm.querySelectorAll('input[name*="[lugar]"]');
+                        Array.prototype.forEach.call(lugarInputs, function (input) {
+                            input.addEventListener('click', function (e) {
+                                e.preventDefault();
+                                if (window.openMapPicker) window.openMapPicker(input);
+                            });
+                            input.style.cursor = 'pointer';
+                            input.setAttribute('placeholder', 'Click para seleccionar en mapa');
+                            input.style.pointerEvents = 'auto';
+                        });
+                    } catch (e) { console.error('Error wiring map picker for fauna', e); }
+                }, 100);
+            })();
+
+            // Manejar especie en avistamiento - mostrar/ocultar campo "Otra"
+            (function () {
+                var especieSelects = faunaForm.querySelectorAll('select.fauna-especie-select');
+                
+                Array.prototype.forEach.call(especieSelects, function (sel) {
+                    var especieOtherInput = sel.closest('label').parentElement.querySelector('input[name*="[especie_otra]"]');
+                    
+                    function updateEspecieVisibility() {
+                        if (sel.value === 'Otra' && especieOtherInput) {
+                            especieOtherInput.style.display = 'block';
+                        } else if (especieOtherInput) {
+                            especieOtherInput.style.display = 'none';
+                            especieOtherInput.value = '';
+                        }
+                    }
+                    
+                    sel.addEventListener('change', updateEspecieVisibility);
+                    updateEspecieVisibility();
+                });
+            })();
+
+            // Manejar aerolinea - mostrar/ocultar campo "Otra"
+            (function () {
+                var aerolineaSelect = faunaForm.querySelector('#fauna_report-aerolinea');
+                var aerolineaOtherInput = faunaForm.querySelector('#fauna_report-aerolinea-other');
+                if (!aerolineaSelect || !aerolineaOtherInput) return;
+                
+                function updateAerolineaVisibility() {
+                    if (aerolineaSelect.value === 'Otra') {
+                        aerolineaOtherInput.style.display = 'block';
+                    } else {
+                        aerolineaOtherInput.style.display = 'none';
+                        aerolineaOtherInput.value = '';
+                    }
+                }
+                
+                aerolineaSelect.addEventListener('change', updateAerolineaVisibility);
+                updateAerolineaVisibility();
+            })();
         });
 
         document.addEventListener('DOMContentLoaded', function () {
