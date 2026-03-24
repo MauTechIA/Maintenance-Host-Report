@@ -3466,7 +3466,8 @@
 
             function setupFaunaItemControlsFor(id) {
                 var chk = document.getElementById(id);
-                var det = document.getElementById('fauna_details_' + id);
+                var itemType = id.replace('fauna_', '');
+                var det = document.getElementById('fauna_details_' + itemType);
                 var doneBtn = document.getElementById('done_' + id);
                 var updateBtn = document.getElementById('update_' + id);
                 var dupBtn = document.getElementById('dup_' + id);
@@ -3579,7 +3580,8 @@
 
             function duplicateFaunaItem(origId) {
                 var origChk = document.getElementById(origId);
-                var origDet = document.getElementById('fauna_details_' + origId);
+                var origItemType = origId.replace('fauna_', '');
+                var origDet = document.getElementById('fauna_details_' + origItemType);
                 
                 if (!origChk || !origDet) return;
 
