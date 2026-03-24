@@ -6445,7 +6445,8 @@
                                 aerolinea: aerolinea,
                                 ubicacion: ubicacion,
                                 estado: 'completado',
-                                tipo_reporte: evento || 'Impacto'
+                                tipo_reporte: evento || 'Impacto',
+                                pdf_url: null
                             };
 
                             console.log('DEBUG IMPACTO PAYLOAD:', impactPayload);
@@ -6605,7 +6606,8 @@
                                     sitio_reubicacion: sitioReubicacion,
                                     observaciones: observaciones,
                                     estado: 'completado',
-                                    tipo_reporte: 'Rescate'
+                                    tipo_reporte: 'Rescate',
+                                    pdf_url: null
                                 };
 
                                 var { data: rescateData, error: rescateError } = await client
@@ -7308,6 +7310,13 @@
 
                                 const tr = document.createElement('tr');
                                 tr.style.borderBottom = '1px solid #e5e7eb';
+                                
+                                // Crear link de PDF si existe
+                                let pdfLink = '<a href="#" style="color:#6b7280;text-decoration:none;font-size:12px;">-</a>';
+                                if (report.pdf_url && report.pdf_url.trim() !== '') {
+                                    pdfLink = '<a href="' + report.pdf_url + '" target="_blank" style="color:#3b82f6;text-decoration:none;font-size:12px;font-weight:600;">📄 Ver PDF</a>';
+                                }
+                                
                                 tr.innerHTML = '<td style="padding:12px;">' + fechaReporte + '</td>' +
                                                '<td style="padding:12px;"><span style="display:inline-block;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;background:' + 
                                                (tipoReporte === 'Impacto' || tipoReporte === 'Posible Impacto' ? '#fee2e2;color:#991b1b' : '#dcfce7;color:#166534') + ';">' + tipoReporte + '</span></td>' +
@@ -7316,7 +7325,7 @@
                                                '<td style="padding:12px;">' + responsable + '</td>' +
                                                '<td style="padding:12px;"><span style="display:inline-block;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;background:' + 
                                                (estado === 'pendiente' ? '#fef3c7;color:#92400e' : '#dbeafe;color:#1e40af') + ';">' + estado + '</span></td>' +
-                                               '<td style="padding:12px;text-align:center;"><a href="#" style="color:#3b82f6;text-decoration:none;font-size:12px;font-weight:600;">Ver</a></td>';
+                                               '<td style="padding:12px;text-align:center;">' + pdfLink + '</td>';
                                 reportsList.appendChild(tr);
                             });
                         }
