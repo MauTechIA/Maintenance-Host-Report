@@ -6164,124 +6164,166 @@
                         var cargo = cargoSelect ? (cargoSelect.options[cargoSelect.selectedIndex] || {}).text || cargoSelect.value : '-';
 
                         // Institución
-                        var institucion = document.querySelector('input[name="fauna_rescate[institucion_responsable]"]')?.value || '-';
+                        var institucion = faunaForm.querySelector('input[name="fauna_rescate[institucion_responsable]"]')?.value || '-';
 
                         // Sitio de Rescate
-                        var sitioRescate = document.querySelector('input[name="fauna_rescate[lugar]"]')?.value || '-';
+                        var sitioRescate = faunaForm.querySelector('input[name="fauna_rescate[lugar]"]')?.value || '-';
 
                         // Clase
-                        var claseSelect = document.getElementById('filter-fauna-clase') || document.querySelector('select[name="fauna_rescate[clase]"]');
+                        var claseSelect = faunaForm.querySelector('select[name="fauna_rescate[clase]"]');
                         var clase = claseSelect ? claseSelect.value : '-';
 
                         // Especie
-                        var especieSelect = document.querySelector('select[name="fauna_rescate[especie]"]');
+                        var especieSelect = faunaForm.querySelector('select[name="fauna_rescate[especie]"]');
                         var especie = especieSelect ? especieSelect.value : '-';
 
                         // Sitio Reubicación
-                        var sitioReubicacion = document.querySelector('select[name="fauna_rescate[sitio_reubicacion]"]')?.value || '-';
+                        var sitioReubicacion = faunaForm.querySelector('select[name="fauna_rescate[sitio_reubicacion]"]')?.value || '-';
 
                         // Observaciones
-                        var observaciones = document.querySelector('textarea[name="fauna_rescate[observaciones]"]')?.value || '-';
+                        var observaciones = faunaForm.querySelector('textarea[name="fauna_rescate[observaciones]"]')?.value || '';
 
-                        // Construir HTML del reporte
-                        var reportHTML = '<div style="font-family: Arial, sans-serif; color: #1f2937; max-width: 800px; margin: 0 auto; page-break-after: always;">' +
-                            '<div style="text-align: center; margin-bottom: 30px; border-bottom: 2px solid #1e40af; padding-bottom: 20px;">' +
-                                '<h1 style="margin: 0 0 10px 0; color: #1e40af;">Reporte de Control de Fauna</h1>' +
-                                '<p style="margin: 5px 0; color: #6b7280; font-size: 13px;">Formato de Informes de Control de Fauna</p>' +
+                        // Crear contenedor visible para el reporte
+                        var reportSummary = document.getElementById('fauna-report-summary');
+                        if (!reportSummary) {
+                            reportSummary = document.createElement('div');
+                            reportSummary.id = 'fauna-report-summary';
+                            reportSummary.style.display = 'none';
+                            document.body.appendChild(reportSummary);
+                        }
+
+                        // Construir HTML del reporte con mejor estructura
+                        reportSummary.innerHTML = '<div style="font-family: Arial, sans-serif; color: #1f2937; max-width: 210mm; margin: 0 auto; padding: 20mm; background: white;">' +
+                            '<div style="text-align: center; margin-bottom: 20px; border-bottom: 3px solid #1e40af; padding-bottom: 15px;">' +
+                                '<h1 style="margin: 0 0 5px 0; color: #1e40af; font-size: 24px;">REPORTE DE CONTROL DE FAUNA</h1>' +
+                                '<p style="margin: 0; color: #6b7280; font-size: 12px;">Formato de Informes de Control de Fauna</p>' +
                             '</div>' +
                             
-                            '<div style="margin-bottom: 20px; background: #f3f4f6; padding: 15px; border-radius: 8px;">' +
-                                '<table style="width: 100%; font-size: 13px; border-collapse: collapse;">' +
-                                    '<tr><td style="padding: 6px; border-bottom: 1px solid #e5e7eb;"><strong>Folio:</strong></td><td style="padding: 6px; border-bottom: 1px solid #e5e7eb;">' + folio + '</td></tr>' +
-                                    '<tr><td style="padding: 6px; border-bottom: 1px solid #e5e7eb;"><strong>Fecha:</strong></td><td style="padding: 6px; border-bottom: 1px solid #e5e7eb;">' + fechaLocal + '</td></tr>' +
-                                    '<tr><td style="padding: 6px; border-bottom: 1px solid #e5e7eb;"><strong>Responsable:</strong></td><td style="padding: 6px; border-bottom: 1px solid #e5e7eb;">' + responsable + '</td></tr>' +
-                                    '<tr><td style="padding: 6px; border-bottom: 1px solid #e5e7eb;"><strong>Cargo:</strong></td><td style="padding: 6px; border-bottom: 1px solid #e5e7eb;">' + cargo + '</td></tr>' +
+                            '<table style="width: 100%; font-size: 11px; border-collapse: collapse; margin-bottom: 20px;">' +
+                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; width: 30%; background: #f0f4f8;"><strong>Folio:</strong></td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + folio + '</td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8%; width: 30%;"><strong>Fecha:</strong></td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + fechaLocal + '</td></tr>' +
+                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Responsable:</strong></td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + responsable + '</td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Cargo:</strong></td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + cargo + '</td></tr>' +
+                            '</table>' +
+                            
+                            '<h3 style="color: #1e40af; font-size: 14px; margin: 15px 0 10px 0; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">Datos del Rescate/Reubicación</h3>' +
+                            '<table style="width: 100%; font-size: 11px; border-collapse: collapse; margin-bottom: 20px;">' +
+                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; width: 35%; background: #f0f4f8;"><strong>Institución Responsable:</strong></td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + institucion + '</td></tr>' +
+                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Sitio de Rescate:</strong></td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + sitioRescate + '</td></tr>' +
+                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Clase:</strong></td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + clase + '</td></tr>' +
+                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Especie:</strong></td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + especie + '</td></tr>' +
+                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Sitio Reubicación:</strong></td>' +
+                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + sitioReubicacion + '</td></tr>' +
+                            '</table>' +
+                            
+                            '<h3 style="color: #1e40af; font-size: 14px; margin: 15px 0 10px 0; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">Observaciones</h3>' +
+                            '<div style="padding: 10px; border: 1px solid #d1d5db; background: #fafbfc; font-size: 11px; line-height: 1.6; min-height: 40px; white-space: pre-wrap;" >' + (observaciones || 'N/A') + '</div>' +
+                            
+                            '<div style="margin-top: 60px; padding-top: 20px; border-top: 2px solid #1f2937;">' +
+                                '<table style="width: 100%; margin-top: 40px;">' +
+                                    '<tr><td style="text-align: center; width: 50%;"><div style="border-top: 1px solid #1f2937; padding-top: 40px; font-size: 11px;"><strong>Firma - AIFA</strong><br>(Responsable)</div></td>' +
+                                        '<td style="text-align: center; width: 50%;"><div style="border-top: 1px solid #1f2937; padding-top: 40px; font-size: 11px;"><strong>Firma - AFAC</strong><br>(Supervisor)</div></td></tr>' +
                                 '</table>' +
-                            '</div>' +
-                            
-                            '<div style="margin-bottom: 20px;">' +
-                                '<h3 style="color: #1e40af; border-bottom: 1px solid #d1d5db; padding-bottom: 8px;">Datos del Rescate/Reubicación</h3>' +
-                                '<table style="width: 100%; font-size: 13px; border-collapse: collapse;">' +
-                                    '<tr><td style="padding: 8px; border-bottom: 1px solid #e5e7eb; width: 30%;"><strong>Institución Responsable:</strong></td><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">' + institucion + '</td></tr>' +
-                                    '<tr><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Sitio de Rescate:</strong></td><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">' + sitioRescate + '</td></tr>' +
-                                    '<tr><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Clase:</strong></td><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">' + clase + '</td></tr>' +
-                                    '<tr><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Especie:</strong></td><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">' + especie + '</td></tr>' +
-                                    '<tr><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;"><strong>Sitio Reubicación:</strong></td><td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">' + sitioReubicacion + '</td></tr>' +
-                                '</table>' +
-                            '</div>' +
-                            
-                            '<div style="margin-bottom: 30px; background: #f9fafb; padding: 15px; border-radius: 8px;">' +
-                                '<h4 style="color: #1f2937; margin: 0 0 10px 0;">Observaciones:</h4>' +
-                                '<p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">' + observaciones + '</p>' +
-                            '</div>' +
-                            
-                            '<div style="margin-top: 50px; padding-top: 20px; border-top: 2px solid #d1d5db;">' +
-                                '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 40px;">' +
-                                    '<div style="text-align: center;">' +
-                                        '<p style="border-top: 1px solid #1f2937; padding-top: 8px; margin: 0; font-size: 12px;"><strong>Firma - AIFA (Responsable)</strong></p>' +
-                                    '</div>' +
-                                    '<div style="text-align: center;">' +
-                                        '<p style="border-top: 1px solid #1f2937; padding-top: 8px; margin: 0; font-size: 12px;"><strong>Firma - AFAC (Supervisor)</strong></p>' +
-                                    '</div>' +
-                                '</div>' +
                             '</div>' +
                         '</div>';
-
-                        // Crear contenedor temporal para el reporte
-                        var container = document.createElement('div');
-                        container.innerHTML = reportHTML;
-                        container.style.display = 'none';
-                        document.body.appendChild(container);
 
                         // Configurar html2pdf
                         var filename = 'Reporte-Fauna-' + folio + '.pdf';
                         var opt = {
-                            margin: 10,
+                            margin: [5, 5, 5, 5],
                             filename: filename,
-                            image: { type: 'jpeg', quality: 0.95 },
-                            html2canvas: { scale: 2, useCORS: true },
-                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                            image: { type: 'jpeg', quality: 0.98 },
+                            html2canvas: { scale: 2, logging: false, useCORS: true, allowTaint: true },
+                            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
                         };
 
                         // Generar PDF
-                        html2pdf().set(opt).from(container).toPdf().get('pdf').then(function (pdf) {
-                            // Limpiar contenedor temporal
-                            document.body.removeChild(container);
+                        html2pdf().set(opt).from(reportSummary).save().then(async function() {
+                            console.log('PDF generado exitosamente');
+                            
+                            // Ahora guardar en Supabase
+                            var client = window.supabaseClient;
+                            if (!client) {
+                                alert('Error: No hay conexión con la base de datos.');
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.value = 'Generar reporte';
+                                }
+                                return;
+                            }
 
-                            // Obtener blob del PDF
-                            var blob;
-                            try { blob = pdf.output('blob'); }
-                            catch (e) { console.error('Error getting PDF blob:', e); }
-
-                            if (blob) {
-                                // Crear URL descargable
-                                var url = URL.createObjectURL(blob);
-
-                                // Mostrar preview
-                                var previewContainer = document.getElementById('pdf-preview-container');
-                                if (!previewContainer) {
-                                    previewContainer = document.createElement('div');
-                                    previewContainer.id = 'pdf-preview-container';
-                                    previewContainer.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;z-index:10000;';
-                                    document.body.appendChild(previewContainer);
+                            try {
+                                var { data: { session } } = await client.auth.getSession();
+                                if (!session) {
+                                    alert('Atención: No has iniciado sesión. El PDF se generó pero NO se guardará en la base de datos.');
+                                    if (submitBtn) {
+                                        submitBtn.disabled = false;
+                                        submitBtn.value = 'Generar reporte';
+                                    }
+                                    return;
                                 }
 
-                                previewContainer.innerHTML = '<div style="background:white;width:90%;height:90%;border-radius:12px;overflow:auto;display:flex;flex-direction:column;">' +
-                                    '<div style="padding:20px;background:#1e40af;color:white;display:flex;justify-content:space-between;align-items:center;">' +
-                                        '<h3 style="margin:0;">Vista Previa del Reporte</h3>' +
-                                        '<button onclick="this.closest(\'#pdf-preview-container\').remove();" style="background:red;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">✕ Cerrar</button>' +
-                                    '</div>' +
-                                    '<iframe src="' + url + '" style="flex:1;border:none;"></iframe>' +
-                                    '<div style="padding:20px;border-top:1px solid #e5e7eb;text-align:right;">' +
-                                        '<button onclick="var a=document.createElement(\'a\');a.href=\'' + url + '\';a.download=\'' + filename + '\';document.body.appendChild(a);a.click();document.body.removeChild(a);" style="background:#22c55e;color:white;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;font-weight:600;">📥 Descargar PDF</button>' +
-                                    '</div>' +
-                                '</div>';
-                                previewContainer.style.display = 'flex';
+                                console.log('Guardando en Supabase...');
+
+                                // Guardar reporte de rescate
+                                var rescatePayload = {
+                                    fecha_reporte: new Date().toISOString().split('T')[0],
+                                    responsable: responsable,
+                                    cargo: cargo,
+                                    institucion_responsable: institucion,
+                                    sitio_rescate: sitioRescate,
+                                    clase: clase,
+                                    especie: especie,
+                                    sitio_reubicacion: sitioReubicacion,
+                                    observaciones: observaciones,
+                                    estado: 'completado'
+                                };
+
+                                var { data: rescateData, error: rescateError } = await client
+                                    .from('fauna_rescue_reports')
+                                    .insert([rescatePayload])
+                                    .select();
+
+                                if (rescateError) {
+                                    console.error('Error guardando rescate:', rescateError);
+                                    alert('Error: ' + rescateError.message);
+                                    if (submitBtn) {
+                                        submitBtn.disabled = false;
+                                        submitBtn.value = 'Generar reporte';
+                                    }
+                                    return;
+                                }
+
+                                console.log('Datos guardados en Supabase:', rescateData);
+                                alert('✓ Reporte generado y guardado exitosamente.');
+
+                                // Limpiar formulario
+                                faunaForm.reset();
+
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.value = 'Generar reporte';
+                                }
+
+                            } catch (err) {
+                                console.error('Error en guardado:', err);
+                                alert('Error: ' + err.message);
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.value = 'Generar reporte';
+                                }
                             }
                         }).catch(function (err) {
                             console.error('Error generando PDF:', err);
-                            alert('Error al generar el PDF.');
-                        }).finally(function () {
+                            alert('Error al generar el PDF: ' + err.message);
                             if (submitBtn) {
                                 submitBtn.disabled = false;
                                 submitBtn.value = 'Generar reporte';
