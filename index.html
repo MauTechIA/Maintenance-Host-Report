@@ -6398,6 +6398,71 @@
                         var fechaLocal = pad(now.getDate()) + '/' + pad(now.getMonth() + 1) + '/' + now.getFullYear() + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
                         var folio = now.getFullYear().toString() + pad(now.getMonth() + 1) + pad(now.getDate()) + '-' + pad(now.getHours()) + pad(now.getMinutes()) + pad(now.getSeconds());
 
+                        // ═════════════════ DETECTAR PESTAÑA ACTIVA ═════════════════
+                        var impactoTab = document.querySelector('.fauna-tab-content[data-fauna-tab-content="impacto"]');
+                        var rescateTab = document.querySelector('.fauna-tab-content[data-fauna-tab-content="rescate"]');
+                        var isImpacto = impactoTab && impactoTab.classList.contains('active');
+                        var isRescate = rescateTab && rescateTab.classList.contains('active');
+
+                        var client = window.supabaseClient;
+                        if (!client) {
+                            alert('Error: No hay conexión con Supabase');
+                            submitBtn.disabled = false;
+                            submitBtn.value = 'Generar reporte';
+                            return;
+                        }
+
+                        // ═════════════════════════════════════════════════════════
+                        // GUARDAR IMPACTO
+                        // ═════════════════════════════════════════════════════════
+                        if (isImpacto) {
+                            var evento = faunaForm.querySelector('input[name="fauna_report_evento"]:checked')?.value || '';
+                            var faseVuelo = faunaForm.querySelector('input[name="fauna_report_fase_vuelo"]:checked')?.value || '';
+                            var pista = faunaForm.querySelector('input[name="fauna_pista"]:checked')?.value || '';
+                            var responsableSelect = document.getElementById('fauna_report-authors-select');
+                            var responsable = responsableSelect ? responsableSelect.value : '';
+                            var cargoSelect = document.getElementById('fauna_report-role');
+                            var cargo = cargoSelect ? cargoSelect.value : '';
+                            var aerolinea = faunaForm.querySelector('select[name="fauna_report_aerolinea"]')?.value || '';
+                            var ubicacion = faunaForm.querySelector('select[name="fauna_report_ubicacion"]')?.value || '';
+
+                            var impactPayload = {
+                                folio: folio,
+                                fecha_reporte: new Date().toISOString().split('T')[0],
+                                evento: evento,
+                                fase_vuelo: faseVuelo,
+                                pista: pista,
+                                responsable: responsable,
+                                cargo: cargo,
+                                aerolinea: aerolinea,
+                                ubicacion: ubicacion,
+                                estado: 'completado'
+                            };
+
+                            var { data: impactData, error: impactError } = await client
+                                .from('fauna_impact_reports')
+                                .insert([impactPayload])
+                                .select();
+
+                            if (impactError) {
+                                console.error('Error guardando impacto:', impactError);
+                                alert('Error: ' + impactError.message);
+                                submitBtn.disabled = false;
+                                submitBtn.value = 'Generar reporte';
+                                return;
+                            }
+
+                            console.log('Impacto guardado:', impactData);
+                            alert('✓ Reporte de impacto guardado exitosamente.');
+                            faunaForm.reset();
+                            submitBtn.disabled = false;
+                            submitBtn.value = 'Generar reporte';
+                            return;
+                        }
+
+                        // ═════════════════════════════════════════════════════════
+                        // GUARDAR RESCATE
+                        // ═════════════════════════════════════════════════════════
                         // Responsable
                         var responsableSelect = document.getElementById('fauna_report-authors-select-rescate');
                         var responsable = responsableSelect ? (responsableSelect.options[responsableSelect.selectedIndex] || {}).text || responsableSelect.value : '-';
