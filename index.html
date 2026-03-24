@@ -3472,7 +3472,20 @@
                 var dupBtn = document.getElementById('dup_' + id);
                 var clearBtn = document.getElementById('clear_' + id);
                 
-                if (!chk || !det) return; // Verificar que existan los elementos
+                // Debug log
+                console.log('Setup for:', id, {
+                    chk: !!chk,
+                    det: !!det, 
+                    doneBtn: !!doneBtn,
+                    updateBtn: !!updateBtn,
+                    dupBtn: !!dupBtn,
+                    clearBtn: !!clearBtn
+                });
+
+                if (!chk || !det) {
+                    console.warn('Missing elements for', id);
+                    return;
+                }
 
                 // Mostrar/ocultar detalles cuando cambia el checkbox
                 chk.addEventListener('change', function () {
