@@ -3473,25 +3473,12 @@
                 var dupBtn = document.getElementById('dup_' + id);
                 var clearBtn = document.getElementById('clear_' + id);
 
-                console.log('[FAUNA] Setup para:', id);
-                console.log('[FAUNA] itemType:', itemType, '| det ID buscado:', 'fauna_details_' + itemType);
-                console.log('[FAUNA] Elementos encontrados:', {
-                    chk: !!chk,
-                    det: !!det,
-                    doneBtn: !!doneBtn,
-                    updateBtn: !!updateBtn,
-                    dupBtn: !!dupBtn,
-                    clearBtn: !!clearBtn
-                });
-
                 if (!chk || !det) {
-                    console.warn('[FAUNA] ERROR: Checkbox o details div no encontrados para', id);
                     return;
                 }
 
                 // Mostrar/ocultar detalles cuando cambia el checkbox
                 chk.addEventListener('change', function () {
-                    console.log('[FAUNA CHANGE EVENT]', id, 'checked:', chk.checked);
                     det.style.display = chk.checked ? 'block' : 'none';
                     refresh();
                 });
@@ -3569,28 +3556,17 @@
                     var isDone = chk.disabled;
                     var isChecked = chk.checked;
 
-                    console.log('[FAUNA REFRESH]', id, '| isDone:', isDone, '| isChecked:', isChecked);
-                    console.log('[FAUNA REFRESH] Botones encontrados:', {
-                        doneBtn: !!doneBtn,
-                        updateBtn: !!updateBtn,
-                        dupBtn: !!dupBtn,
-                        clearBtn: !!clearBtn
-                    });
-
                     if (isDone) {
-                        console.log('[FAUNA REFRESH] Estado: DONE (bloqueado)');
-                        if (doneBtn) { doneBtn.style.display = 'none'; console.log('[FAUNA] done -> none'); }
-                        if (updateBtn) { updateBtn.style.display = 'inline-block'; console.log('[FAUNA] update -> inline-block'); }
-                        if (dupBtn) { dupBtn.style.display = 'none'; console.log('[FAUNA] dup -> none'); }
-                        if (clearBtn) { clearBtn.style.display = 'none'; console.log('[FAUNA] clear -> none'); }
+                        if (doneBtn) doneBtn.style.display = 'none';
+                        if (updateBtn) updateBtn.style.display = 'inline-block';
+                        if (dupBtn) dupBtn.style.display = 'none';
+                        if (clearBtn) clearBtn.style.display = 'none';
                     } else if (isChecked) {
-                        console.log('[FAUNA REFRESH] Estado: CHECKED (no bloqueado)');
-                        if (doneBtn) { doneBtn.style.display = 'inline-block'; console.log('[FAUNA] done -> inline-block'); }
-                        if (updateBtn) { updateBtn.style.display = 'none'; console.log('[FAUNA] update -> none'); }
-                        if (dupBtn) { dupBtn.style.display = 'inline-block'; console.log('[FAUNA] dup -> inline-block'); }
-                        if (clearBtn) { clearBtn.style.display = 'inline-block'; console.log('[FAUNA] clear -> inline-block'); }
+                        if (doneBtn) doneBtn.style.display = 'inline-block';
+                        if (updateBtn) updateBtn.style.display = 'none';
+                        if (dupBtn) dupBtn.style.display = 'inline-block';
+                        if (clearBtn) clearBtn.style.display = 'inline-block';
                     } else {
-                        console.log('[FAUNA REFRESH] Estado: UNCHECKED');
                         if (doneBtn) doneBtn.style.display = 'none';
                         if (updateBtn) updateBtn.style.display = 'none';
                         if (dupBtn) dupBtn.style.display = 'none';
@@ -3599,7 +3575,6 @@
                 }
 
                 // Inicializar estado visual
-                console.log('[FAUNA] Llamando refresh() al init para', id);
                 refresh();
             }
 
