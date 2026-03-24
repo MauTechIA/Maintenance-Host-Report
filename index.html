@@ -6452,73 +6452,104 @@
 
                             console.log('DEBUG IMPACTO PAYLOAD:', impactPayload);
 
-                            // Generar HTML del reporte impacto para PDF (formato profesional)
+                            // Obtener logo del header
+                            var logoSrc = '';
+                            try { 
+                                var logoEl = document.querySelector('.report-header .left img'); 
+                                if (logoEl) logoSrc = logoEl.getAttribute('src'); 
+                            } catch (e) { }
+                            
+                            // Fallback logo
+                            var inlineLogo = '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="70" viewBox="0 0 180 70" style="display:block;margin:0 auto;">' +
+                                '<rect width="100%" height="100%" fill="#0b66c3" rx="6" />' +
+                                '<g transform="translate(12,10)">' +
+                                '<circle cx="20" cy="20" r="16" fill="#fff" />' +
+                                '<path d="M 20 8 L 28 20 L 24 20 L 24 28 L 16 28 L 16 20 L 12 20 Z" fill="#0b66c3"/>' +
+                                '</g>' +
+                                '<text x="95" y="28" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" font-weight="bold">Fauna</text>' +
+                                '<text x="95" y="48" font-family="Arial, sans-serif" font-size="11" fill="#e8f1f8">Control Aeródromo</text>' +
+                                '</svg>';
+
+                            // Generar HTML del reporte impacto para PDF con formato profesional (similar a revisión)
                             var impactoReportSummary = document.createElement('div');
+                            var impactoHtml = '<div style="font-family:Arial,Helvetica,sans-serif;color:#0f1724;max-width:210mm;margin:0 auto;padding:12mm;">';
                             
-                            var impactoHtml = '<div style="font-family: Arial, Helvetica, sans-serif; color: #0f1724;">';
+                            // Obtener membrete (similar a revisión)
+                            var membreteLines = [];
+                            try {
+                                document.querySelectorAll('.report-header .meta > div').forEach(function(d) {
+                                    if (d.querySelector && d.querySelector('#report-date')) return;
+                                    if (d.querySelector && d.querySelector('button')) return;
+                                    var txt = d.textContent.trim(); if (txt) membreteLines.push(txt);
+                                });
+                            } catch (e) { }
+
+                            // Header: membrete izquierda, logo+titulo centrado, folio derecha (estilo revisión)
+                            impactoHtml += '<div style="display:flex;justify-content:space-between;align-items:center;">';
+                            // membrete (izq)
+                            impactoHtml += '<div style="min-width:180px;">';
+                            if (membreteLines.length) { 
+                                impactoHtml += '<div style="font-size:12px;color:#1f2937;line-height:1.1">'; 
+                                membreteLines.forEach(function (line) { impactoHtml += '<div>' + line + '</div>'; }); 
+                                impactoHtml += '</div>'; 
+                            }
+                            impactoHtml += '</div>';
+
+                            // centro: logo sobre título (centrado)
+                            impactoHtml += '<div style="flex:1;text-align:center;padding:0 12px">';
+                            if (logoSrc) { 
+                                impactoHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">'; 
+                            } else { 
+                                impactoHtml += inlineLogo; 
+                            }
+                            impactoHtml += '<h2 style="color:#0b66c3;margin:0;font-size:20px;">Reporte de Control de Fauna</h2>';
+                            impactoHtml += '<div style="margin-top:6px;font-size:14px;color:#111;font-weight:700;">Impacto Faunístico</div>';
+                            impactoHtml += '</div>';
+
+                            // derecha: UTC time (hora) con fecha debajo, y folio
+                            impactoHtml += '<div style="text-align:right;color:#6b7280;font-size:12px;min-width:120px">';
+                            impactoHtml += '<div><strong>' + folio + '</strong></div>';
+                            impactoHtml += '<div style="font-size:12px;color:#6b7280;margin-top:6px">' + (new Date().toISOString().split('T')[0]) + '</div>';
+                            impactoHtml += '</div>';
+                            impactoHtml += '</div>';
+
+                            // Mostrar Evento, Fase, Pista, Responsable, Cargo distribuidos horizontalmente (flex)
+                            impactoHtml += '<div style="display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:12px;align-items:center">';
+                            var sep = '<div style="width:1px;height:28px;background:#e6eef9;margin:0 8px;display:inline-block;vertical-align:middle"></div>';
+                            impactoHtml += '<div style="min-width:140px;text-align:center;font-size:13px;color:#374151">Tipo de Evento<br><strong>' + (evento || '-') + '</strong></div>';
+                            impactoHtml += sep;
+                            impactoHtml += '<div style="min-width:120px;text-align:center;font-size:13px;color:#374151">Fase de Vuelo<br><strong>' + (faseVuelo || '-') + '</strong></div>';
+                            impactoHtml += sep;
+                            impactoHtml += '<div style="min-width:100px;text-align:center;font-size:13px;color:#374151">Pista<br><strong>' + (pista || '-') + '</strong></div>';
+                            impactoHtml += sep;
+                            impactoHtml += '<div style="min-width:140px;text-align:center;font-size:13px;color:#374151">Responsable<br><strong>' + (responsable || '-') + '</strong></div>';
+                            impactoHtml += sep;
+                            impactoHtml += '<div style="min-width:140px;text-align:center;font-size:13px;color:#374151">Cargo<br><strong>' + (cargo || '-') + '</strong></div>';
+                            impactoHtml += '</div>';
+                            impactoHtml += '<hr style="border:none;border-top:1px solid #e6eef9;margin:12px 0">';
+
+                            // Tabla de información detallada
+                            impactoHtml += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+                            impactoHtml += '<thead><tr>' +
+                                '<th style="text-align:left;padding:8px;border-bottom:1px solid #e6eef9;width:30%">Concepto</th>' +
+                                '<th style="text-align:left;padding:8px;border-bottom:1px solid #e6eef9;width:70%">Valor</th>' +
+                                '</tr></thead>';
+                            impactoHtml += '<tbody>';
+                            impactoHtml += '<tr>' +
+                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff;font-weight:600;background:#f5f8fc">Aerolínea</td>' +
+                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff">' + (aerolinea || '-') + '</td>' +
+                                '</tr>';
+                            impactoHtml += '<tr>' +
+                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff;font-weight:600;background:#f5f8fc">Ubicación</td>' +
+                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff">' + (ubicacion || '-') + '</td>' +
+                                '</tr>';
+                            impactoHtml += '</tbody></table>';
+
+                            impactoHtml += '<div style="text-align:center;color:#6b7280;font-size:10px;margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;">' +
+                                'Reporte generado automáticamente • ' + new Date().toLocaleString('es-ES') +
+                                '</div>';
                             
-                            // Encabezado profesional (sin imagen para evitar CORS)
-                            impactoHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:3px solid #1e40af;">';
-                            impactoHtml += '<div style="flex:1;">';
-                            impactoHtml += '<div style="font-size:12px;color:#1f2937;line-height:1.2;"><strong>AIFA - Aeropuerto Internacional Benito Juárez</strong><br>Gerencia de Seguridad Operacional</div>';
                             impactoHtml += '</div>';
-                            impactoHtml += '<div style="flex:1;text-align:center;">';
-                            impactoHtml += '<div style="font-size:28px;font-weight:bold;color:#0b66c3;">🦅</div>';
-                            impactoHtml += '<h2 style="color:#0b66c3;margin:4px 0;font-size:18px;font-weight:bold;">REPORTE DE IMPACTO FAUNÍSTICO</h2>';
-                            impactoHtml += '<div style="font-size:11px;color:#374151;">Control de Fauna Silvestre en Área de Movimiento</div>';
-                            impactoHtml += '</div>';
-                            impactoHtml += '<div style="flex:1;text-align:right;color:#6b7280;font-size:11px;">';
-                            impactoHtml += '<div><strong>Folio:</strong> ' + folio + '</div>';
-                            impactoHtml += '<div style="margin-top:6px;"><strong>Fecha:</strong> ' + (new Date().toISOString().split('T')[0]) + '</div>';
-                            impactoHtml += '</div>';
-                            impactoHtml += '</div>';
-                            
-                            // Información principal en tabla profesional
-                            impactoHtml += '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px;">';
-                            impactoHtml += '<tr>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;width:25%;font-weight:600;color:#374151;">Tipo de Evento</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (evento || '-') + '</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;width:25%;font-weight:600;color:#374151;">Fase de Vuelo</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (faseVuelo || '-') + '</td>';
-                            impactoHtml += '</tr>';
-                            impactoHtml += '<tr>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Pista</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (pista || '-') + '</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Ubicación</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (ubicacion || '-') + '</td>';
-                            impactoHtml += '</tr>';
-                            impactoHtml += '<tr>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Responsable</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (responsable || '-') + '</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Cargo</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (cargo || '-') + '</td>';
-                            impactoHtml += '</tr>';
-                            impactoHtml += '<tr>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Aerolínea</td>';
-                            impactoHtml += '<td style="padding:10px;border:1px solid #d1d5db;" colspan="3">' + (aerolinea || '-') + '</td>';
-                            impactoHtml += '</tr>';
-                            impactoHtml += '</table>';
-                            
-                            // Firmas
-                            impactoHtml += '<div style="margin-top:30px;display:flex;justify-content:space-around;gap:20px;">';
-                            impactoHtml += '<div style="flex:1;border:1px solid #d1d5db;padding:12px;border-radius:6px;text-align:center;min-height:100px;display:flex;flex-direction:column;justify-content:space-between;">';
-                            impactoHtml += '<div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">Responsable</div>';
-                            impactoHtml += '<div style="border-top:1px solid #d1d5db;margin:8px 0;padding-top:8px;min-height:30px;"></div>';
-                            impactoHtml += '<div style="font-size:11px;color:#6b7280;">' + (responsable || 'Firma') + '</div>';
-                            impactoHtml += '</div>';
-                            impactoHtml += '<div style="flex:1;border:1px solid #d1d5db;padding:12px;border-radius:6px;text-align:center;min-height:100px;display:flex;flex-direction:column;justify-content:space-between;">';
-                            impactoHtml += '<div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">AIFA</div>';
-                            impactoHtml += '<div style="border-top:1px solid #d1d5db;margin:8px 0;padding-top:8px;min-height:30px;"></div>';
-                            impactoHtml += '<div style="font-size:11px;color:#6b7280;">Supervisor</div>';
-                            impactoHtml += '</div>';
-                            impactoHtml += '<div style="flex:1;border:1px solid #d1d5db;padding:12px;border-radius:6px;text-align:center;min-height:100px;display:flex;flex-direction:column;justify-content:space-between;">';
-                            impactoHtml += '<div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">AFAC</div>';
-                            impactoHtml += '<div style="border-top:1px solid #d1d5db;margin:8px 0;padding-top:8px;min-height:30px;"></div>';
-                            impactoHtml += '<div style="font-size:11px;color:#6b7280;">Supervisor</div>';
-                            impactoHtml += '</div>';
-                            impactoHtml += '</div>';
-                            impactoHtml += '</div>';
-                            
                             impactoReportSummary.innerHTML = impactoHtml;
 
                             var filename = 'Reporte-Fauna-' + folio + '.pdf';
@@ -6667,76 +6698,98 @@
                             document.body.appendChild(reportSummary);
                         }
 
-                        // Construir HTML del reporte con formato profesional
-                        var rescateHtml = '<div style="font-family: Arial, Helvetica, sans-serif; color: #0f1724;">';
-                        
-                        // Encabezado profesional
-                        rescateHtml += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:3px solid #1e40af;">';
-                        rescateHtml += '<div style="flex:1;">';
-                        rescateHtml += '<div style="font-size:12px;color:#1f2937;line-height:1.2;"><strong>AIFA - Aeropuerto Internacional Benito Juárez</strong><br>Gerencia de Seguridad Operacional</div>';
-                        rescateHtml += '</div>';
-                        rescateHtml += '<div style="flex:1;text-align:center;">';
-                        rescateHtml += '<div style="font-size:28px;font-weight:bold;color:#0b66c3;">🦅</div>';
-                        rescateHtml += '<h2 style="color:#0b66c3;margin:4px 0;font-size:18px;font-weight:bold;">REPORTE DE RESCATE DE FAUNA</h2>';
-                        rescateHtml += '<div style="font-size:11px;color:#374151;">Captura, Reubicación y Control de Fauna Silvestre</div>';
-                        rescateHtml += '</div>';
-                        rescateHtml += '<div style="flex:1;text-align:right;color:#6b7280;font-size:11px;">';
-                        rescateHtml += '<div><strong>Folio:</strong> ' + folio + '</div>';
-                        rescateHtml += '<div style="margin-top:6px;"><strong>Fecha:</strong> ' + (new Date().toISOString().split('T')[0]) + '</div>';
-                        rescateHtml += '</div>';
-                        rescateHtml += '</div>';
-                        
-                        // Tabla con información del rescate
-                        rescateHtml += '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px;">';
-                        rescateHtml += '<tr>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;width:25%;font-weight:600;color:#374151;">Clase</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (clase || '-') + '</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;width:25%;font-weight:600;color:#374151;">Especie</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (especie || '-') + '</td>';
-                        rescateHtml += '</tr>';
-                        rescateHtml += '<tr>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Sitio de Rescate</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (sitioRescate || '-') + '</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Sitio de Reubicación</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (sitioReubicacion || '-') + '</td>';
-                        rescateHtml += '</tr>';
-                        rescateHtml += '<tr>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Responsable</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (responsable || '-') + '</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Cargo</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;">' + (cargo || '-') + '</td>';
-                        rescateHtml += '</tr>';
-                        rescateHtml += '<tr>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Institución</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;" colspan="3">' + (institucion || '-') + '</td>';
-                        rescateHtml += '</tr>';
-                        rescateHtml += '<tr>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;background:#f3f4f6;font-weight:600;color:#374151;">Observaciones</td>';
-                        rescateHtml += '<td style="padding:10px;border:1px solid #d1d5db;" colspan="3;">' + (observaciones ? '<div style="white-space:pre-wrap;">' + observaciones + '</div>' : '-') + '</td>';
-                        rescateHtml += '</tr>';
-                        rescateHtml += '</table>';
-                        
-                        // Firmas
-                        rescateHtml += '<div style="margin-top:30px;display:flex;justify-content:space-around;gap:20px;">';
-                        rescateHtml += '<div style="flex:1;border:1px solid #d1d5db;padding:12px;border-radius:6px;text-align:center;min-height:100px;display:flex;flex-direction:column;justify-content:space-between;">';
-                        rescateHtml += '<div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">Responsable</div>';
-                        rescateHtml += '<div style="border-top:1px solid #d1d5db;margin:8px 0;padding-top:8px;min-height:30px;"></div>';
-                        rescateHtml += '<div style="font-size:11px;color:#6b7280;">' + (responsable || 'Firma') + '</div>';
-                        rescateHtml += '</div>';
-                        rescateHtml += '<div style="flex:1;border:1px solid #d1d5db;padding:12px;border-radius:6px;text-align:center;min-height:100px;display:flex;flex-direction:column;justify-content:space-between;">';
-                        rescateHtml += '<div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">AIFA</div>';
-                        rescateHtml += '<div style="border-top:1px solid #d1d5db;margin:8px 0;padding-top:8px;min-height:30px;"></div>';
-                        rescateHtml += '<div style="font-size:11px;color:#6b7280;">Supervisor</div>';
-                        rescateHtml += '</div>';
-                        rescateHtml += '<div style="flex:1;border:1px solid #d1d5db;padding:12px;border-radius:6px;text-align:center;min-height:100px;display:flex;flex-direction:column;justify-content:space-between;">';
-                        rescateHtml += '<div style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px;">AFAC</div>';
-                        rescateHtml += '<div style="border-top:1px solid #d1d5db;margin:8px 0;padding-top:8px;min-height:30px;"></div>';
-                        rescateHtml += '<div style="font-size:11px;color:#6b7280;">Supervisor</div>';
-                        rescateHtml += '</div>';
-                        rescateHtml += '</div>';
-                        rescateHtml += '</div>';
-                        
-                        reportSummary.innerHTML = rescateHtml;
+                        // Construir HTML del reporte con formato profesional (similar a revisión)
+                        reportSummary.innerHTML = '<div style="font-family:Arial,Helvetica,sans-serif;color:#0f1724;max-width:210mm;margin:0 auto;padding:12mm;">' +
+                            
+                            // Obtener membrete (similar a revisión)
+                            (function() {
+                                var membreteHtml = '';
+                                try {
+                                    var membreteLines = [];
+                                    document.querySelectorAll('.report-header .meta > div').forEach(function(d) {
+                                        if (d.querySelector && d.querySelector('#report-date')) return;
+                                        if (d.querySelector && d.querySelector('button')) return;
+                                        var txt = d.textContent.trim(); if (txt) membreteLines.push(txt);
+                                    });
+                                    
+                                    if (membreteLines.length) {
+                                        membreteHtml = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
+                                            '<div style="min-width:180px;font-size:12px;color:#1f2937;line-height:1.1">';
+                                        membreteLines.forEach(function (line) { membreteHtml += '<div>' + line + '</div>'; });
+                                        membreteHtml += '</div>' +
+                                            '<div style="flex:1;text-align:center;padding:0 12px">';
+                                        
+                                        var logoSrc = '';
+                                        try { var logoEl = document.querySelector('.report-header .left img'); if (logoEl) logoSrc = logoEl.getAttribute('src'); } catch (e) { }
+                                        if (logoSrc) {
+                                            membreteHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">';
+                                        } else {
+                                            membreteHtml += '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="70" viewBox="0 0 180 70" style="display:block;margin:0 auto;">' +
+                                                '<rect width="100%" height="100%" fill="#0b66c3" rx="6" />' +
+                                                '<g transform="translate(12,10)">' +
+                                                '<circle cx="20" cy="20" r="16" fill="#fff" />' +
+                                                '<path d="M 20 8 L 28 20 L 24 20 L 24 28 L 16 28 L 16 20 L 12 20 Z" fill="#0b66c3"/>' +
+                                                '</g>' +
+                                                '<text x="95" y="28" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" font-weight="bold">Fauna</text>' +
+                                                '<text x="95" y="48" font-family="Arial, sans-serif" font-size="11" fill="#e8f1f8">Rescate</text>' +
+                                                '</svg>';
+                                        }
+                                        
+                                        membreteHtml += '<h2 style="color:#0b66c3;margin:0;font-size:20px;">Reporte de Control de Fauna</h2>' +
+                                            '<div style="margin-top:6px;font-size:14px;color:#111;font-weight:700;">Rescate y Reubicación</div>' +
+                                            '</div>' +
+                                            '<div style="text-align:right;color:#6b7280;font-size:12px;min-width:120px">' +
+                                            '<div><strong>' + folio + '</strong></div>' +
+                                            '<div style="font-size:12px;color:#6b7280;margin-top:6px">' + fechaLocal.split(' ')[0] + '</div>' +
+                                            '</div>' +
+                                            '</div>';
+                                    }
+                                } catch (e) { console.log('Error building membrete:', e); }
+                                return membreteHtml;
+                            })() +
+                            
+                            '<hr style="border:none;border-top:1px solid #e6eef9;margin:12px 0">' +
+                            
+                            '<div style="display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-top:12px;align-items:center">' +
+                                '<div style="min-width:140px;text-align:center;font-size:13px;color:#374151">Responsable<br><strong>' + (responsable || '-') + '</strong></div>' +
+                                '<div style="width:1px;height:28px;background:#e6eef9;margin:0 8px;display:inline-block;vertical-align:middle"></div>' +
+                                '<div style="min-width:140px;text-align:center;font-size:13px;color:#374151">Cargo<br><strong>' + (cargo || '-') + '</strong></div>' +
+                                '<div style="width:1px;height:28px;background:#e6eef9;margin:0 8px;display:inline-block;vertical-align:middle"></div>' +
+                                '<div style="min-width:140px;text-align:center;font-size:13px;color:#374151">Institución<br><strong>' + (institucion || '-') + '</strong></div>' +
+                            '</div>' +
+                            '<hr style="border:none;border-top:1px solid #e6eef9;margin:12px 0">' +
+                            
+                            '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+                                '<thead><tr>' +
+                                    '<th style="text-align:left;padding:8px;border-bottom:1px solid #e6eef9;width:35%">Concepto</th>' +
+                                    '<th style="text-align:left;padding:8px;border-bottom:1px solid #e6eef9;width:65%">Detalle</th>' +
+                                '</tr></thead>' +
+                                '<tbody>' +
+                                    '<tr><td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff;font-weight:600;background:#f5f8fc">Sitio de Rescate</td>' +
+                                        '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff">' + (sitioRescate || '-') + '</td></tr>' +
+                                    '<tr><td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff;font-weight:600;background:#f5f8fc">Clase de Animal</td>' +
+                                        '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff">' + (clase || '-') + '</td></tr>' +
+                                    '<tr><td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff;font-weight:600;background:#f5f8fc">Especie</td>' +
+                                        '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff">' + (especie || '-') + '</td></tr>' +
+                                    '<tr><td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff;font-weight:600;background:#f5f8fc">Sitio de Reubicación</td>' +
+                                        '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff">' + (sitioReubicacion || '-') + '</td></tr>' +
+                                '</tbody>' +
+                            '</table>' +
+                            
+                            '<h3 style="color:#0b66c3;font-size:13px;margin:16px 0 8px 0;border-bottom:1.5px solid #0b66c3;padding-bottom:4px;">Observaciones</h3>' +
+                            '<div style="padding:10px;border:1px solid #e6eef9;background:#fafbfc;font-size:12px;line-height:1.6;min-height:50px;white-space:pre-wrap">' + (observaciones || 'N/A') + '</div>' +
+                            
+                            '<div style="margin-top:60px;padding-top:20px;border-top:2px solid #e6eef9;">' +
+                                '<table style="width:100%;margin-top:40px;">' +
+                                    '<tr><td style="text-align:center;width:50%;"><div style="border-top:1px solid #1f2937;padding-top:40px;font-size:11px;"><strong>Firma - AIFA</strong><br>(Responsable)</div></td>' +
+                                        '<td style="text-align:center;width:50%;"><div style="border-top:1px solid #1f2937;padding-top:40px;font-size:11px;"><strong>Firma - AFAC</strong><br>(Supervisor)</div></td></tr>' +
+                                '</table>' +
+                            '</div>' +
+                            
+                            '<div style="text-align:center;color:#6b7280;font-size:10px;margin-top:20px;padding-top:12px;border-top:1px solid #e5e7eb;">' +
+                                'Reporte generado automáticamente • ' + new Date().toLocaleString('es-ES') +
+                            '</div>' +
+                        '</div>';
 
                         // Configurar html2pdf
                         var filename = 'Reporte-Fauna-' + folio + '.pdf';
