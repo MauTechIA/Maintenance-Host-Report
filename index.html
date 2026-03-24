@@ -2453,10 +2453,8 @@
 
                     <input type="checkbox" id="fauna_avistamiento" name="fauna_tipo_reporte" value="Avistamiento de Aves">
                     <label for="fauna_avistamiento">Avistamiento de Aves</label>
-                    <button type="button" id="fauna_done_avistamiento" class="item-done" style="display:none; margin-left:6px;">Done</button>
-                    <button type="button" id="fauna_update_avistamiento" class="item-update" style="display:none; margin-left:6px;">Update</button>
                     <br>
-                    <div class="item-details" id="fauna_details_avistamiento" style="display:none; margin-left:18px; margin-bottom:10px;">
+                    <div class="item-details" id="fauna_details_avistamiento" style="display:none; margin-left:18px; margin-bottom:10px; padding:12px; background:#f9fafb; border-left:3px solid #3b82f6; border-radius:6px;">
                         <label>Ubicación: <input type="text" name="fauna_details[avistamiento][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
                         <label>Especie:
                             <select name="fauna_details[avistamiento][especie]" class="fauna-especie-select">
@@ -2503,14 +2501,18 @@
                                 <option value="3">Alta</option>
                             </select>
                         </label><br>
+                        <div style="margin-top:14px; padding-top:12px; border-top:1px solid #d1d5db; display:flex; gap:8px; justify-content:flex-end;">
+                            <button type="button" id="done_fauna_avistamiento" class="item-done" style="display:none;">✓ Done</button>
+                            <button type="button" id="update_fauna_avistamiento" class="item-update" style="display:none;">↻ Update</button>
+                            <button type="button" id="dup_fauna_avistamiento" class="item-duplicate" style="display:none; width:44px; height:44px;">➕</button>
+                            <button type="button" id="clear_fauna_avistamiento" class="item-done item-clear" style="display:none; background:#ef4444;">🗑️ Clear</button>
+                        </div>
                     </div>
 
                     <input type="checkbox" id="fauna_presencia" name="fauna_tipo_reporte" value="Presencia de Animales">
                     <label for="fauna_presencia">Presencia de Animales</label>
-                    <button type="button" id="fauna_done_presencia" class="item-done" style="display:none; margin-left:6px;">Done</button>
-                    <button type="button" id="fauna_update_presencia" class="item-update" style="display:none; margin-left:6px;">Update</button>
                     <br>
-                    <div class="item-details" id="fauna_details_presencia" style="display:none; margin-left:18px; margin-bottom:10px;">
+                    <div class="item-details" id="fauna_details_presencia" style="display:none; margin-left:18px; margin-bottom:10px; padding:12px; background:#f9fafb; border-left:3px solid #10b981; border-radius:6px;">
                         <label>Ubicación: <input type="text" name="fauna_details[presencia][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
                         <label>Tipo de Animal: <input type="text" name="fauna_details[presencia][tipo_animal]"></label><br>
                         <label>Riesgo/Amenaza:
@@ -2522,14 +2524,18 @@
                             </select>
                         </label><br>
                         <label>Observaciones:<br><textarea name="fauna_details[presencia][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
+                        <div style="margin-top:14px; padding-top:12px; border-top:1px solid #d1d5db; display:flex; gap:8px; justify-content:flex-end;">
+                            <button type="button" id="done_fauna_presencia" class="item-done" style="display:none;">✓ Done</button>
+                            <button type="button" id="update_fauna_presencia" class="item-update" style="display:none;">↻ Update</button>
+                            <button type="button" id="dup_fauna_presencia" class="item-duplicate" style="display:none; width:44px; height:44px;">➕</button>
+                            <button type="button" id="clear_fauna_presencia" class="item-done item-clear" style="display:none; background:#ef4444;">🗑️ Clear</button>
+                        </div>
                     </div>
 
                     <input type="checkbox" id="fauna_daino" name="fauna_tipo_reporte" value="Daño a Infraestructura">
                     <label for="fauna_daino">Daño a Infraestructura</label>
-                    <button type="button" id="fauna_done_daino" class="item-done" style="display:none; margin-left:6px;">Done</button>
-                    <button type="button" id="fauna_update_daino" class="item-update" style="display:none; margin-left:6px;">Update</button>
                     <br>
-                    <div class="item-details" id="fauna_details_daino" style="display:none; margin-left:18px; margin-bottom:10px;">
+                    <div class="item-details" id="fauna_details_daino" style="display:none; margin-left:18px; margin-bottom:10px; padding:12px; background:#f9fafb; border-left:3px solid #f59e0b; border-radius:6px;">
                         <label>Ubicación: <input type="text" name="fauna_details[daino][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
                         <label>Descripción del Daño: <input type="text" name="fauna_details[daino][descripcion]"></label><br>
                         <label>Severidad:
@@ -2541,6 +2547,12 @@
                             </select>
                         </label><br>
                         <label>Observaciones:<br><textarea name="fauna_details[daino][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
+                        <div style="margin-top:14px; padding-top:12px; border-top:1px solid #d1d5db; display:flex; gap:8px; justify-content:flex-end;">
+                            <button type="button" id="done_fauna_daino" class="item-done" style="display:none;">✓ Done</button>
+                            <button type="button" id="update_fauna_daino" class="item-update" style="display:none;">↻ Update</button>
+                            <button type="button" id="dup_fauna_daino" class="item-duplicate" style="display:none; width:44px; height:44px;">➕</button>
+                            <button type="button" id="clear_fauna_daino" class="item-done item-clear" style="display:none; background:#ef4444;">🗑️ Clear</button>
+                        </div>
                     </div>
                 </div>
 
@@ -3442,6 +3454,191 @@
             });
             // Exponer API mínima para duplicar desde fuera (necesario para restauración)
             try { window.mhr = window.mhr || {}; window.mhr.duplicateItem = duplicateItem; window.mhr.counters = counters; window.mhr.setupItemControlsFor = setupItemControlsFor; } catch (e) { }
+        })();
+    </script>
+
+    <!-- ─── Script: Fauna Impacto - Botones Done/Update/Duplicate/Clear ─── -->
+    <script>
+        (function () {
+            // Añadir botones 'duplicar' (+), Done, Update y Clear para items de Fauna Impacto
+            var counters = {};
+            var faunaItemIds = ['fauna_avistamiento', 'fauna_presencia', 'fauna_daino'];
+
+            function setupFaunaItemControlsFor(id) {
+                var chk = document.getElementById(id);
+                var det = document.getElementById('details_' + id);
+                var doneBtn = document.getElementById('done_' + id);
+                var updateBtn = document.getElementById('update_' + id);
+                var dupBtn = document.getElementById('dup_' + id);
+                var clearBtn = document.getElementById('clear_' + id);
+                if (!chk) return;
+
+                // Helper: detecta si el item tiene datos
+                function hasItemData() {
+                    try {
+                        if (chk && chk.checked) return true;
+                        if (!det) return false;
+                        var els = Array.prototype.slice.call(det.querySelectorAll('input,textarea,select'));
+                        for (var i = 0; i < els.length; i++) {
+                            var el = els[i];
+                            if (!el) continue;
+                            if (el.type === 'checkbox' || el.type === 'radio') { if (el.checked) return true; }
+                            else if ((el.value || '').toString().trim() !== '') return true;
+                        }
+                    } catch (e) { }
+                    return false;
+                }
+
+                function updateClearVisibility() {
+                    try {
+                        if (!clearBtn) return;
+                        var has = hasItemData();
+                        clearBtn.style.display = has ? 'inline-block' : 'none';
+                    } catch (e) { }
+                }
+
+                function refresh() {
+                    if (chk.disabled) {
+                        if (doneBtn) doneBtn.style.display = 'none';
+                        if (updateBtn) updateBtn.style.display = 'inline-block';
+                    } else {
+                        if (chk.checked) { if (doneBtn) doneBtn.style.display = 'inline-block'; } else { if (doneBtn) doneBtn.style.display = 'none'; }
+                        if (updateBtn) updateBtn.style.display = 'none';
+                    }
+                    // mostrar/ocultar botones + y Clear según si el checkbox está seleccionado
+                    if (dupBtn) dupBtn.style.display = chk.checked ? 'inline-block' : 'none';
+                    updateClearVisibility();
+                }
+
+                chk.addEventListener('change', function () {
+                    if (det) { det.style.display = chk.checked ? 'block' : 'none'; }
+                    refresh();
+                });
+
+                if (doneBtn) {
+                    doneBtn.addEventListener('click', function () {
+                        if (chk.checked) {
+                            chk.disabled = true;
+                            if (det) {
+                                Array.prototype.slice.call(det.querySelectorAll('input, textarea, select')).forEach(function (el) { try { el.disabled = true; } catch (e) { } });
+                            }
+                        }
+                        refresh();
+                    });
+                }
+                if (updateBtn) {
+                    updateBtn.addEventListener('click', function () {
+                        chk.disabled = false;
+                        if (det) {
+                            Array.prototype.slice.call(det.querySelectorAll('input, textarea, select')).forEach(function (el) { try { el.disabled = false; } catch (e) { } });
+                        }
+                        refresh();
+                    });
+                }
+
+                if (dupBtn) {
+                    dupBtn.addEventListener('click', function () { duplicateFaunaItem(id); });
+                }
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', function () {
+                        try {
+                            // uncheck the checkbox, hide details and clear values
+                            if (chk) { chk.checked = false; chk.disabled = false; }
+                            if (det) {
+                                det.style.display = 'none';
+                                Array.prototype.slice.call(det.querySelectorAll('input, textarea, select')).forEach(function (el) {
+                                    try {
+                                        if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+                                        else el.value = '';
+                                        el.disabled = false;
+                                    } catch (e) { }
+                                });
+                            }
+                            // update visuals
+                            if (doneBtn) doneBtn.style.display = 'none';
+                            if (updateBtn) updateBtn.style.display = 'none';
+                            if (clearBtn) clearBtn.style.display = 'none';
+                        } catch (e) { console.error('Error clearing fauna item', id, e); }
+                    });
+                }
+
+                // si hay panel de detalles, escuchar cambios para mostrar/ocultar Clear
+                if (det) {
+                    try {
+                        Array.prototype.slice.call(det.querySelectorAll('input,textarea,select')).forEach(function (el) {
+                            el.addEventListener('input', updateClearVisibility);
+                            el.addEventListener('change', updateClearVisibility);
+                        });
+                    } catch (e) { }
+                }
+
+                // inicializar estado visual
+                refresh();
+            }
+
+            function duplicateFaunaItem(origId) {
+                var origChk = document.getElementById(origId);
+                var origDet = document.getElementById('details_' + origId);
+                if (!origChk) return;
+                counters[origId] = (counters[origId] || 0) + 1;
+                var suffix = '_dup' + counters[origId];
+                var newId = origId + suffix;
+
+                // clone checkbox
+                var newChk = origChk.cloneNode(false);
+                newChk.id = newId;
+                newChk.checked = false;
+                newChk.disabled = false;
+
+                // clone label
+                var origLabel = document.querySelector('label[for="' + origId + '"]');
+                var newLabel = origLabel ? origLabel.cloneNode(true) : null;
+                if (newLabel) newLabel.setAttribute('for', newId);
+
+                // create done/update/dup/clear buttons for the clone
+                var newDone = document.createElement('button'); newDone.type = 'button'; newDone.id = 'done_' + newId; newDone.className = 'item-done'; newDone.style.display = 'none'; newDone.textContent = '✓ Done';
+                var newUpdate = document.createElement('button'); newUpdate.type = 'button'; newUpdate.id = 'update_' + newId; newUpdate.className = 'item-update'; newUpdate.style.display = 'none'; newUpdate.textContent = '↻ Update';
+                var newDup = document.createElement('button'); newDup.type = 'button'; newDup.id = 'dup_' + newId; newDup.className = 'item-duplicate'; newDup.style.display = 'none'; newDup.textContent = '➕';
+                var newClear = document.createElement('button'); newClear.type = 'button'; newClear.id = 'clear_' + newId; newClear.className = 'item-done item-clear'; newClear.style.display = 'none'; newClear.style.background = '#ef4444'; newClear.textContent = '🗑️ Clear';
+                var br = document.createElement('br');
+
+                // clone details panel and adjust ids/names
+                var newDet = origDet ? origDet.cloneNode(true) : null;
+                if (newDet) {
+                    newDet.id = 'details_' + newId;
+                    // update any element ids inside
+                    Array.prototype.slice.call(newDet.querySelectorAll('[id]')).forEach(function (el) { if (el.id) el.id = el.id.replace(origId, newId); });
+                    // update name attributes and clear values
+                    Array.prototype.slice.call(newDet.querySelectorAll('[name]')).forEach(function (el) {
+                        if (el.name) el.name = el.name.replace(origId, newId);
+                        try {
+                            if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+                            else el.value = '';
+                            el.disabled = false;
+                        } catch (e) { }
+                    });
+                }
+
+                // insert cloned nodes after the original details block
+                var insertAfter = origDet ? origDet : origChk;
+                var parent = insertAfter.parentNode;
+                var ref = insertAfter.nextSibling;
+                var frag = document.createDocumentFragment();
+                frag.appendChild(newChk);
+                if (newLabel) frag.appendChild(newLabel);
+                frag.appendChild(br);
+                if (newDet) frag.appendChild(newDet);
+                if (ref) parent.insertBefore(frag, ref);
+                else parent.appendChild(frag);
+
+                // attach controls to the clone
+                setupFaunaItemControlsFor(newId);
+            }
+
+            // Inicializar controles para items existentes
+            faunaItemIds.forEach(function (id) {
+                setupFaunaItemControlsFor(id);
+            });
         })();
     </script>
 
