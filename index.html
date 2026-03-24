@@ -3487,8 +3487,12 @@
                         chk.disabled = true;
                         // Deshabilitar todos los inputs/selects/textareas en el detalle
                         try {
-                            var fields = det.querySelectorAll('input[type!="checkbox"], textarea, select');
-                            fields.forEach(function (el) { el.disabled = true; });
+                            var fields = det.querySelectorAll('input, textarea, select');
+                            fields.forEach(function (el) { 
+                                if (el.type !== 'checkbox' && el.type !== 'radio') {
+                                    el.disabled = true;
+                                }
+                            });
                         } catch (e) { }
                         refresh();
                     });
@@ -3501,8 +3505,12 @@
                         chk.disabled = false;
                         // Habilitar todos los inputs/selects/textareas en el detalle
                         try {
-                            var fields = det.querySelectorAll('input[type!="checkbox"], textarea, select');
-                            fields.forEach(function (el) { el.disabled = false; });
+                            var fields = det.querySelectorAll('input, textarea, select');
+                            fields.forEach(function (el) { 
+                                if (el.type !== 'checkbox' && el.type !== 'radio') {
+                                    el.disabled = false;
+                                }
+                            });
                         } catch (e) { }
                         refresh();
                     });
@@ -3567,7 +3575,7 @@
                 // Detectar si el item tiene datos
                 function hasItemData() {
                     try {
-                        var inputs = det.querySelectorAll('input[type!="checkbox"], textarea, select');
+                        var inputs = det.querySelectorAll('input, textarea, select');
                         for (var i = 0; i < inputs.length; i++) {
                             if (inputs[i].value && inputs[i].value.trim() !== '') {
                                 return true;
