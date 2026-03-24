@@ -23,6 +23,8 @@
     <script src="https://cdn.jsdelivr.net/npm/@mapbox/togeojson@0.16.2/togeojson.js"></script>
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Chart.js para gráficos -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         /* ===== PROFESSIONAL AVIATION THEME ===== */
         :root {
@@ -1656,7 +1658,7 @@
             <button class="sidebar-tab active" data-tab="revision">📋 Formato de Revisión</button>
             <button class="sidebar-tab" data-tab="fauna">🦁 Fauna</button>
             <button class="sidebar-tab" data-tab="historial">📚 Historial de Reportes</button>
-            <button class="sidebar-tab" data-tab="estadistica">📊 Estadísticas</button>
+            <button class="sidebar-tab" data-tab="estadistica-fauna">📊 Estadística Fauna</button>
         </div>
         <div class="sidebar-footer">
             <div>AIFA-DO-SSO-GSO-MHR-F1</div>
@@ -2731,84 +2733,97 @@
         </div> <!-- End historial-section -->
 
         <!-- Estadísticas Section -->
-        <div id="estadistica-section" class="content-section">
-            <h1>Estadísticas de Reportes</h1>
+        <div id="estadistica-fauna-section" class="content-section">
+            <h1>Estadística de Fauna</h1>
 
-            <!-- Estadísticas Panel -->
-            <div id="estadisticas-panel"
+            <!-- Estadísticas Panel Fauna -->
+            <div id="estadisticas-fauna-panel"
                 style="background:var(--card); padding:20px; border-radius:12px; box-shadow:var(--shadow); margin:20px auto; max-width:1200px;">
-                <h2>📊 Panel de Estadísticas</h2>
+                <h2>📊 Panel de Estadísticas de Fauna</h2>
 
                 <div
                     style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-top: 20px;">
-                    <!-- Estadísticas principales -->
+                    
+                    <!-- Total de Impactos Reportados -->
                     <div class="stat-card"
-                        style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="total-reports">0</h3>
-                        <p style="margin: 0; font-size: 1.1em;">Total de Reportes</p>
+                        style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="total-impact-reports">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Reportes de Impacto</p>
                     </div>
 
+                    <!-- Total de Rescates -->
                     <div class="stat-card"
-                        style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="reports-this-month">0</h3>
-                        <p style="margin: 0; font-size: 1.1em;">Reportes este Mes</p>
+                        style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="total-rescue-reports">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Reportes de Rescate</p>
                     </div>
 
+                    <!-- Total de Fauna Impactada -->
                     <div class="stat-card"
-                        style="background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="report-diurnos">0</h3>
-                        <p style="margin: 0; font-size: 1.1em;">Reportes Diurnos</p>
+                        style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="total-fauna-impacted">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Fauna Impactada</p>
                     </div>
 
+                    <!-- Total de Fauna Rescatada -->
                     <div class="stat-card"
-                        style="background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="report-nocturnos">0</h3>
-                        <p style="margin: 0; font-size: 1.1em;">Reportes Nocturnos</p>
+                        style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="total-fauna-rescued">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Fauna Rescatada</p>
                     </div>
 
+                    <!-- Aves Impactadas -->
                     <div class="stat-card"
-                        style="background: linear-gradient(135deg, #facc15 0%, #eab308 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="report-primarios">0</h3>
-                        <p style="margin: 0; font-size: 1.1em;">Reportes Primarios</p>
+                        style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="aves-count">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Aves</p>
                     </div>
 
+                    <!-- Mamíferos Impactados -->
                     <div class="stat-card"
-                        style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="report-secundarios">0</h3>
-                        <p style="margin: 0; font-size: 1.1em;">Reportes Secundarios</p>
+                        style="background: linear-gradient(135deg, #8b7355 0%, #654321 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="mamiferos-count">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Mamíferos</p>
                     </div>
 
-                    <div id="reportes-por-pista" class="stat-card"
-                        style="background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
-                        <div style="font-size: 1.1em; font-weight: 600; margin-bottom: 10px;">Reportes por Pista</div>
-                        <div id="report-pista-cards" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-height:130px;overflow:auto;padding-top:6px"></div>
+                    <!-- Reptiles Impactados -->
+                    <div class="stat-card"
+                        style="background: linear-gradient(135deg, #6d28d9 0%, #5b21b6 100%); color: white; padding: 20px; border-radius: 12px; text-align: center;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 2.5em; font-weight: bold;" id="reptiles-count">0</h3>
+                        <p style="margin: 0; font-size: 1.1em;">Reptiles</p>
                     </div>
                 </div>
 
                 <!-- Gráficos y detalles -->
                 <div style="margin-top: 30px;">
-                    <h3>Distribución por Tipo de Inspección</h3>
-                    <div id="inspection-types-chart"
+                    <h3>Distribución de Impactos por Tipo</h3>
+                    <div id="impact-types-chart"
                         style="height: 300px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 20px 0;">
                         <p style="color: #6b7280;">Cargando datos...</p>
                     </div>
 
-                    <h3 style="margin-top: 30px;">Reportes por Mes</h3>
-                    <div id="monthly-reports-chart"
+                    <h3 style="margin-top: 30px;">Especies Rescatadas (Top 10)</h3>
+                    <div id="rescue-species-chart"
+                        style="height: 350px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 20px 0;">
+                        <p style="color: #6b7280;">Cargando datos...</p>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">Reportes Diarios de Fauna</h3>
+                    <div id="daily-fauna-chart"
                         style="height: 300px; background: #f9fafb; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin: 20px 0;">
                         <p style="color: #6b7280;">Cargando datos...</p>
                     </div>
 
-                    <h3 style="margin-top: 30px;">Reportes por Responsable</h3>
-                    <div id="responsable-table" style="background:#f9fafb;border-radius:8px;padding:14px;">
+                    <h3 style="margin-top: 30px;">Sitios de Reubicación más Utilizados</h3>
+                    <div id="reubication-sites-table" style="background:#f9fafb;border-radius:8px;padding:14px;">
                         <table style="width:100%;border-collapse:collapse;font-size:14px;">
                             <thead>
                                 <tr>
-                                    <th style="text-align:left;padding:10px;border-bottom:1px solid #e5e7eb;">Responsable</th>
-                                    <th style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb;"># Reportes</th>
+                                    <th style="text-align:left;padding:10px;border-bottom:1px solid #e5e7eb;">Sitio de Reubicación</th>
+                                    <th style="text-align:right;padding:10px;border-bottom:1px solid #e5e7eb;"># Rescates</th>
                                 </tr>
                             </thead>
-                            <tbody id="responsable-table-body">
+                            <tbody id="reubication-sites-body">
                                 <tr><td colspan="2" style="padding:12px;color:#6b7280;text-align:center;">Cargando datos...</td></tr>
                             </tbody>
                         </table>
@@ -2816,11 +2831,10 @@
                 </div>
 
                 <div style="text-align: center; margin-top: 30px;">
-                    <button id="refresh-estadisticas-btn" class="btn btn-ghost" style="padding: 10px 20px;">🔄
-                        Actualizar Estadísticas</button>
+                    <button id="refresh-fauna-stats-btn" class="btn btn-ghost" style="padding: 10px 20px;">🔄 Actualizar Estadísticas</button>
                 </div>
             </div>
-        </div> <!-- End estadistica-section -->
+        </div> <!-- End estadistica-fauna-section -->
 
     </div> <!-- End main-content -->
 
@@ -5893,14 +5907,14 @@
                                     mainTitle.textContent = 'Registro de Impacto o Posible Impacto';
                                 } else if (targetTab === 'historial') {
                                     mainTitle.textContent = 'Historial de Reportes';
-                                } else if (targetTab === 'estadistica') {
-                                    mainTitle.textContent = 'Estadísticas';
+                                } else if (targetTab === 'estadistica-fauna') {
+                                    mainTitle.textContent = 'Estadística de Fauna';
                                 }
                             }
 
-                            // Load statistics when statistics tab is activated
-                            if (targetTab === 'estadistica') {
-                                loadEstadisticas();
+                            // Load statistics when fauna statistics tab is activated
+                            if (targetTab === 'estadistica-fauna') {
+                                loadFaunaEstadisticas();
                             }
                         }
 
@@ -6304,8 +6318,339 @@
                 container.innerHTML = html;
             }
 
-            // Event listener para el botón de actualizar estadísticas
-            document.getElementById('refresh-estadisticas-btn')?.addEventListener('click', loadEstadisticas);
+            // ── Función para cargar Estadísticas de Fauna desde Supabase ──────────────
+            async function loadFaunaEstadisticas() {
+                const client = window.supabaseClient;
+                if (!client) {
+                    console.error('Supabase client not ready');
+                    return;
+                }
+
+                // Mostrar estado de carga
+                ['impact-types-chart','rescue-species-chart','daily-fauna-chart'].forEach(function(id){
+                    var el = document.getElementById(id);
+                    if (el) el.innerHTML = '<p style="color:#6b7280;text-align:center;padding:20px">Cargando datos...</p>';
+                });
+
+                try {
+                    // Cargar datos de impacto
+                    const { data: impactReports, error: impactError } = await client
+                        .from('fauna_impact_reports')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (impactError) {
+                        console.error('Error loading impact reports:', impactError);
+                        throw impactError;
+                    }
+
+                    // Cargar datos de rescate
+                    const { data: rescueReports, error: rescueError } = await client
+                        .from('fauna_rescue_reports')
+                        .select('*')
+                        .order('created_at', { ascending: false });
+
+                    if (rescueError) {
+                        console.error('Error loading rescue reports:', rescueError);
+                        throw rescueError;
+                    }
+
+                    // Cargar items de impacto para contar fauna
+                    const { data: impactItems, error: itemsError } = await client
+                        .from('fauna_impact_items')
+                        .select('*');
+
+                    if (itemsError) {
+                        console.error('Error loading impact items:', itemsError);
+                        throw itemsError;
+                    }
+
+                    // Calcular estadísticas básicas
+                    const totalImpactReports = impactReports.length;
+                    const totalRescueReports = rescueReports.length;
+                    const totalFaunaImpacted = impactItems.reduce((sum, item) => sum + (item.cantidad || 0), 0);
+
+                    // Contar fauna rescatada por especie
+                    let totalFaunaRescued = 0;
+                    const speciesCounts = {};
+                    rescueReports.forEach(function(report) {
+                        if (report.especie) {
+                            totalFaunaRescued++;
+                            speciesCounts[report.especie] = (speciesCounts[report.especie] || 0) + 1;
+                        }
+                    });
+
+                    // Contar por clase
+                    const claseCounts = {};
+                    rescueReports.forEach(function(report) {
+                        if (report.clase) {
+                            claseCounts[report.clase] = (claseCounts[report.clase] || 0) + 1;
+                        }
+                    });
+
+                    const avesCount = claseCounts['Ave'] || 0;
+                    const mamiferosCont = claseCounts['Mamífero'] || 0;
+                    const reptilesCount = claseCounts['Reptil'] || 0;
+
+                    // Contar sitios de reubicación
+                    const reubicationSites = {};
+                    rescueReports.forEach(function(report) {
+                        if (report.sitio_reubicacion) {
+                            reubicationSites[report.sitio_reubicacion] = (reubicationSites[report.sitio_reubicacion] || 0) + 1;
+                        }
+                    });
+
+                    // Actualizar tarjetas de resumen
+                    const updates = {
+                        'total-impact-reports': totalImpactReports,
+                        'total-rescue-reports': totalRescueReports,
+                        'total-fauna-impacted': totalFaunaImpacted,
+                        'total-fauna-rescued': totalFaunaRescued,
+                        'aves-count': avesCount,
+                        'mamiferos-count': mamiferosCont,
+                        'reptiles-count': reptilesCount
+                    };
+
+                    Object.entries(updates).forEach(function(entry) {
+                        const el = document.getElementById(entry[0]);
+                        if (el) el.textContent = entry[1];
+                    });
+
+                    // Crear gráfico de distribución de impactos
+                    createImpactTypesChart(impactItems);
+
+                    // Crear gráfico de especies rescatadas
+                    createRescueSpeciesChart(speciesCounts);
+
+                    // Crear gráfico de reportes diarios
+                    createDailyFaunaChart(impactReports, rescueReports);
+
+                    // Llenar tabla de sitios de reubicación
+                    const reubicationTable = document.getElementById('reubication-sites-body');
+                    if (reubicationTable) {
+                        const entries = Object.entries(reubicationSites).sort(function(a,b){ return b[1]-a[1]; });
+                        if (entries.length === 0) {
+                            reubicationTable.innerHTML = '<tr><td colspan="2" style="padding:12px;color:#6b7280;text-align:center;">Sin datos</td></tr>';
+                        } else {
+                            reubicationTable.innerHTML = '';
+                            entries.forEach(function(entry) {
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = '<td style="padding:10px;border-bottom:1px solid #e5e7eb;">' + entry[0] + '</td>' +
+                                               '<td style="padding:10px;border-bottom:1px solid #e5e7eb;text-align:right;">' + entry[1] + '</td>';
+                                reubicationTable.appendChild(tr);
+                            });
+                        }
+                    }
+
+                } catch (err) {
+                    console.error('Error in loadFaunaEstadisticas:', err);
+                    ['impact-types-chart','rescue-species-chart','daily-fauna-chart'].forEach(function(id){
+                        var el = document.getElementById(id);
+                        if (el) el.innerHTML = '<p style="color:#ef4444;text-align:center;padding:20px">Error al cargar datos</p>';
+                    });
+                }
+            }
+
+            // ── Gráfico de Distribución de Impactos ──────────────────────────────────
+            function createImpactTypesChart(impactItems) {
+                const container = document.getElementById('impact-types-chart');
+                if (!container || !window.Chart) return;
+
+                // Destruir gráfico anterior si existe
+                if (window.impactChart instanceof Chart) {
+                    window.impactChart.destroy();
+                }
+
+                const typeCounts = {};
+                impactItems.forEach(function(item) {
+                    const type = item.tipo_item || 'Desconocido';
+                    typeCounts[type] = (typeCounts[type] || 0) + item.cantidad;
+                });
+
+                const labels = Object.keys(typeCounts);
+                const data = Object.values(typeCounts);
+                const colors = ['#ef4444', '#f59e0b', '#10b981', '#06b6d4', '#8b5cf6'];
+
+                const canvas = document.createElement('canvas');
+                container.innerHTML = '';
+                container.appendChild(canvas);
+
+                window.impactChart = new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Cantidad de Fauna Impactada',
+                            data: data,
+                            backgroundColor: colors.slice(0, labels.length),
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        maxHeight: 300,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ── Gráfico de Especies Rescatadas (Top 10) ────────────────────────────────
+            function createRescueSpeciesChart(speciesCounts) {
+                const container = document.getElementById('rescue-species-chart');
+                if (!container || !window.Chart) return;
+
+                // Destruir gráfico anterior si existe
+                if (window.speciesChart instanceof Chart) {
+                    window.speciesChart.destroy();
+                }
+
+                const entries = Object.entries(speciesCounts)
+                    .sort(function(a,b) { return b[1] - a[1]; })
+                    .slice(0, 10);
+
+                const labels = entries.map(e => e[0]);
+                const data = entries.map(e => e[1]);
+
+                const canvas = document.createElement('canvas');
+                container.innerHTML = '';
+                container.appendChild(canvas);
+
+                window.speciesChart = new Chart(canvas, {
+                    type: 'horizontalBar',
+                    type: 'barh',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: '# de Rescates',
+                            data: data,
+                            backgroundColor: '#10b981',
+                            borderRadius: 6,
+                            borderSkipped: false
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        maxHeight: 350,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // ── Gráfico de Reportes Diarios de Fauna ──────────────────────────────────
+            function createDailyFaunaChart(impactReports, rescueReports) {
+                const container = document.getElementById('daily-fauna-chart');
+                if (!container || !window.Chart) return;
+
+                // Destruir gráfico anterior si existe
+                if (window.dailyChart instanceof Chart) {
+                    window.dailyChart.destroy();
+                }
+
+                const dailyData = {};
+                
+                // Contar por fecha
+                impactReports.forEach(function(report) {
+                    const date = report.fecha_reporte || new Date(report.created_at).toISOString().split('T')[0];
+                    dailyData[date] = (dailyData[date] || {impact: 0, rescue: 0});
+                    dailyData[date].impact++;
+                });
+
+                rescueReports.forEach(function(report) {
+                    const date = report.fecha_reporte || new Date(report.created_at).toISOString().split('T')[0];
+                    if (!dailyData[date]) {
+                        dailyData[date] = {impact: 0, rescue: 0};
+                    }
+                    dailyData[date].rescue++;
+                });
+
+                // Ordenar por fecha
+                const sortedDates = Object.keys(dailyData).sort().slice(-14); // Últimos 14 días
+                const impactData = sortedDates.map(d => dailyData[d].impact);
+                const rescueData = sortedDates.map(d => dailyData[d].rescue);
+
+                const canvas = document.createElement('canvas');
+                container.innerHTML = '';
+                container.appendChild(canvas);
+
+                window.dailyChart = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: sortedDates,
+                        datasets: [
+                            {
+                                label: 'Reportes de Impacto',
+                                data: impactData,
+                                borderColor: '#ef4444',
+                                backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Reportes de Rescate',
+                                data: rescueData,
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        maxHeight: 300,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'top'
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Event listener para el botón de actualizar estadísticas de fauna
+            document.getElementById('refresh-fauna-stats-btn')?.addEventListener('click', loadFaunaEstadisticas);
         })();
     </script>
 
