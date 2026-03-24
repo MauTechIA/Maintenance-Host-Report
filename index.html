@@ -3649,11 +3649,19 @@
             }
 
             // Inicializar cuando el DOM esté listo
-            setTimeout(function() {
-                faunaItemIds.forEach(function (id) {
-                    setupFaunaItemControlsFor(id);
-                });
-            }, 100);
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeFaunaItems);
+            } else {
+                initializeFaunaItems();
+            }
+
+            function initializeFaunaItems() {
+                setTimeout(function() {
+                    faunaItemIds.forEach(function (id) {
+                        setupFaunaItemControlsFor(id);
+                    });
+                }, 0);
+            }
         })();
     </script>
 
