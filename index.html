@@ -129,6 +129,59 @@
             margin: 0 auto;
         }
 
+        /* ===== FAUNA TABS ===== */
+        .fauna-tabs {
+            display: flex;
+            gap: 0;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 32px;
+            margin-left: -36px;
+            margin-right: -36px;
+            margin-top: 0;
+            padding: 0 36px;
+            background: linear-gradient(135deg, rgba(29, 78, 216, 0.04) 0%, rgba(248, 250, 252, 0.8) 100%);
+            border-radius: 18px 18px 0 0;
+            border-top: 1px solid rgba(29, 78, 216, 0.1);
+        }
+
+        .fauna-tab {
+            flex: 1;
+            padding: 16px 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--muted);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+            position: relative;
+            user-select: none;
+        }
+
+        .fauna-tab:hover {
+            color: var(--blue);
+            background: rgba(29, 78, 216, 0.05);
+        }
+
+        .fauna-tab.active {
+            color: var(--blue);
+            border-bottom-color: var(--blue);
+            background: rgba(29, 78, 216, 0.12);
+            font-weight: 700;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.15);
+        }
+
+        .fauna-tab-content {
+            display: none;
+        }
+
+        .fauna-tab-content.active {
+            display: block;
+        }
+
         /* ===== SECTION HEADERS ===== */
         h3 {
             font-size: 11px;
@@ -2286,17 +2339,10 @@
 
             <form id="fauna-form" action="#" method="get">
 
-                <h3>⚠️ Tipo de Registro</h3>
-
-                <div class="pista-options" style="display:flex;gap:10px;flex-wrap:wrap;">
-                    <label class="pista-option" style="flex:1;">
-                        <input type="radio" name="fauna_tipo_reporte_inspeccion" value="Impacto"> Impacto
-                    </label>
-                    <label class="pista-option" style="flex:1;">
-                        <input type="radio" name="fauna_tipo_reporte_inspeccion" value="Posible Impacto"> Posible Impacto
-                    </label>
+                <div class="fauna-tabs">
+                    <button type="button" class="fauna-tab active" data-fauna-tab="impacto" data-fauna-title="📊 Registro de Impacto o Posible Impacto">📊 Registro de Impacto o Posible Impacto</button>
+                    <button type="button" class="fauna-tab" data-fauna-tab="rescate" data-fauna-title="🛟 Registro de Fauna Rescatada y Reubicada">🛟 Registro de Fauna Rescatada y Reubicada</button>
                 </div>
-                <button type="button" id="fauna_tipo_reporte-change-btn" style="display:none; margin-top:6px;">Cambiar Tipo de Registro</button>
 
                 <div id="fauna_turno-section" style="display:none; margin-top:8px;">
                     <h3>Turno</h3>
@@ -2319,182 +2365,283 @@
                     <button type="button" id="fauna_pista-change-btn" style="display:none; margin-top:6px;">Cambiar pista</button>
                 </div>
 
-                <div id="fauna_fase_vuelo-section" style="margin-top:8px;">
-                    <h3>✈️ Fase de Vuelo</h3>
-                    <div class="pista-options" style="display:flex;gap:10px;flex-wrap:wrap;">
-                        <label class="pista-option" style="flex:1;">
-                            <input type="radio" name="fauna_fase_vuelo" value="Aterrizaje"> Aterrizaje
-                        </label>
-                        <label class="pista-option" style="flex:1;">
-                            <input type="radio" name="fauna_fase_vuelo" value="Despegue"> Despegue
-                        </label>
-                    </div>
-                    <button type="button" id="fauna_fase_vuelo-change-btn" style="display:none; margin-top:6px;">Cambiar Fase de Vuelo</button>
-                </div>
+                <!-- TAB 1: Registro de Impacto o Posible Impacto -->
+                <div class="fauna-tab-content active" data-fauna-tab-content="impacto">
+                    <h3>🧑‍✈️ Responsable(s) que elaboran el reporte</h3>
+                    <select id="fauna_report-authors-select" name="fauna_report_authors" title="Seleccionar Responsable">
+                        <option value="">-- Seleccionar Responsable --</option>
+                        <option value="Daniel Mejia">Daniel Mejia</option>
+                        <option value="Cesar Cisneros">Cesar Cisneros</option>
+                        <option value="Alejandro Jimenez">Alejandro Jimenez</option>
+                        <option value="Daniela Hernandez">Daniela Hernandez</option>
+                    </select>
+                    <button type="button" id="fauna_report-authors-reset" style="display:none; margin-top:6px;">Cambiar responsable</button>
 
-                <h3>🧑‍✈️ Responsable(s) que elaboran el reporte</h3>
-                <select id="fauna_report-authors-select" name="fauna_report_authors" title="Seleccionar Responsable">
-                    <option value="">-- Seleccionar Responsable --</option>
-                    <option value="Daniel Mejia">Daniel Mejia</option>
-                    <option value="Cesar Cisneros">Cesar Cisneros</option>
-                    <option value="Alejandro Jimenez">Alejandro Jimenez</option>
-                    <option value="Daniela Hernandez">Daniela Hernandez</option>
-                </select>
-                <button type="button" id="fauna_report-authors-reset" style="display:none; margin-top:6px;">Cambiar responsable</button>
+                    <h3>🪪 Cargo</h3>
+                    <select id="fauna_report-role" name="fauna_report_role" title="Seleccionar Cargo">
+                        <option value="Coordinador de Fauna">Coordinador de Fauna</option>
+                        <option value="Supervisor de Fauna">Supervisor de Fauna</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    <button type="button" id="fauna_report-role-reset" style="display:none; margin-top:6px;">Cambiar cargo</button>
+                    <input type="text" id="fauna_report-role-other" name="fauna_report_role_other" placeholder="Especifique otro cargo"
+                        style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px;" />
 
-                <h3>🪪 Cargo</h3>
-                <select id="fauna_report-role" name="fauna_report_role" title="Seleccionar Cargo">
-                    <option value="Coordinador de Fauna">Coordinador de Fauna</option>
-                    <option value="Supervisor de Fauna">Supervisor de Fauna</option>
-                    <option value="Otro">Otro</option>
-                </select>
-                <button type="button" id="fauna_report-role-reset" style="display:none; margin-top:6px;">Cambiar cargo</button>
-                <input type="text" id="fauna_report-role-other" name="fauna_report_role_other" placeholder="Especifique otro cargo"
-                    style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px;" />
+                    <h3>👤 Representante AFAC (Supervisor)</h3>
+                    <input type="text" id="fauna_report-afac-name" name="fauna_report_afac_name" placeholder="Nombre del representante AFAC" style="margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" />
 
-                <h3>👤 Representante AFAC (Supervisor)</h3>
-                <input type="text" id="fauna_report-afac-name" name="fauna_report_afac_name" placeholder="Nombre del representante AFAC" style="margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" />
+                    <h3>✈️ Aerolinea</h3>
+                    <select id="fauna_report-aerolinea" name="fauna_report_aerolinea" title="Seleccionar Aerolinea" style="max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc; margin-top:6px;">
+                        <option value="">-- Seleccionar Aerolinea --</option>
+                        <option value="Aeromexico">Aeromexico</option>
+                        <option value="Aerounion">Aerounion</option>
+                        <option value="Aerus">Aerus</option>
+                        <option value="Air Canada">Air Canada</option>
+                        <option value="Air China">Air China</option>
+                        <option value="Air France">Air France</option>
+                        <option value="AM Costera">AM Costera</option>
+                        <option value="Arajet">Arajet</option>
+                        <option value="Atlas Air">Atlas Air</option>
+                        <option value="Cargojet">Cargojet</option>
+                        <option value="Cathay Pacific">Cathay Pacific</option>
+                        <option value="China Southern">China Southern</option>
+                        <option value="DHL Guatemala">DHL Guatemala</option>
+                        <option value="Emirates">Emirates</option>
+                        <option value="Estafeta">Estafeta</option>
+                        <option value="Ethiopian">Ethiopian</option>
+                        <option value="Kalitta Air">Kalitta Air</option>
+                        <option value="Lufthansa">Lufthansa</option>
+                        <option value="Mas Air">Mas Air</option>
+                        <option value="Mexicana">Mexicana</option>
+                        <option value="Otra">Otra</option>
+                        <option value="Qatar Airways">Qatar Airways</option>
+                        <option value="UPS">UPS</option>
+                        <option value="Viva">Viva</option>
+                        <option value="Volaris">Volaris</option>
+                    </select>
+                    <input type="text" id="fauna_report-aerolinea-other" name="fauna_report_aerolinea_other" placeholder="Especifique otra aerolinea" style="display:none; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" />
 
-                <h3>✈️ Aerolinea</h3>
-                <select id="fauna_report-aerolinea" name="fauna_report_aerolinea" title="Seleccionar Aerolinea" style="max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc; margin-top:6px;">
-                    <option value="">-- Seleccionar Aerolinea --</option>
-                    <option value="Aeromexico">Aeromexico</option>
-                    <option value="Aerounion">Aerounion</option>
-                    <option value="Aerus">Aerus</option>
-                    <option value="Air Canada">Air Canada</option>
-                    <option value="Air China">Air China</option>
-                    <option value="Air France">Air France</option>
-                    <option value="AM Costera">AM Costera</option>
-                    <option value="Arajet">Arajet</option>
-                    <option value="Atlas Air">Atlas Air</option>
-                    <option value="Cargojet">Cargojet</option>
-                    <option value="Cathay Pacific">Cathay Pacific</option>
-                    <option value="China Southern">China Southern</option>
-                    <option value="DHL Guatemala">DHL Guatemala</option>
-                    <option value="Emirates">Emirates</option>
-                    <option value="Estafeta">Estafeta</option>
-                    <option value="Ethiopian">Ethiopian</option>
-                    <option value="Kalitta Air">Kalitta Air</option>
-                    <option value="Lufthansa">Lufthansa</option>
-                    <option value="Mas Air">Mas Air</option>
-                    <option value="Mexicana">Mexicana</option>
-                    <option value="Otra">Otra</option>
-                    <option value="Qatar Airways">Qatar Airways</option>
-                    <option value="UPS">UPS</option>
-                    <option value="Viva">Viva</option>
-                    <option value="Volaris">Volaris</option>
-                </select>
-                <input type="text" id="fauna_report-aerolinea-other" name="fauna_report_aerolinea_other" placeholder="Especifique otra aerolinea" style="display:none; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" />
+                    <h3>📍 Ubicación</h3>
+                    <select id="fauna_report-ubicacion" name="fauna_report_ubicacion" title="Seleccionar Ubicación" style="max-width:420px; width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
+                        <option value="">-- Seleccionar Ubicación --</option>
+                        <optgroup label="Sector A">
+                            <option value="A3 - A5">A3 - A5</option>
+                            <option value="A5 - A6">A5 - A6</option>
+                            <option value="A6 - A10">A6 - A10</option>
+                            <option value="A10 - A11">A10 - A11</option>
+                        </optgroup>
+                        <optgroup label="Sector K">
+                            <option value="K3 - K6">K3 - K6</option>
+                            <option value="K6 - K7">K6 - K7</option>
+                            <option value="K7 - K11">K7 - K11</option>
+                            <option value="K11 - K14">K11 - K14</option>
+                        </optgroup>
+                    </select>
 
-                <h3>📍 Ubicación</h3>
-                <select id="fauna_report-ubicacion" name="fauna_report_ubicacion" title="Seleccionar Ubicación" style="max-width:420px; width:100%; padding:10px; margin-top:6px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
-                    <option value="">-- Seleccionar Ubicación --</option>
-                    <optgroup label="Sector A">
-                        <option value="A3 - A5">A3 - A5</option>
-                        <option value="A5 - A6">A5 - A6</option>
-                        <option value="A6 - A10">A6 - A10</option>
-                        <option value="A10 - A11">A10 - A11</option>
-                    </optgroup>
-                    <optgroup label="Sector K">
-                        <option value="K3 - K6">K3 - K6</option>
-                        <option value="K6 - K7">K6 - K7</option>
-                        <option value="K7 - K11">K7 - K11</option>
-                        <option value="K11 - K14">K11 - K14</option>
-                    </optgroup>
-                </select>
+                    <h3>🦁 Informe de Impacto</h3>
 
-                <h3>🦁 Informe</h3>
-
-                <input type="checkbox" id="fauna_avistamiento" name="fauna_tipo_reporte" value="Avistamiento de Aves">
-                <label for="fauna_avistamiento">Avistamiento de Aves</label>
-                <button type="button" id="fauna_done_avistamiento" class="item-done" style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="fauna_update_avistamiento" class="item-update" style="display:none; margin-left:6px;">Update</button>
-                <br>
-                <div class="item-details" id="fauna_details_avistamiento" style="display:none; margin-left:18px; margin-bottom:10px;">
-                    <label>Ubicación: <input type="text" name="fauna_details[avistamiento][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
-                    <label>Especie:
-                        <select name="fauna_details[avistamiento][especie]" class="fauna-especie-select">
-                            <option value="">-- Seleccionar Especie --</option>
-                            <option value="Alondra cornuda (Eremophila alpestris)">Alondra cornuda (Eremophila alpestris)</option>
-                            <option value="Bisbita norteamericana (Anthus rubescens)">Bisbita norteamericana (Anthus rubescens)</option>
-                            <option value="Tecolote llanero (Athene cunicularia)">Tecolote llanero (Athene cunicularia)</option>
-                            <option value="Playero blanco (Calidris alba)">Playero blanco (Calidris alba)</option>
-                            <option value="Playero de Baird (Calidris bairdii)">Playero de Baird (Calidris bairdii)</option>
-                            <option value="Chorlo tildío (Charadrius vociferus)">Chorlo tildío (Charadrius vociferus)</option>
-                            <option value="Cernicalo americano (Falco sparverius)">Cernicalo americano (Falco sparverius)</option>
-                            <option value="Pinzón mexicano (Haemorhous mexicanus)">Pinzón mexicano (Haemorhous mexicanus)</option>
-                            <option value="Golondrina tijereta (Hirundo rustica)">Golondrina tijereta (Hirundo rustica)</option>
-                            <option value="Liebre cola negra (Lepus californicus)">Liebre cola negra (Lepus californicus)</option>
-                            <option value="Gorrión común (Passer domesticus)">Gorrión común (Passer domesticus)</option>
-                            <option value="Gorrión sabanero (Passerculus sandwichensis)">Gorrión sabanero (Passerculus sandwichensis)</option>
-                            <option value="Zacatonero de Boterii (Peucaea botterii)">Zacatonero de Boterii (Peucaea botterii)</option>
-                            <option value="Zanate mexicano (Quiscalus mexicanus)">Zanate mexicano (Quiscalus mexicanus)</option>
-                            <option value="Pradero tortillaconchile (Sturnella magna)">Pradero tortillaconchile (Sturnella magna)</option>
-                            <option value="Lechuza de campanario (Tyto furcata)">Lechuza de campanario (Tyto furcata)</option>
-                            <option value="Tordo cabeza amarilla (Xanthocephalus xanthochephalus)">Tordo cabeza amarilla (Xanthocephalus xanthochephalus)</option>
-                            <option value="Huilota común (Zenaida macroura)">Huilota común (Zenaida macroura)</option>
-                            <option value="Otra">Otra (especificar)</option>
-                        </select>
-                    </label><br>
-                    <input type="text" name="fauna_details[avistamiento][especie_otra]" placeholder="Especifique la especie" style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px; border-radius:4px; border:1px solid #c8d8ee;">
+                    <input type="checkbox" id="fauna_avistamiento" name="fauna_tipo_reporte" value="Avistamiento de Aves">
+                    <label for="fauna_avistamiento">Avistamiento de Aves</label>
+                    <button type="button" id="fauna_done_avistamiento" class="item-done" style="display:none; margin-left:6px;">Done</button>
+                    <button type="button" id="fauna_update_avistamiento" class="item-update" style="display:none; margin-left:6px;">Update</button>
                     <br>
-                    <label>Cantidad: <input type="number" name="fauna_details[avistamiento][cantidad]"></label><br>
-                    <label>Condición del Daño:
-                        <select class="condicion-select" name="fauna_details[avistamiento][condicion]">
-                            <option value="">--</option>
-                            <option value="Daño Menor">Daño Menor</option>
-                            <option value="Daño Mayor">Daño Mayor</option>
-                            <option value="Daño Severo">Daño Severo</option>
-                            <option value="Daño Catastrofico">Daño Catastrofico</option>
-                        </select>
-                    </label><br>
-                    <label>Observaciones:<br><textarea name="fauna_details[avistamiento][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
-                    <label>Prioridad:
-                        <select class="priority-select" name="fauna_details[avistamiento][prioridad]">
-                            <option value="">N/A</option>
-                            <option value="1">Baja</option>
-                            <option value="2">Media</option>
-                            <option value="3">Alta</option>
-                        </select>
-                    </label><br>
+                    <div class="item-details" id="fauna_details_avistamiento" style="display:none; margin-left:18px; margin-bottom:10px;">
+                        <label>Ubicación: <input type="text" name="fauna_details[avistamiento][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
+                        <label>Especie:
+                            <select name="fauna_details[avistamiento][especie]" class="fauna-especie-select">
+                                <option value="">-- Seleccionar Especie --</option>
+                                <option value="Alondra cornuda (Eremophila alpestris)">Alondra cornuda (Eremophila alpestris)</option>
+                                <option value="Bisbita norteamericana (Anthus rubescens)">Bisbita norteamericana (Anthus rubescens)</option>
+                                <option value="Tecolote llanero (Athene cunicularia)">Tecolote llanero (Athene cunicularia)</option>
+                                <option value="Playero blanco (Calidris alba)">Playero blanco (Calidris alba)</option>
+                                <option value="Playero de Baird (Calidris bairdii)">Playero de Baird (Calidris bairdii)</option>
+                                <option value="Chorlo tildío (Charadrius vociferus)">Chorlo tildío (Charadrius vociferus)</option>
+                                <option value="Cernicalo americano (Falco sparverius)">Cernicalo americano (Falco sparverius)</option>
+                                <option value="Pinzón mexicano (Haemorhous mexicanus)">Pinzón mexicano (Haemorhous mexicanus)</option>
+                                <option value="Golondrina tijereta (Hirundo rustica)">Golondrina tijereta (Hirundo rustica)</option>
+                                <option value="Liebre cola negra (Lepus californicus)">Liebre cola negra (Lepus californicus)</option>
+                                <option value="Gorrión común (Passer domesticus)">Gorrión común (Passer domesticus)</option>
+                                <option value="Gorrión sabanero (Passerculus sandwichensis)">Gorrión sabanero (Passerculus sandwichensis)</option>
+                                <option value="Zacatonero de Boterii (Peucaea botterii)">Zacatonero de Boterii (Peucaea botterii)</option>
+                                <option value="Zanate mexicano (Quiscalus mexicanus)">Zanate mexicano (Quiscalus mexicanus)</option>
+                                <option value="Pradero tortillaconchile (Sturnella magna)">Pradero tortillaconchile (Sturnella magna)</option>
+                                <option value="Lechuza de campanario (Tyto furcata)">Lechuza de campanario (Tyto furcata)</option>
+                                <option value="Tordo cabeza amarilla (Xanthocephalus xanthochephalus)">Tordo cabeza amarilla (Xanthocephalus xanthochephalus)</option>
+                                <option value="Huilota común (Zenaida macroura)">Huilota común (Zenaida macroura)</option>
+                                <option value="Otra">Otra (especificar)</option>
+                            </select>
+                        </label><br>
+                        <input type="text" name="fauna_details[avistamiento][especie_otra]" placeholder="Especifique la especie" style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px; border-radius:4px; border:1px solid #c8d8ee;">
+                        <br>
+                        <label>Cantidad: <input type="number" name="fauna_details[avistamiento][cantidad]"></label><br>
+                        <label>Condición del Daño:
+                            <select class="condicion-select" name="fauna_details[avistamiento][condicion]">
+                                <option value="">--</option>
+                                <option value="Daño Menor">Daño Menor</option>
+                                <option value="Daño Mayor">Daño Mayor</option>
+                                <option value="Daño Severo">Daño Severo</option>
+                                <option value="Daño Catastrofico">Daño Catastrofico</option>
+                            </select>
+                        </label><br>
+                        <label>Observaciones:<br><textarea name="fauna_details[avistamiento][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
+                        <label>Prioridad:
+                            <select class="priority-select" name="fauna_details[avistamiento][prioridad]">
+                                <option value="">N/A</option>
+                                <option value="1">Baja</option>
+                                <option value="2">Media</option>
+                                <option value="3">Alta</option>
+                            </select>
+                        </label><br>
+                    </div>
+
+                    <input type="checkbox" id="fauna_presencia" name="fauna_tipo_reporte" value="Presencia de Animales">
+                    <label for="fauna_presencia">Presencia de Animales</label>
+                    <button type="button" id="fauna_done_presencia" class="item-done" style="display:none; margin-left:6px;">Done</button>
+                    <button type="button" id="fauna_update_presencia" class="item-update" style="display:none; margin-left:6px;">Update</button>
+                    <br>
+                    <div class="item-details" id="fauna_details_presencia" style="display:none; margin-left:18px; margin-bottom:10px;">
+                        <label>Ubicación: <input type="text" name="fauna_details[presencia][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
+                        <label>Tipo de Animal: <input type="text" name="fauna_details[presencia][tipo_animal]"></label><br>
+                        <label>Riesgo/Amenaza:
+                            <select name="fauna_details[presencia][riesgo]">
+                                <option value="">--</option>
+                                <option>Bajo</option>
+                                <option>Medio</option>
+                                <option>Alto</option>
+                            </select>
+                        </label><br>
+                        <label>Observaciones:<br><textarea name="fauna_details[presencia][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
+                    </div>
+
+                    <input type="checkbox" id="fauna_daino" name="fauna_tipo_reporte" value="Daño a Infraestructura">
+                    <label for="fauna_daino">Daño a Infraestructura</label>
+                    <button type="button" id="fauna_done_daino" class="item-done" style="display:none; margin-left:6px;">Done</button>
+                    <button type="button" id="fauna_update_daino" class="item-update" style="display:none; margin-left:6px;">Update</button>
+                    <br>
+                    <div class="item-details" id="fauna_details_daino" style="display:none; margin-left:18px; margin-bottom:10px;">
+                        <label>Ubicación: <input type="text" name="fauna_details[daino][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
+                        <label>Descripción del Daño: <input type="text" name="fauna_details[daino][descripcion]"></label><br>
+                        <label>Severidad:
+                            <select name="fauna_details[daino][severidad]">
+                                <option value="">--</option>
+                                <option>Leve</option>
+                                <option>Moderada</option>
+                                <option>Severa</option>
+                            </select>
+                        </label><br>
+                        <label>Observaciones:<br><textarea name="fauna_details[daino][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
+                    </div>
                 </div>
 
-                <input type="checkbox" id="fauna_presencia" name="fauna_tipo_reporte" value="Presencia de Animales">
-                <label for="fauna_presencia">Presencia de Animales</label>
-                <button type="button" id="fauna_done_presencia" class="item-done" style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="fauna_update_presencia" class="item-update" style="display:none; margin-left:6px;">Update</button>
-                <br>
-                <div class="item-details" id="fauna_details_presencia" style="display:none; margin-left:18px; margin-bottom:10px;">
-                    <label>Ubicación: <input type="text" name="fauna_details[presencia][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
-                    <label>Tipo de Animal: <input type="text" name="fauna_details[presencia][tipo_animal]"></label><br>
-                    <label>Riesgo/Amenaza:
-                        <select name="fauna_details[presencia][riesgo]">
-                            <option value="">--</option>
-                            <option>Bajo</option>
-                            <option>Medio</option>
-                            <option>Alto</option>
-                        </select>
-                    </label><br>
-                    <label>Observaciones:<br><textarea name="fauna_details[presencia][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
-                </div>
+                <!-- TAB 2: Registro de Fauna Rescatada y Reubicada -->
+                <div class="fauna-tab-content" data-fauna-tab-content="rescate">
+                    <h3>🧑‍✈️ Responsable(s) que elaboran el reporte</h3>
+                    <select id="fauna_report-authors-select-rescate" name="fauna_report_authors_rescate" title="Seleccionar Responsable">
+                        <option value="">-- Seleccionar Responsable --</option>
+                        <option value="Daniel Mejia">Daniel Mejia</option>
+                        <option value="Cesar Cisneros">Cesar Cisneros</option>
+                        <option value="Alejandro Jimenez">Alejandro Jimenez</option>
+                        <option value="Daniela Hernandez">Daniela Hernandez</option>
+                    </select>
+                    <button type="button" id="fauna_report-authors-reset-rescate" style="display:none; margin-top:6px;">Cambiar responsable</button>
 
-                <input type="checkbox" id="fauna_daino" name="fauna_tipo_reporte" value="Daño a Infraestructura">
-                <label for="fauna_daino">Daño a Infraestructura</label>
-                <button type="button" id="fauna_done_daino" class="item-done" style="display:none; margin-left:6px;">Done</button>
-                <button type="button" id="fauna_update_daino" class="item-update" style="display:none; margin-left:6px;">Update</button>
-                <br>
-                <div class="item-details" id="fauna_details_daino" style="display:none; margin-left:18px; margin-bottom:10px;">
-                    <label>Ubicación: <input type="text" name="fauna_details[daino][lugar]" placeholder="Click para seleccionar en mapa" readonly style="cursor: pointer; padding:6px; border-radius:4px; border:1px solid #c8d8ee; background:#f5f8fc;"></label><br>
-                    <label>Descripción del Daño: <input type="text" name="fauna_details[daino][descripcion]"></label><br>
-                    <label>Severidad:
-                        <select name="fauna_details[daino][severidad]">
-                            <option value="">--</option>
-                            <option>Leve</option>
-                            <option>Moderada</option>
-                            <option>Severa</option>
+                    <h3>🪪 Cargo</h3>
+                    <select id="fauna_report-role-rescate" name="fauna_report_role_rescate" title="Seleccionar Cargo">
+                        <option value="Coordinador de Fauna">Coordinador de Fauna</option>
+                        <option value="Supervisor de Fauna">Supervisor de Fauna</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                    <button type="button" id="fauna_report-role-reset-rescate" style="display:none; margin-top:6px;">Cambiar cargo</button>
+                    <input type="text" id="fauna_report-role-other-rescate" name="fauna_report_role_other_rescate" placeholder="Especifique otro cargo"
+                        style="display:none; margin-top:6px; max-width:420px; width:100%; padding:6px;" />
+
+                    <h3>✈️ Autoridad o Institución Responsable</h3>
+                    <input type="text" id="fauna_report-institucion-rescate" name="fauna_report_institucion_rescate" placeholder="Ej: PROFEPA, Zoo, Centro de Rescate, etc." style="margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" />
+
+                    <h3>🛟 Registrar Fauna Rescatada y Reubicada</h3>
+
+                    <label>🏘️ Sitio de Rescate: 
+                        <input type="text" name="fauna_rescate[sitio_rescate]" placeholder="Ubicación exacta donde se rescató el animal" style="display:block; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
+                    </label><br>
+
+                    <label>🦁 Clase: 
+                        <select id="fauna_rescate_clase" name="fauna_rescate[clase]" style="display:block; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
+                            <option value="">-- Seleccionar Clase --</option>
+                            <option value="Ave">Ave</option>
+                            <option value="Mamifero">Mamifero</option>
+                            <option value="Reptil">Reptil</option>
+                            <option value="Otro">Otro</option>
+                        </select>
+                    </label>
+                    <input type="text" id="fauna_rescate_clase_otro" name="fauna_rescate_clase_otro" placeholder="Especifique otra clase" style="display:none; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" /><br>
+
+                    <label>🔬 Especie: 
+                        <select name="fauna_rescate[especie]" style="display:block; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
+                            <option value="">-- Seleccionar Especie --</option>
+                            <option value="Aguililla de Harris (Parabuteo unicinctus)">Aguililla de Harris (Parabuteo unicinctus)</option>
+                            <option value="Alicante (Pituophis deppei)">Alicante (Pituophis deppei)</option>
+                            <option value="Besucona asiática (Hemidactylus frenatus)">Besucona asiática (Hemidactylus frenatus)</option>
+                            <option value="Caracara quebrantahuesos (Caracara plancus)">Caracara quebrantahuesos (Caracara plancus)</option>
+                            <option value="Cernicalo americano (Falco sparverius)">Cernicalo americano (Falco sparverius)</option>
+                            <option value="Colibri pico ancho (Cynanthus latirostris)">Colibri pico ancho (Cynanthus latirostris)</option>
+                            <option value="Colorín sietecolores (Passerina ciris)">Colorín sietecolores (Passerina ciris)</option>
+                            <option value="Conejo serrano (Sylvilagus floridanus)">Conejo serrano (Sylvilagus floridanus)</option>
+                            <option value="Cuicacoche picocurvo (Toxostoma curvirostre)">Cuicacoche picocurvo (Toxostoma curvirostre)</option>
+                            <option value="Culebra chata mexicana (Salvadora bairdi)">Culebra chata mexicana (Salvadora bairdi)</option>
+                            <option value="Culebra toluquense (Conopsis lineata)">Culebra toluquense (Conopsis lineata)</option>
+                            <option value="Gavilán de Cooper (Astur cooperii)">Gavilán de Cooper (Astur cooperii)</option>
+                            <option value="Gorrión sabanero (Passerculus sandwichensis)">Gorrión sabanero (Passerculus sandwichensis)</option>
+                            <option value="Halcon peregrino (Falco peregrinus)">Halcon peregrino (Falco peregrinus)</option>
+                            <option value="Lagartija espinosa mexicana (Sceloporus spinosus)">Lagartija espinosa mexicana (Sceloporus spinosus)</option>
+                            <option value="Lagarto alicante de las montañas (Barisia imbricata)">Lagarto alicante de las montañas (Barisia imbricata)</option>
+                            <option value="Lechuza de campanario (Tyto furcata)">Lechuza de campanario (Tyto furcata)</option>
+                            <option value="Liebre cola negra (Lepus californicus)">Liebre cola negra (Lepus californicus)</option>
+                            <option value="Loro corona lila (Amazona finschi)">Loro corona lila (Amazona finschi)</option>
+                            <option value="Murcielago de cola libre (Tadadira brasilensis)">Murcielago de cola libre (Tadadira brasilensis)</option>
+                            <option value="Murciélago ratón de California (Myotis californicus)">Murciélago ratón de California (Myotis californicus)</option>
+                            <option value="Periquito africano de fischer (Agapornis roseicollis)">Periquito africano de fischer (Agapornis roseicollis)</option>
+                            <option value="Periquito australiano (Melopsittacus undulatus)">Periquito australiano (Melopsittacus undulatus)</option>
+                            <option value="Pijije canelo (Dendrocygna bicolor)">Pijije canelo (Dendrocygna bicolor)</option>
+                            <option value="Pradero tortillaconchile (Sturnella magna)">Pradero tortillaconchile (Sturnella magna)</option>
+                            <option value="Rascador viejita (Melozone fusca)">Rascador viejita (Melozone fusca)</option>
+                            <option value="Tapacaminos cuerporruín mexicano (Antrostomus arizonae)">Tapacaminos cuerporruín mexicano (Antrostomus arizonae)</option>
+                            <option value="Tecolote del Oeste (Megascops kennicottii)">Tecolote del Oeste (Megascops kennicottii)</option>
+                            <option value="Tecolote llanero (Athene cunicularia)">Tecolote llanero (Athene cunicularia)</option>
+                            <option value="Tlacuache norteño (Didelphis virginiana)">Tlacuache norteño (Didelphis virginiana)</option>
+                            <option value="Tuza del eje neovolcánico (Cratogeomys fumosus)">Tuza del eje neovolcánico (Cratogeomys fumosus)</option>
+                            <option value="Verdugo americano (Lanius ludovicianus)">Verdugo americano (Lanius ludovicianus)</option>
+                            <option value="Zopilote aura (Cathartes aura)">Zopilote aura (Cathartes aura)</option>
                         </select>
                     </label><br>
-                    <label>Observaciones:<br><textarea name="fauna_details[daino][observaciones]" rows="3" style="width:100%; max-width:420px;"></textarea></label><br>
+
+                    <label>📍 Sitio de Reubicación: 
+                        <select name="fauna_rescate[sitio_reubicacion]" style="display:block; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
+                            <option value="">-- Seleccionar Sitio de Reubicación --</option>
+                            <option value="Parque Estatal Sierra Hermosa">Parque Estatal Sierra Hermosa</option>
+                            <option value="Parque Estatal Sierra de Tepotzotlán">Parque Estatal Sierra de Tepotzotlán</option>
+                            <option value="Parque Estatal Sierra de Guadalupe">Parque Estatal Sierra de Guadalupe</option>
+                            <option value="Parque Estatal Cerro Gordo">Parque Estatal Cerro Gordo</option>
+                            <option value="Unidad de Rehabilitación de Fauna Silvestre de Pachuca">Unidad de Rehabilitación de Fauna Silvestre de Pachuca</option>
+                            <option value="Adopción">Adopción</option>
+                        </select>
+                    </label><br>
+
+                    <p style="font-size:14px; font-weight:600; margin-bottom:12px;">📸 Evidencia Fotográfica <span style="font-size:12px; color:#6b7280; font-weight:400;">(opcional)</span></p>
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+                        <button type="button" id="fauna_rescate_galeria_btn" style="flex:1; min-width:200px; padding:14px; background:#f0f9ff; border:2px dashed #3b82f6; border-radius:8px; cursor:pointer; font-size:14px; font-weight:500; color:#1e40af; transition:all 0.3s ease;">
+                            📁 Adjuntar archivo
+                        </button>
+                        <button type="button" id="fauna_rescate_camara_btn" style="flex:1; min-width:200px; padding:14px; background:#f0fdf4; border:2px dashed #10b981; border-radius:8px; cursor:pointer; font-size:14px; font-weight:500; color:#065f46; transition:all 0.3s ease;">
+                            📷 Tomar foto
+                        </button>
+                        <input type="file" id="fauna_rescate_fotos_galeria" name="fauna_rescate[fotos_galeria]" multiple accept="image/*" style="display:none;">
+                        <input type="file" id="fauna_rescate_fotos_camara" name="fauna_rescate[fotos_camara]" accept="image/*" capture="environment" style="display:none;">
+                    </div>
+                    <div id="fauna_rescate_fotos_preview" class="photo-previews" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;"></div>
+
+                    <label>📝 Observaciones:<br>
+                        <textarea name="fauna_rescate[observaciones]" rows="4" placeholder="Detalles adicionales sobre el rescate y reubicación" style="width:100%; max-width:420px; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;"></textarea>
+                    </label><br>
                 </div>
 
                 <h3>✍️ Firmas</h3>
@@ -5679,6 +5826,145 @@
                 if (menuToggleBtn) {
                     menuToggleBtn.addEventListener('click', function () {
                         document.body.classList.remove('sidebar-hidden');
+                    });
+                }
+            })();
+
+            // Fauna Tabs switching functionality
+            (function () {
+                const faunaTabs = document.querySelectorAll('.fauna-tab');
+                const faunaContents = document.querySelectorAll('.fauna-tab-content');
+
+                faunaTabs.forEach(tab => {
+                    tab.addEventListener('click', function () {
+                        const targetTab = this.getAttribute('data-fauna-tab');
+                        const faunaTitle = this.getAttribute('data-fauna-title');
+
+                        // Remove active class from all fauna tabs
+                        faunaTabs.forEach(t => t.classList.remove('active'));
+                        // Add active class to clicked tab
+                        this.classList.add('active');
+
+                        // Hide all fauna tab contents
+                        faunaContents.forEach(content => content.classList.remove('active'));
+                        // Show target fauna tab content
+                        const targetContent = document.querySelector('.fauna-tab-content[data-fauna-tab-content="' + targetTab + '"]');
+                        if (targetContent) {
+                            targetContent.classList.add('active');
+                        }
+
+                        // Update main title when fauna tab changes
+                        const mainTitle = document.getElementById('main-title');
+                        if (mainTitle && faunaTitle) {
+                            mainTitle.textContent = faunaTitle;
+                        }
+
+                        // Mostrar/ocultar sección de Pista según la pestaña
+                        const pistaSection = document.getElementById('fauna_pista-section');
+                        if (pistaSection) {
+                            if (targetTab === 'rescate') {
+                                pistaSection.style.display = 'none';
+                            } else {
+                                pistaSection.style.display = 'block';
+                            }
+                        }
+                    });
+                });
+            })();
+
+            // Fauna Rescate Fotos Handler
+            (function () {
+                const fotosInputGaleria = document.getElementById('fauna_rescate_fotos_galeria');
+                const fotosInputCamara = document.getElementById('fauna_rescate_fotos_camara');
+                const fotosPreview = document.getElementById('fauna_rescate_fotos_preview');
+                const galeriaBtn = document.getElementById('fauna_rescate_galeria_btn');
+                const camaraBtn = document.getElementById('fauna_rescate_camara_btn');
+                
+                if ((fotosInputGaleria || fotosInputCamara) && fotosPreview) {
+                    window.faunaRescateFotos = window.faunaRescateFotos || [];
+                    
+                    // Button click handlers
+                    if (galeriaBtn) {
+                        galeriaBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            fotosInputGaleria.click();
+                        });
+                    }
+                    
+                    if (camaraBtn) {
+                        camaraBtn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            fotosInputCamara.click();
+                        });
+                    }
+                    
+                    function setupFotosListener(inputElement) {
+                        if (inputElement) {
+                            inputElement.addEventListener('change', function (e) {
+                                const files = Array.from(this.files || []);
+                                
+                                files.forEach(file => {
+                                    const reader = new FileReader();
+                                    reader.onload = function (event) {
+                                        window.faunaRescateFotos.push({
+                                            name: file.name,
+                                            dataURL: event.target.result
+                                        });
+                                        renderFotosPreview();
+                                        inputElement.value = ''; // Reset input
+                                    };
+                                    reader.readAsDataURL(file);
+                                });
+                            });
+                        }
+                    }
+                    
+                    setupFotosListener(fotosInputGaleria);
+                    setupFotosListener(fotosInputCamara);
+                    
+                    function renderFotosPreview() {
+                        fotosPreview.innerHTML = '';
+                        window.faunaRescateFotos.forEach((foto, idx) => {
+                            const wrapper = document.createElement('div');
+                            wrapper.style.cssText = 'position:relative; width:100px; height:100px; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);';
+                            
+                            const img = document.createElement('img');
+                            img.src = foto.dataURL;
+                            img.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+                            
+                            const removeBtn = document.createElement('button');
+                            removeBtn.type = 'button';
+                            removeBtn.className = 'photo-thumb-remove';
+                            removeBtn.style.cssText = 'position:absolute; top:2px; right:2px; width:24px; height:24px; padding:0; background:#ef4444; color:white; border:none; border-radius:50%; cursor:pointer; font-weight:bold; display:flex; align-items:center; justify-content:center;';
+                            removeBtn.textContent = '×';
+                            removeBtn.title = 'Eliminar foto';
+                            removeBtn.onclick = function (e) {
+                                e.preventDefault();
+                                window.faunaRescateFotos.splice(idx, 1);
+                                renderFotosPreview();
+                            };
+                            
+                            wrapper.appendChild(img);
+                            wrapper.appendChild(removeBtn);
+                            fotosPreview.appendChild(wrapper);
+                        });
+                    }
+                }
+            })();
+
+            // Fauna Rescate Clase Handler
+            (function () {
+                const claseSelect = document.getElementById('fauna_rescate_clase');
+                const claseOtroInput = document.getElementById('fauna_rescate_clase_otro');
+                
+                if (claseSelect && claseOtroInput) {
+                    claseSelect.addEventListener('change', function () {
+                        if (this.value === 'Otro') {
+                            claseOtroInput.style.display = 'block';
+                        } else {
+                            claseOtroInput.style.display = 'none';
+                            claseOtroInput.value = '';
+                        }
                     });
                 }
             })();
