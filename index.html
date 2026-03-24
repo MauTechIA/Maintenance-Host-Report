@@ -5971,10 +5971,20 @@
             document.body.classList.add('loading-auth');
 
             async function checkSession() {
-                var { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    handleUser(session.user);
-                } else {
+                try {
+                    var { data: { session }, error } = await supabase.auth.getSession();
+                    if (error) {
+                        console.error('Error checkSession:', error);
+                        showLogin();
+                        return;
+                    }
+                    if (session && session.user) {
+                        handleUser(session.user);
+                    } else {
+                        showLogin();
+                    }
+                } catch (err) {
+                    console.error('Exception en checkSession:', err);
                     showLogin();
                 }
             }
@@ -6281,38 +6291,86 @@
 
             if (loginBtn) {
                 loginBtn.addEventListener('click', async function () {
-                    var email = emailInput.value;
+                    var email = emailInput.value.trim();
                     var password = passInput.value;
+                    
+                    // Validación
+                    if (!email || !password) {
+                        errorMsg.textContent = 'Por favor ingresa email y contraseña';
+                        errorMsg.style.display = 'block';
+                        return;
+                    }
+                    
                     errorMsg.style.display = 'none';
                     loginBtn.disabled = true;
                     loginBtn.textContent = 'Entrando...';
 
-                    var { data, error } = await supabase.auth.signInWithPassword({
-                        email: email,
-                        password: password
-                    });
+                    try {
+                        var { data, error } = await supabase.auth.signInWithPassword({
+                            email: email,
+                            password: password
+                        });
 
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'Entrar';
+                        if (error) {
+                            console.error('Login error:', error);
+                            errorMsg.textContent = 'Error: ' + (error.message || 'No se pudo conectar');
+                            errorMsg.style.display = 'block';
+                            loginBtn.disabled = false;
+                            loginBtn.textContent = 'Entrar';
+                            return;
+                        }
 
-                    if (error) {
-                        errorMsg.textContent = 'Error: ' + error.message;
+                        if (data && data.user) {
+                            handleUser(data.user);
+                        } else {
+                            errorMsg.textContent = 'Error: No se recibieron datos de usuario';
+                            errorMsg.style.display = 'block';
+                            loginBtn.disabled = false;
+                            loginBtn.textContent = 'Entrar';
+                        }
+                    } catch (err) {
+                        console.error('Exception en login:', err);
+                        errorMsg.textContent = 'Error: ' + (err.message || 'Error desconocido');
                         errorMsg.style.display = 'block';
-                    } else {
-                        handleUser(data.user);
+                        loginBtn.disabled = false;
+                        loginBtn.textContent = 'Entrar';
                     }
                 });
             }
 
             if (logoutBtn) {
                 logoutBtn.addEventListener('click', async function () {
-                    await supabase.auth.signOut();
-                    location.reload();
+                    try {
+                        await supabase.auth.signOut();
+                    } catch (err) {
+                        console.warn('Error en signOut:', err);
+                    }
+                    // Limpiar storage completamente
+                    try {
+                        localStorage.clear();
+                        sessionStorage.clear();
+                    } catch (e) { }
+                    // Reload después de limpiar
+                    setTimeout(function() {
+                        location.href = location.origin + location.pathname;
+                    }, 100);
                 });
             }
 
             // Iniciar chequeo
             checkSession();
+            
+            // Listener para cambios de autenticación (más robusto)
+            if (supabase && supabase.auth && typeof supabase.auth.onAuthStateChange === 'function') {
+                supabase.auth.onAuthStateChange(function(event, session) {
+                    console.log('Auth event:', event, 'Session:', !!session);
+                    if (session && session.user) {
+                        handleUser(session.user);
+                    } else {
+                        showLogin();
+                    }
+                });
+            }
 
             // Tab switching functionality
             (function () {
