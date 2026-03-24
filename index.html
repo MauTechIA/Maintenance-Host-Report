@@ -6495,13 +6495,9 @@
                             }
                             impactoHtml += '</div>';
 
-                            // centro: logo sobre título (centrado)
+                            // centro: logo sobre título (centrado) - usar SVG embebido para evitar CORS
                             impactoHtml += '<div style="flex:1;text-align:center;padding:0 12px">';
-                            if (logoSrc) { 
-                                impactoHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">'; 
-                            } else { 
-                                impactoHtml += inlineLogo; 
-                            }
+                            impactoHtml += inlineLogo;
                             impactoHtml += '<h2 style="color:#0b66c3;margin:0;font-size:20px;">Reporte de Control de Fauna</h2>';
                             impactoHtml += '<div style="margin-top:6px;font-size:14px;color:#111;font-weight:700;">Impacto Faunístico</div>';
                             impactoHtml += '</div>';
@@ -6721,19 +6717,16 @@
                                         
                                         var logoSrc = '';
                                         try { var logoEl = document.querySelector('.report-header .left img'); if (logoEl) logoSrc = logoEl.getAttribute('src'); } catch (e) { }
-                                        if (logoSrc) {
-                                            membreteHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">';
-                                        } else {
-                                            membreteHtml += '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="70" viewBox="0 0 180 70" style="display:block;margin:0 auto;">' +
-                                                '<rect width="100%" height="100%" fill="#0b66c3" rx="6" />' +
-                                                '<g transform="translate(12,10)">' +
-                                                '<circle cx="20" cy="20" r="16" fill="#fff" />' +
-                                                '<path d="M 20 8 L 28 20 L 24 20 L 24 28 L 16 28 L 16 20 L 12 20 Z" fill="#0b66c3"/>' +
-                                                '</g>' +
-                                                '<text x="95" y="28" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" font-weight="bold">Fauna</text>' +
-                                                '<text x="95" y="48" font-family="Arial, sans-serif" font-size="11" fill="#e8f1f8">Rescate</text>' +
-                                                '</svg>';
-                                        }
+                                        // Usar SVG embebido para evitar problemas CORS
+                                        membreteHtml += '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="70" viewBox="0 0 180 70" style="display:block;margin:0 auto;">' +
+                                            '<rect width="100%" height="100%" fill="#0b66c3" rx="6" />' +
+                                            '<g transform="translate(12,10)">' +
+                                            '<circle cx="20" cy="20" r="16" fill="#fff" />' +
+                                            '<path d="M 20 8 L 28 20 L 24 20 L 24 28 L 16 28 L 16 20 L 12 20 Z" fill="#0b66c3"/>' +
+                                            '</g>' +
+                                            '<text x="95" y="28" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" font-weight="bold">Fauna</text>' +
+                                            '<text x="95" y="48" font-family="Arial, sans-serif" font-size="11" fill="#e8f1f8">Rescate</text>' +
+                                            '</svg>';
                                         
                                         membreteHtml += '<h2 style="color:#0b66c3;margin:0;font-size:20px;">Reporte de Control de Fauna</h2>' +
                                             '<div style="margin-top:6px;font-size:14px;color:#111;font-weight:700;">Rescate y Reubicación</div>' +
