@@ -6452,20 +6452,57 @@
 
                             console.log('DEBUG IMPACTO PAYLOAD:', impactPayload);
 
-                            // Generar HTML del reporte impacto para PDF
+                            // Generar HTML del reporte impacto para PDF con formato profesional
                             var impactoReportSummary = document.createElement('div');
-                            impactoReportSummary.innerHTML = '<div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">' +
-                                '<h2 style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px;">REPORTE DE IMPACTO FAUNÍSTICO</h2>' +
-                                '<p><strong>Folio:</strong> ' + folio + '</p>' +
-                                '<p><strong>Fecha del Reporte:</strong> ' + (new Date().toISOString().split('T')[0]) + '</p>' +
-                                '<p><strong>Tipo de Evento:</strong> ' + evento + '</p>' +
-                                '<p><strong>Fase de Vuelo:</strong> ' + faseVuelo + '</p>' +
-                                '<p><strong>Pista:</strong> ' + pista + '</p>' +
-                                '<p><strong>Responsable:</strong> ' + responsable + '</p>' +
-                                '<p><strong>Cargo:</strong> ' + cargo + '</p>' +
-                                '<p><strong>Aerolínea:</strong> ' + aerolinea + '</p>' +
-                                '<p><strong>Ubicación:</strong> ' + ubicacion + '</p>' +
+                            
+                            var impactoHtml = '<div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">' +
+                                '<h2 style="text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 10px; color: #1e40af;">REPORTE DE IMPACTO FAUNÍSTICO</h2>' +
+                                '<div style="margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px;">' +
+                                '<div><strong>Folio:</strong> ' + folio + '</div>' +
+                                '<div><strong>Fecha:</strong> ' + (new Date().toISOString().split('T')[0]) + '</div>' +
+                                '<div><strong>Responsable:</strong> ' + responsable + '</div>' +
+                                '<div><strong>Cargo:</strong> ' + cargo + '</div>' +
                                 '</div>';
+                            
+                            // Tabla principal con 4 columnas
+                            impactoHtml += '<table style="width:100%;border-collapse:collapse;font-size:13px;">';
+                            impactoHtml += '<thead><tr>' +
+                                '<th style="text-align:left;padding:8px;border-bottom:2px solid #1e40af;width:25%;color:#1e40af;font-weight:700">Tipo de Evento</th>' +
+                                '<th style="text-align:left;padding:8px;border-bottom:2px solid #1e40af;width:25%;color:#1e40af;font-weight:700">Detalles</th>' +
+                                '<th style="text-align:left;padding:8px;border-bottom:2px solid #1e40af;width:25%;color:#1e40af;font-weight:700">Ubicación</th>' +
+                                '<th style="text-align:left;padding:8px;border-bottom:2px solid #1e40af;width:25%;color:#1e40af;font-weight:700">Aerolínea</th>' +
+                                '</tr></thead>';
+                            impactoHtml += '<tbody>';
+                            impactoHtml += '<tr>' +
+                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #e5e7eb;font-weight:600">' + evento + '</td>' +
+                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #e5e7eb"><ul style="margin:0;padding-left:16px;">' +
+                                '<li>Fase de Vuelo: ' + faseVuelo + '</li>' +
+                                '<li>Pista: ' + pista + '</li>' +
+                                '</ul></td>' +
+                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #e5e7eb">' + ubicacion + '</td>' +
+                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #e5e7eb">' + aerolinea + '</td>' +
+                                '</tr>';
+                            impactoHtml += '</tbody></table>';
+                            
+                            // Cajas de firma
+                            impactoHtml += '<div style="display:flex;justify-content:space-around;gap:24px;margin-top:22px">';
+                            impactoHtml += '<div style="flex:1;border:1px solid #e5e7eb;padding:14px;border-radius:6px;min-height:100px;display:flex;flex-direction:column;justify-content:space-between">' +
+                                '<div style="font-size:12px;color:#1e40af;text-align:center;font-weight:700">RESPONSABLE</div>' +
+                                '<div><div style="border-top:1px solid #cbd5e1;margin-top:10px;padding-top:8px;text-align:center;color:#1e40af;min-height:20px;"></div>' +
+                                '<div style="font-size:11px;color:#374151;text-align:center;font-weight:600">' + responsable + '</div>' +
+                                '<div style="font-size:10px;color:#6b7280;text-align:center">' + cargo + '</div></div>' +
+                                '</div>';
+                            impactoHtml += '<div style="flex:1;border:1px solid #e5e7eb;padding:14px;border-radius:6px;min-height:100px;display:flex;flex-direction:column;justify-content:space-between">' +
+                                '<div style="font-size:12px;color:#1e40af;text-align:center;font-weight:700">SUPERVISOR</div>' +
+                                '<div><div style="border-top:1px solid #cbd5e1;margin-top:10px;padding-top:8px;text-align:center;color:#1e40af;min-height:20px;"></div>' +
+                                '<div style="font-size:11px;color:#374151;text-align:center;font-weight:600">-</div></div>' +
+                                '</div>';
+                            impactoHtml += '</div>';
+                            
+                            impactoHtml += '<p style="margin-top:18px;font-size:11px;color:#6b7280;text-align:center">Generado desde el sistema de reportes faunísticos.</p>' +
+                            impactoHtml += '</div>';
+                            
+                            impactoReportSummary.innerHTML = impactoHtml;
 
                             var filename = 'Reporte-Fauna-' + folio + '.pdf';
                             var opt = {
@@ -6613,48 +6650,50 @@
                             document.body.appendChild(reportSummary);
                         }
 
-                        // Construir HTML del reporte con mejor estructura
-                        reportSummary.innerHTML = '<div style="font-family: Arial, sans-serif; color: #1f2937; max-width: 210mm; margin: 0 auto; padding: 20mm; background: white;">' +
-                            '<div style="text-align: center; margin-bottom: 20px; border-bottom: 3px solid #1e40af; padding-bottom: 15px;">' +
-                                '<h1 style="margin: 0 0 5px 0; color: #1e40af; font-size: 24px;">REPORTE DE CONTROL DE FAUNA</h1>' +
-                                '<p style="margin: 0; color: #6b7280; font-size: 12px;">Formato de Informes de Control de Fauna</p>' +
+                        // Construir HTML del reporte con formato profesional (igual a revisión)
+                        reportSummary.innerHTML = '<div style="font-family: Arial, sans-serif; color: #1f2937; padding: 20px;">' +
+                            '<h2 style="text-align: center; border-bottom: 2px solid #1e40af; padding-bottom: 10px; color: #1e40af;">REPORTE DE RESCATE FAUNÍSTICO</h2>' +
+                            '<div style="margin-bottom: 20px; display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; font-size: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px;">' +
+                            '<div><strong>Folio:</strong> ' + folio + '</div>' +
+                            '<div><strong>Fecha:</strong> ' + new Date().toISOString().split('T')[0] + '</div>' +
+                            '<div><strong>Responsable:</strong> ' + responsable + '</div>' +
+                            '<div><strong>Cargo:</strong> ' + cargo + '</div>' +
                             '</div>' +
                             
-                            '<table style="width: 100%; font-size: 11px; border-collapse: collapse; margin-bottom: 20px;">' +
-                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; width: 30%; background: #f0f4f8;"><strong>Folio:</strong></td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + folio + '</td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8%; width: 30%;"><strong>Fecha:</strong></td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + fechaLocal + '</td></tr>' +
-                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Responsable:</strong></td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + responsable + '</td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Cargo:</strong></td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + cargo + '</td></tr>' +
+                            '<table style="width:100%;border-collapse:collapse;font-size:13px;">' +
+                            '<thead><tr>' +
+                            '<th style="text-align:left;padding:8px;border-bottom:2px solid #1e40af;width:25%;color:#1e40af;font-weight:700">Especie</th>' +
+                            '<th style="text-align:left;padding:8px;border-bottom:2px solid #1e40af;width:25%;color:#1e40af;font-weight:700">Sitio Rescate</th>' +
+                            '<th style="text-align:left;padding:8px;border-bottom:2px solid #1e40af;width:25%;color:#1e40af;font-weight:700">Sitio Reubicación</th>' +
+                            '<th style="text-align:left;padding:8px;border-bottom:2px solid #1e40af;width:25%;color:#1e40af;font-weight:700">Institución</th>' +
+                            '</tr></thead>' +
+                            '<tbody><tr>' +
+                            '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #e5e7eb;font-weight:600"><div>' + especie + '</div><div style="font-size:11px;color:#6b7280;">Clase: ' + clase + '</div></td>' +
+                            '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #e5e7eb">' + sitioRescate + '</td>' +
+                            '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #e5e7eb">' + sitioReubicacion + '</td>' +
+                            '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #e5e7eb">' + institucion + '</td>' +
+                            '</tr></tbody>' +
                             '</table>' +
                             
-                            '<h3 style="color: #1e40af; font-size: 14px; margin: 15px 0 10px 0; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">Datos del Rescate/Reubicación</h3>' +
-                            '<table style="width: 100%; font-size: 11px; border-collapse: collapse; margin-bottom: 20px;">' +
-                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; width: 35%; background: #f0f4f8;"><strong>Institución Responsable:</strong></td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + institucion + '</td></tr>' +
-                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Sitio de Rescate:</strong></td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + sitioRescate + '</td></tr>' +
-                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Clase:</strong></td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + clase + '</td></tr>' +
-                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Especie:</strong></td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + especie + '</td></tr>' +
-                                '<tr><td style="padding: 6px; border: 1px solid #d1d5db; background: #f0f4f8;"><strong>Sitio Reubicación:</strong></td>' +
-                                    '<td style="padding: 6px; border: 1px solid #d1d5db;">' + sitioReubicacion + '</td></tr>' +
-                            '</table>' +
+                            '<h3 style="color:#1e40af;font-size:13px;margin:15px 0 8px 0;border-bottom:1px solid #1e40af;padding-bottom:5px;">Observaciones</h3>' +
+                            '<div style="padding:10px;border:1px solid #d1d5db;background:#fafbfc;font-size:12px;line-height:1.6;min-height:60px;white-space:pre-wrap;">' + (observaciones || '-') + '</div>' +
                             
-                            '<h3 style="color: #1e40af; font-size: 14px; margin: 15px 0 10px 0; border-bottom: 2px solid #1e40af; padding-bottom: 5px;">Observaciones</h3>' +
-                            '<div style="padding: 10px; border: 1px solid #d1d5db; background: #fafbfc; font-size: 11px; line-height: 1.6; min-height: 40px; white-space: pre-wrap;" >' + (observaciones || 'N/A') + '</div>' +
-                            
-                            '<div style="margin-top: 60px; padding-top: 20px; border-top: 2px solid #1f2937;">' +
-                                '<table style="width: 100%; margin-top: 40px;">' +
-                                    '<tr><td style="text-align: center; width: 50%;"><div style="border-top: 1px solid #1f2937; padding-top: 40px; font-size: 11px;"><strong>Firma - AIFA</strong><br>(Responsable)</div></td>' +
-                                        '<td style="text-align: center; width: 50%;"><div style="border-top: 1px solid #1f2937; padding-top: 40px; font-size: 11px;"><strong>Firma - AFAC</strong><br>(Supervisor)</div></td></tr>' +
-                                '</table>' +
+                            '<div style="display:flex;justify-content:space-around;gap:24px;margin-top:22px">' +
+                            '<div style="flex:1;border:1px solid #e5e7eb;padding:14px;border-radius:6px;min-height:100px;display:flex;flex-direction:column;justify-content:space-between">' +
+                            '<div style="font-size:12px;color:#1e40af;text-align:center;font-weight:700">RESPONSABLE</div>' +
+                            '<div><div style="border-top:1px solid #cbd5e1;margin-top:10px;padding-top:8px;text-align:center;color:#1e40af;min-height:20px;"></div>' +
+                            '<div style="font-size:11px;color:#374151;text-align:center;font-weight:600">' + responsable + '</div>' +
+                            '<div style="font-size:10px;color:#6b7280;text-align:center">' + cargo + '</div></div>' +
                             '</div>' +
-                        '</div>';
+                            '<div style="flex:1;border:1px solid #e5e7eb;padding:14px;border-radius:6px;min-height:100px;display:flex;flex-direction:column;justify-content:space-between">' +
+                            '<div style="font-size:12px;color:#1e40af;text-align:center;font-weight:700">SUPERVISOR</div>' +
+                            '<div><div style="border-top:1px solid #cbd5e1;margin-top:10px;padding-top:8px;text-align:center;color:#1e40af;min-height:20px;"></div>' +
+                            '<div style="font-size:11px;color:#374151;text-align:center;font-weight:600">-</div></div>' +
+                            '</div>' +
+                            '</div>' +
+                            
+                            '<p style="margin-top:18px;font-size:11px;color:#6b7280;text-align:center">Generado desde el sistema de reportes faunísticos.</p>' +
+                            '</div>';
 
                         // Configurar html2pdf
                         var filename = 'Reporte-Fauna-' + folio + '.pdf';
