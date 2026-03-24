@@ -3605,7 +3605,8 @@
 
                 // Crear el nuevo detalle clonando el original
                 var newDet = origDet.cloneNode(true);
-                newDet.id = 'fauna_details_' + newId;
+                var newItemType = newId.replace('fauna_', '');
+                newDet.id = 'fauna_details_' + newItemType;
                 newDet.style.display = 'none';
                 
                 // Actualizar IDs y nombres dentro del detalle clonado
