@@ -1658,6 +1658,7 @@
             <button class="sidebar-tab" data-tab="historial">📚 Historial de Reportes</button>
             <button class="sidebar-tab" data-tab="estadistica">📊 Estadísticas</button>
             <button class="sidebar-tab" data-tab="estadistica-fauna">🦅 Estadística Fauna</button>
+            <button class="sidebar-tab" data-tab="historial-fauna">📖 Historial Fauna</button>
         </div>
         <div class="sidebar-footer">
             <div>AIFA-DO-SSO-GSO-MHR-F1</div>
@@ -2922,6 +2923,102 @@
                 </div>
             </div>
         </div> <!-- End estadistica-fauna-section -->
+
+        <!-- Historial Fauna Section -->
+        <div id="historial-fauna-section" class="content-section">
+            <h1>Historial de Reportes de Fauna</h1>
+
+            <!-- Fauna Reports Panel -->
+            <div id="fauna-reports-panel"
+                style="background:var(--card); padding:20px; border-radius:12px; box-shadow:var(--shadow); margin:20px auto; max-width:1400px;">
+                
+                <!-- Filtros -->
+                <div style="background:#f9fafb;border-radius:8px;padding:16px;margin-bottom:20px;">
+                    <h3 style="margin:0 0 16px 0;font-size:1.1em;">Filtros</h3>
+                    
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;margin-bottom:16px;">
+                        <!-- Filtro por fecha desde -->
+                        <div>
+                            <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#1f2937;">Fecha Desde:</label>
+                            <input type="date" id="filter-fauna-fecha-desde" 
+                                style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                        </div>
+
+                        <!-- Filtro por fecha hasta -->
+                        <div>
+                            <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#1f2937;">Fecha Hasta:</label>
+                            <input type="date" id="filter-fauna-fecha-hasta" 
+                                style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                        </div>
+
+                        <!-- Filtro por clase -->
+                        <div>
+                            <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#1f2937;">Clase:</label>
+                            <select id="filter-fauna-clase" multiple
+                                style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                <option value="">Todas las clases</option>
+                            </select>
+                        </div>
+
+                        <!-- Filtro por especie -->
+                        <div>
+                            <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#1f2937;">Especie:</label>
+                            <select id="filter-fauna-especie"
+                                style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                <option value="">Todas las especies</option>
+                            </select>
+                        </div>
+
+                        <!-- Filtro por tipo (Impacto o Rescate) -->
+                        <div>
+                            <label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#1f2937;">Tipo de Reporte:</label>
+                            <select id="filter-fauna-tipo"
+                                style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                <option value="">Todos</option>
+                                <option value="impacto">Impactos</option>
+                                <option value="rescate">Rescates</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:10px;justify-content:flex-start;">
+                        <button id="fauna-filter-apply-btn" class="btn btn-primary" style="padding:8px 16px;font-size:13px;">
+                            🔍 Aplicar Filtros
+                        </button>
+                        <button id="fauna-filter-clear-btn" class="btn btn-ghost" style="padding:8px 16px;font-size:13px;">
+                            ✕ Limpiar Filtros
+                        </button>
+                        <button id="fauna-refresh-btn" class="btn btn-ghost" style="padding:8px 16px;font-size:13px;margin-left:auto;">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla de Reportes de Fauna -->
+                <div style="overflow-x:auto;">
+                    <table id="fauna-reports-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                        <thead style="background:#f3f4f6;border-bottom:2px solid #e5e7eb;">
+                            <tr>
+                                <th style="text-align:left;padding:12px;font-weight:600;color:#1f2937;">Fecha</th>
+                                <th style="text-align:left;padding:12px;font-weight:600;color:#1f2937;">Tipo</th>
+                                <th style="text-align:left;padding:12px;font-weight:600;color:#1f2937;">Especie</th>
+                                <th style="text-align:left;padding:12px;font-weight:600;color:#1f2937;">Ubicación</th>
+                                <th style="text-align:left;padding:12px;font-weight:600;color:#1f2937;">Responsable</th>
+                                <th style="text-align:left;padding:12px;font-weight:600;color:#1f2937;">Estado</th>
+                                <th style="text-align:center;padding:12px;font-weight:600;color:#1f2937;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fauna-reports-list">
+                            <tr><td colspan="7" style="padding:20px;text-align:center;color:#6b7280;">Cargando reportes...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div style="text-align:center;margin-top:20px;">
+                    <p id="fauna-reports-count" style="color:#6b7280;font-size:13px;">Cargando...</p>
+                </div>
+            </div>
+        </div> <!-- End historial-fauna-section -->
 
     </div> <!-- End main-content -->
 
@@ -6000,6 +6097,10 @@
                                     mainTitle.textContent = 'Estadística Fauna';
                                     // Cargar estadísticas de fauna cuando se abre la pestaña
                                     loadFaunaStatistics();
+                                } else if (targetTab === 'historial-fauna') {
+                                    mainTitle.textContent = 'Historial de Reportes de Fauna';
+                                    // Cargar historial de fauna cuando se abre la pestaña
+                                    loadFaunaReports({});
                                 }
                             }
 
@@ -6544,6 +6645,163 @@
                     console.error('Error in loadFaunaStatistics:', err);
                 }
             }
+
+            // Función para cargar reportes de fauna desde Supabase
+            async function loadFaunaReports(filters) {
+                const client = window.supabaseClient;
+                if (!client) {
+                    console.error('Supabase client not ready');
+                    return;
+                }
+
+                const reportsList = document.getElementById('fauna-reports-list');
+                const reportsCount = document.getElementById('fauna-reports-count');
+                
+                if (reportsList) {
+                    reportsList.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#6b7280;">Cargando reportes...</td></tr>';
+                }
+
+                try {
+                    // Consultar impactos
+                    let impactQuery = client.from('fauna_impact_reports').select('*');
+                    
+                    if (filters.fechaDesde) {
+                        impactQuery = impactQuery.gte('fecha_reporte', filters.fechaDesde);
+                    }
+                    if (filters.fechaHasta) {
+                        impactQuery = impactQuery.lte('fecha_reporte', filters.fechaHasta);
+                    }
+
+                    const { data: impactData, error: impactError } = await impactQuery.order('fecha_reporte', { ascending: false });
+
+                    // Consultar rescates
+                    let rescateQuery = client.from('fauna_rescue_reports').select('*');
+                    
+                    if (filters.fechaDesde) {
+                        rescateQuery = rescateQuery.gte('fecha_reporte', filters.fechaDesde);
+                    }
+                    if (filters.fechaHasta) {
+                        rescateQuery = rescateQuery.lte('fecha_reporte', filters.fechaHasta);
+                    }
+                    if (filters.clase && filters.clase !== '') {
+                        rescateQuery = rescateQuery.eq('clase', filters.clase);
+                    }
+                    if (filters.especie && filters.especie !== '') {
+                        rescateQuery = rescateQuery.eq('especie', filters.especie);
+                    }
+
+                    const { data: rescateData, error: rescateError } = await rescateQuery.order('fecha_reporte', { ascending: false });
+
+                    if (impactError || rescateError) {
+                        console.error('Error loading fauna reports:', {impactError, rescateError});
+                        if (reportsList) {
+                            reportsList.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#ef4444;">Error al cargar reportes</td></tr>';
+                        }
+                        return;
+                    }
+
+                    // Combinar reportes según filtro de tipo
+                    let allReports = [];
+                    
+                    if (!filters.tipo || filters.tipo === 'impacto') {
+                        if (impactData) {
+                            impactData.forEach(function(report) {
+                                allReports.push({
+                                    ...report,
+                                    tipoReporte: 'Impacto',
+                                    especie: report.ubicacion || '-',
+                                    ubicacion: report.pista || '-'
+                                });
+                            });
+                        }
+                    }
+
+                    if (!filters.tipo || filters.tipo === 'rescate') {
+                        if (rescateData) {
+                            rescateData.forEach(function(report) {
+                                allReports.push({
+                                    ...report,
+                                    tipoReporte: 'Rescate',
+                                    ubicacion: report.sitio_rescate || '-'
+                                });
+                            });
+                        }
+                    }
+
+                    // Renderizar tabla
+                    if (reportsList) {
+                        if (allReports.length === 0) {
+                            reportsList.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#6b7280;">No hay reportes que coincidan con los filtros</td></tr>';
+                        } else {
+                            reportsList.innerHTML = '';
+                            allReports.forEach(function(report) {
+                                const fechaReporte = report.fecha_reporte ? new Date(report.fecha_reporte).toLocaleDateString('es-ES') : '-';
+                                const especie = report.especie || '-';
+                                const ubicacion = report.ubicacion || '-';
+                                const responsable = report.responsable || '-';
+                                const estado = report.estado || 'pendiente';
+                                const tipoReporte = report.tipoReporte || '-';
+
+                                const tr = document.createElement('tr');
+                                tr.style.borderBottom = '1px solid #e5e7eb';
+                                tr.innerHTML = '<td style="padding:12px;">' + fechaReporte + '</td>' +
+                                               '<td style="padding:12px;"><span style="display:inline-block;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;background:' + 
+                                               (tipoReporte === 'Impacto' ? '#fee2e2;color:#991b1b' : '#dcfce7;color:#166534') + ';">' + tipoReporte + '</span></td>' +
+                                               '<td style="padding:12px;">' + especie + '</td>' +
+                                               '<td style="padding:12px;">' + ubicacion + '</td>' +
+                                               '<td style="padding:12px;">' + responsable + '</td>' +
+                                               '<td style="padding:12px;"><span style="display:inline-block;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;background:' + 
+                                               (estado === 'pendiente' ? '#fef3c7;color:#92400e' : '#dbeafe;color:#1e40af') + ';">' + estado + '</span></td>' +
+                                               '<td style="padding:12px;text-align:center;"><a href="#" style="color:#3b82f6;text-decoration:none;font-size:12px;font-weight:600;">Ver</a></td>';
+                                reportsList.appendChild(tr);
+                            });
+                        }
+                    }
+
+                    if (reportsCount) {
+                        reportsCount.textContent = 'Total de reportes: ' + allReports.length;
+                    }
+
+                } catch (err) {
+                    console.error('Error in loadFaunaReports:', err);
+                    if (reportsList) {
+                        reportsList.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#ef4444;">Error al cargar reportes</td></tr>';
+                    }
+                }
+            }
+
+            // Configurar filtros de fauna
+            var currentFaunaFilters = {};
+
+            function readFaunaFilters() {
+                return {
+                    fechaDesde: document.getElementById('filter-fauna-fecha-desde')?.value || '',
+                    fechaHasta: document.getElementById('filter-fauna-fecha-hasta')?.value || '',
+                    clase: document.getElementById('filter-fauna-clase')?.value || '',
+                    especie: document.getElementById('filter-fauna-especie')?.value || '',
+                    tipo: document.getElementById('filter-fauna-tipo')?.value || ''
+                };
+            }
+
+            // Event listeners para filtros
+            document.getElementById('fauna-filter-apply-btn')?.addEventListener('click', function() {
+                currentFaunaFilters = readFaunaFilters();
+                loadFaunaReports(currentFaunaFilters);
+            });
+
+            document.getElementById('fauna-filter-clear-btn')?.addEventListener('click', function() {
+                document.getElementById('filter-fauna-fecha-desde').value = '';
+                document.getElementById('filter-fauna-fecha-hasta').value = '';
+                document.getElementById('filter-fauna-clase').value = '';
+                document.getElementById('filter-fauna-especie').value = '';
+                document.getElementById('filter-fauna-tipo').value = '';
+                currentFaunaFilters = {};
+                loadFaunaReports({});
+            });
+
+            document.getElementById('fauna-refresh-btn')?.addEventListener('click', function() {
+                loadFaunaReports(currentFaunaFilters);
+            });
 
             // Event listener para el botón de actualizar estadísticas de fauna
             document.getElementById('refresh-estadisticas-fauna-btn')?.addEventListener('click', loadFaunaStatistics);
