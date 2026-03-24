@@ -3466,24 +3466,13 @@
 
             function setupFaunaItemControlsFor(id) {
                 var chk = document.getElementById(id);
-                var det = document.getElementById('details_' + id);
+                var det = document.getElementById('fauna_details_' + id);
                 var doneBtn = document.getElementById('done_' + id);
                 var updateBtn = document.getElementById('update_' + id);
                 var dupBtn = document.getElementById('dup_' + id);
                 var clearBtn = document.getElementById('clear_' + id);
-                
-                // Debug log
-                console.log('Setup for:', id, {
-                    chk: !!chk,
-                    det: !!det, 
-                    doneBtn: !!doneBtn,
-                    updateBtn: !!updateBtn,
-                    dupBtn: !!dupBtn,
-                    clearBtn: !!clearBtn
-                });
 
                 if (!chk || !det) {
-                    console.warn('Missing elements for', id);
                     return;
                 }
 
@@ -3590,7 +3579,7 @@
 
             function duplicateFaunaItem(origId) {
                 var origChk = document.getElementById(origId);
-                var origDet = document.getElementById('details_' + origId);
+                var origDet = document.getElementById('fauna_details_' + origId);
                 
                 if (!origChk || !origDet) return;
 
@@ -3614,7 +3603,7 @@
 
                 // Crear el nuevo detalle clonando el original
                 var newDet = origDet.cloneNode(true);
-                newDet.id = 'details_' + newId;
+                newDet.id = 'fauna_details_' + newId;
                 newDet.style.display = 'none';
                 
                 // Actualizar IDs y nombres dentro del detalle clonado
