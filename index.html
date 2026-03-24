@@ -3550,39 +3550,25 @@
 
                 // Función para actualizar la visibilidad de botones
                 function refresh() {
-                    if (chk.disabled) {
-                        // Item bloqueado: mostrar Update, ocultar Done
+                    var isDone = chk.disabled;
+                    var isChecked = chk.checked;
+
+                    if (isDone) {
                         if (doneBtn) doneBtn.style.display = 'none';
                         if (updateBtn) updateBtn.style.display = 'inline-block';
                         if (dupBtn) dupBtn.style.display = 'none';
                         if (clearBtn) clearBtn.style.display = 'none';
-                    } else if (chk.checked) {
-                        // Item desbloqueado y marcado: mostrar Done, Dup, Clear
+                    } else if (isChecked) {
                         if (doneBtn) doneBtn.style.display = 'inline-block';
                         if (updateBtn) updateBtn.style.display = 'none';
                         if (dupBtn) dupBtn.style.display = 'inline-block';
-                        // Mostrar Clear si hay datos
-                        if (clearBtn) clearBtn.style.display = hasItemData() ? 'inline-block' : 'none';
+                        if (clearBtn) clearBtn.style.display = 'inline-block';
                     } else {
-                        // Item sin marcar: ocultar todos los botones
                         if (doneBtn) doneBtn.style.display = 'none';
                         if (updateBtn) updateBtn.style.display = 'none';
                         if (dupBtn) dupBtn.style.display = 'none';
                         if (clearBtn) clearBtn.style.display = 'none';
                     }
-                }
-
-                // Detectar si el item tiene datos
-                function hasItemData() {
-                    try {
-                        var inputs = det.querySelectorAll('input, textarea, select');
-                        for (var i = 0; i < inputs.length; i++) {
-                            if (inputs[i].value && inputs[i].value.trim() !== '') {
-                                return true;
-                            }
-                        }
-                    } catch (e) { }
-                    return false;
                 }
 
                 // Inicializar estado visual
@@ -3663,17 +3649,11 @@
             }
 
             // Inicializar cuando el DOM esté listo
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', function () {
-                    faunaItemIds.forEach(function (id) {
-                        setupFaunaItemControlsFor(id);
-                    });
-                });
-            } else {
+            setTimeout(function() {
                 faunaItemIds.forEach(function (id) {
                     setupFaunaItemControlsFor(id);
                 });
-            }
+            }, 100);
         })();
     </script>
 
