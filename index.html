@@ -646,6 +646,7 @@
             border: 1px solid var(--border);
             box-shadow: var(--shadow-lg);
             display: none;
+            flex-direction: column;
             z-index: 9999;
             padding: 8px;
             border-radius: 12px;
@@ -6451,25 +6452,124 @@
 
                             console.log('DEBUG IMPACTO PAYLOAD:', impactPayload);
 
-                            var { data: impactData, error: impactError } = await client
-                                .from('fauna_impact_reports')
-                                .insert([impactPayload])
-                                .select();
+                            // Generar HTML del reporte impacto para PDF
+                            var impactoReportSummary = document.createElement('div');
+                            impactoReportSummary.innerHTML = '<div style="font-family: Arial, sans-serif; padding: 20px; line-height: 1.6;">' +
+                                '<h2 style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 10px;">REPORTE DE IMPACTO FAUNÍSTICO</h2>' +
+                                '<p><strong>Folio:</strong> ' + folio + '</p>' +
+                                '<p><strong>Fecha del Reporte:</strong> ' + (new Date().toISOString().split('T')[0]) + '</p>' +
+                                '<p><strong>Tipo de Evento:</strong> ' + evento + '</p>' +
+                                '<p><strong>Fase de Vuelo:</strong> ' + faseVuelo + '</p>' +
+                                '<p><strong>Pista:</strong> ' + pista + '</p>' +
+                                '<p><strong>Responsable:</strong> ' + responsable + '</p>' +
+                                '<p><strong>Cargo:</strong> ' + cargo + '</p>' +
+                                '<p><strong>Aerolínea:</strong> ' + aerolinea + '</p>' +
+                                '<p><strong>Ubicación:</strong> ' + ubicacion + '</p>' +
+                                '</div>';
 
-                            if (impactError) {
-                                console.error('Error guardando impacto:', impactError);
-                                alert('Error: ' + impactError.message);
+                            var filename = 'Reporte-Fauna-' + folio + '.pdf';
+                            var opt = {
+                                margin: [5, 5, 5, 5],
+                                filename: filename,
+                                image: { type: 'jpeg', quality: 0.98 },
+                                html2canvas: { scale: 2, logging: false, useCORS: true, allowTaint: true },
+                                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
+                            };
+
+                            // Generar PDF - toPdf() retorna promesa
+                            html2pdf().set(opt).from(impactoReportSummary).toPdf().get('pdf').then(async function(pdf) {
+                                console.log('PDF impacto generado exitosamente');
+                                
+                                try {
+                                    // Obtener blob del PDF
+                                    var pdfBlob = pdf.output('blob');
+                                    
+                                    // Mostrar preview en iframe
+                                    var previewContainer = document.getElementById('pdf-preview-container');
+                                    var previewFrame = document.getElementById('pdf-preview-frame');
+                                    var spinner = document.getElementById('pdf-spinner');
+                                    
+                                    if (previewContainer && previewFrame) {
+                                        var blobUrl = URL.createObjectURL(pdfBlob);
+                                        previewFrame.src = blobUrl;
+                                        previewContainer.style.display = 'flex';
+                                        if (spinner) spinner.style.display = 'none';
+                                        
+                                        // Wire download button
+                                        var downloadBtn = document.getElementById('pdf-download-btn');
+                                        if (downloadBtn) {
+                                            downloadBtn.onclick = function() {
+                                                pdf.save(filename);
+                                            };
+                                        }
+                                        
+                                        // Wire close button
+                                        var closeBtn = document.getElementById('pdf-preview-close');
+                                        if (closeBtn) {
+                                            closeBtn.onclick = function() {
+                                                previewContainer.style.display = 'none';
+                                                URL.revokeObjectURL(blobUrl);
+                                            };
+                                        }
+                                    }
+                                    
+                                    // Upload PDF a storage
+                                    var pdfPath = 'fauna/' + Date.now() + '-' + folio + '.pdf';
+                                    var { data: uploadData, error: uploadError } = await client.storage
+                                        .from('fauna-reports')
+                                        .upload(pdfPath, pdfBlob, { contentType: 'application/pdf' });
+                                    
+                                    if (uploadError) {
+                                        console.warn('Warning subiendo PDF:', uploadError);
+                                    }
+                                    
+                                    var pdfUrl = null;
+                                    if (uploadData && !uploadError) {
+                                        var { data: { publicUrl } } = client.storage
+                                            .from('fauna-reports')
+                                            .getPublicUrl(pdfPath);
+                                        pdfUrl = publicUrl;
+                                        console.log('PDF URL generada:', pdfUrl);
+                                    }
+                                    
+                                    // Actualizar payload con PDF URL
+                                    impactPayload.pdf_url = pdfUrl;
+
+                                    var { data: impactData, error: impactError } = await client
+                                        .from('fauna_impact_reports')
+                                        .insert([impactPayload])
+                                        .select();
+
+                                    if (impactError) {
+                                        console.error('Error guardando impacto:', impactError);
+                                        alert('Error: ' + impactError.message);
+                                        submitBtn.disabled = false;
+                                        submitBtn.value = 'Generar reporte';
+                                        return;
+                                    }
+
+                                    console.log('✓ Impacto guardado:', impactData);
+                                    alert('✓ Reporte de impacto generado y guardado exitosamente.');
+                                    faunaForm.reset();
+                                    
+                                    // Recargar historial
+                                    setTimeout(loadFaunaReports, 500);
+
+                                    submitBtn.disabled = false;
+                                    submitBtn.value = 'Generar reporte';
+                                    
+                                } catch (err) {
+                                    console.error('Error en impacto:', err);
+                                    alert('Error: ' + err.message);
+                                    submitBtn.disabled = false;
+                                    submitBtn.value = 'Generar reporte';
+                                }
+                            }).catch(function (err) {
+                                console.error('Error generando PDF impacto:', err);
+                                alert('Error al generar el PDF: ' + err.message);
                                 submitBtn.disabled = false;
                                 submitBtn.value = 'Generar reporte';
-                                return;
-                            }
-
-                            console.log('✓ Impacto guardado:', impactData);
-                            console.log('DEBUG: Report saved to fauna_impact_reports with evento:', evento);
-                            alert('✓ Reporte de impacto guardado exitosamente.');
-                            faunaForm.reset();
-                            submitBtn.disabled = false;
-                            submitBtn.value = 'Generar reporte';
+                            });
                             return;
                         }
 
@@ -6566,25 +6666,57 @@
                             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
                         };
 
-                        // Generar PDF
-                        html2pdf().set(opt).from(reportSummary).save().then(async function() {
+                        // Generar PDF - toPdf() retorna promesa
+                        html2pdf().set(opt).from(reportSummary).toPdf().get('pdf').then(async function(pdf) {
                             console.log('PDF generado exitosamente');
                             
-                            // Ahora guardar en Supabase
-                            var client = window.supabaseClient;
-                            if (!client) {
-                                alert('Error: No hay conexión con la base de datos.');
-                                if (submitBtn) {
-                                    submitBtn.disabled = false;
-                                    submitBtn.value = 'Generar reporte';
-                                }
-                                return;
-                            }
-
                             try {
+                                // Obtener blob del PDF
+                                var pdfBlob = pdf.output('blob');
+                                
+                                // Mostrar preview en iframe
+                                var previewContainer = document.getElementById('pdf-preview-container');
+                                var previewFrame = document.getElementById('pdf-preview-frame');
+                                var spinner = document.getElementById('pdf-spinner');
+                                
+                                if (previewContainer && previewFrame) {
+                                    var blobUrl = URL.createObjectURL(pdfBlob);
+                                    previewFrame.src = blobUrl;
+                                    previewContainer.style.display = 'flex';
+                                    if (spinner) spinner.style.display = 'none';
+                                    
+                                    // Wire download button
+                                    var downloadBtn = document.getElementById('pdf-download-btn');
+                                    if (downloadBtn) {
+                                        downloadBtn.onclick = function() {
+                                            pdf.save(filename);
+                                        };
+                                    }
+                                    
+                                    // Wire close button
+                                    var closeBtn = document.getElementById('pdf-preview-close');
+                                    if (closeBtn) {
+                                        closeBtn.onclick = function() {
+                                            previewContainer.style.display = 'none';
+                                            URL.revokeObjectURL(blobUrl);
+                                        };
+                                    }
+                                }
+                                
+                                // Ahora guardar en Supabase
+                                var client = window.supabaseClient;
+                                if (!client) {
+                                    alert('✓ PDF generado. Notificación: Sin conexión para guardar en BD.');
+                                    if (submitBtn) {
+                                        submitBtn.disabled = false;
+                                        submitBtn.value = 'Generar reporte';
+                                    }
+                                    return;
+                                }
+
                                 var { data: { session } } = await client.auth.getSession();
                                 if (!session) {
-                                    alert('Atención: No has iniciado sesión. El PDF se generó pero NO se guardará en la base de datos.');
+                                    alert('✓ PDF generado. Notificación: No estás en sesión para guardar en BD.');
                                     if (submitBtn) {
                                         submitBtn.disabled = false;
                                         submitBtn.value = 'Generar reporte';
@@ -6593,6 +6725,26 @@
                                 }
 
                                 console.log('Guardando en Supabase...');
+                                
+                                // Upload PDF a storage
+                                var pdfPath = 'fauna/' + Date.now() + '-' + folio + '.pdf';
+                                var { data: uploadData, error: uploadError } = await client.storage
+                                    .from('fauna-reports')
+                                    .upload(pdfPath, pdfBlob, { contentType: 'application/pdf' });
+                                
+                                if (uploadError) {
+                                    console.warn('Warning subiendo PDF:', uploadError);
+                                    // Continuar sin URL
+                                }
+                                
+                                var pdfUrl = null;
+                                if (uploadData && !uploadError) {
+                                    var { data: { publicUrl } } = client.storage
+                                        .from('fauna-reports')
+                                        .getPublicUrl(pdfPath);
+                                    pdfUrl = publicUrl;
+                                    console.log('PDF URL generada:', pdfUrl);
+                                }
 
                                 // Guardar reporte de rescate
                                 var rescatePayload = {
@@ -6607,7 +6759,7 @@
                                     observaciones: observaciones,
                                     estado: 'completado',
                                     tipo_reporte: 'Rescate',
-                                    pdf_url: null
+                                    pdf_url: pdfUrl
                                 };
 
                                 var { data: rescateData, error: rescateError } = await client
@@ -6630,6 +6782,9 @@
 
                                 // Limpiar formulario
                                 faunaForm.reset();
+                                
+                                // Recargar historial
+                                setTimeout(loadFaunaReports, 500);
 
                                 if (submitBtn) {
                                     submitBtn.disabled = false;
