@@ -3064,6 +3064,9 @@
 
     <!-- Scripts: fecha/hora, bloqueo Cargo y comportamiento Turno -->
     <script>
+        // Variable global para almacenar logo en base64
+        window.logoBase64 = null;
+        
         document.addEventListener('DOMContentLoaded', function () {
             function pad(n) { return n.toString().padStart(2, '0'); }
             var d = new Date();
@@ -3077,6 +3080,7 @@
             if (elHistorial) elHistorial.textContent = str;
             var elEstadistica = document.getElementById('report-date-estadistica');
             if (elEstadistica) elEstadistica.textContent = str;
+            
             // Mostrar horario UTC: hora en la primera línea y fecha UTC en la segunda (sin leyenda previa)
             try {
                 var utcHours = pad(d.getUTCHours());
@@ -3091,6 +3095,26 @@
                 var utcElEstadistica = document.getElementById('report-utc-estadistica');
                 if (utcElEstadistica) utcElEstadistica.innerHTML = '<div><strong>' + utcStr + ' UTC</strong></div><div style="font-size:12px;color:#6b7280;margin-top:4px">' + utcDateStr + '</div>';
             } catch (e) { }
+
+            // Cargar logo a base64 para usar en PDFs
+            var logoImg = document.querySelector('.report-header .left img');
+            if (logoImg && logoImg.src) {
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d');
+                var img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = function() {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    window.logoBase64 = canvas.toDataURL('image/png');
+                    console.log('Logo convertido a base64 correctamente');
+                };
+                img.onerror = function() {
+                    console.warn('No se pudo cargar logo, se usará fallback');
+                };
+                img.src = logoImg.src;
+            }
 
             // Bloquear el campo Cargo al seleccionar una opción
             var cargoSelect = document.getElementById('report-role');
@@ -4729,9 +4753,27 @@
                     } catch (ex) { }
                     return h;
                 }
-                // Obtener logo (intentar desde header) y membrete
+                // Obtener logo (intentar desde header o usar base64 si está disponible) y membrete
                 var logoSrc = '';
-                try { var logoEl = document.querySelector('.report-header .left img'); if (logoEl) logoSrc = logoEl.getAttribute('src'); } catch (e) { }
+                // Preferencia 1: Usar logo base64 precargado
+                if (window.logoBase64) {
+                    logoSrc = window.logoBase64;
+                } else {
+                    // Preferencia 2: Intentar desde header
+                    try { 
+                        var logoEl = document.querySelector('.report-header .left img'); 
+                        if (logoEl) {
+                            var src = logoEl.getAttribute('src');
+                            // Convertir ruta relativa a absoluta
+                            if (src && !src.startsWith('http') && !src.startsWith('data:')) {
+                                var baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+                                logoSrc = baseUrl + '/' + src;
+                            } else {
+                                logoSrc = src;
+                            }
+                        }
+                    } catch (e) { }
+                }
                 // Inline SVG fallback logo (se mostrará si no se puede cargar la imagen externa)
                 var inlineLogo = '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="90" viewBox="0 0 240 90">'
                     + '<rect width="100%" height="100%" fill="#007acc" rx="8" />'
@@ -4938,30 +4980,60 @@
                     margin: 10,
                     filename: filename,
                     image: { type: 'jpeg', quality: 0.95 },
-                    html2canvas: { scale: 2, useCORS: true },
+                    html2canvas: { scale: 2, useCORS: false, allowTaint: true, logging: false },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
                 // Generar y forzar descarga.
                 // Primero intentar precargar el logo (si existe) para evitar errores CORS/imagen rota.
                 (function generatePdf() {
-                    var img = container.querySelector('img');
-                    if (img && img.src) {
-                        var testImg = new Image();
-                        // intentar con crossOrigin para permitir html2canvas usarla
-                        try { testImg.crossOrigin = 'Anonymous'; } catch (e) { }
-                        var cleaned = false;
-                        var timeout = setTimeout(function () {
-                            // si tarda demasiado, eliminar la imagen y continuar
-                            if (img && img.parentNode) { img.parentNode.removeChild(img); cleaned = true; }
-                            proceed();
-                        }, 3000);
-                        testImg.onload = function () { clearTimeout(timeout); proceed(); };
-                        testImg.onerror = function () { clearTimeout(timeout); if (img && img.parentNode) { img.parentNode.removeChild(img); cleaned = true; } proceed(); };
-                        // arrancar la carga
-                        try { testImg.src = img.src; } catch (e) { clearTimeout(timeout); if (img && img.parentNode) { img.parentNode.removeChild(img); } proceed(); }
-                    } else {
+                    // Si tenemos logo base64, proceder directamente
+                    if (window.logoBase64) {
                         proceed();
+                    } else {
+                        // Si no tenemos base64, intentar cargar desde la imagen del header
+                        var img = container.querySelector('img');
+                        if (img && img.src) {
+                            var testImg = new Image();
+                            testImg.crossOrigin = 'anonymous';
+                            var cleaned = false;
+                            var timeout = setTimeout(function () {
+                                // si tarda más de 5 segundos, reemplazar con SVG fallback
+                                if (img && img.parentNode && !cleaned) { 
+                                    var fallbackSvg = document.createElement('div');
+                                    fallbackSvg.innerHTML = inlineLogo;
+                                    img.parentNode.replaceChild(fallbackSvg.firstChild, img); 
+                                    cleaned = true; 
+                                }
+                                proceed();
+                            }, 5000);
+                            testImg.onload = function () { 
+                                clearTimeout(timeout); 
+                                proceed(); 
+                            };
+                            testImg.onerror = function () { 
+                                clearTimeout(timeout); 
+                                if (img && img.parentNode && !cleaned) { 
+                                    var fallbackSvg = document.createElement('div');
+                                    fallbackSvg.innerHTML = inlineLogo;
+                                    img.parentNode.replaceChild(fallbackSvg.firstChild, img); 
+                                    cleaned = true; 
+                                } 
+                                proceed(); 
+                            };
+                            // arrancar la carga
+                            try { testImg.src = img.src; } catch (e) { 
+                                clearTimeout(timeout); 
+                                if (img && img.parentNode && !cleaned) { 
+                                    var fallbackSvg = document.createElement('div');
+                                    fallbackSvg.innerHTML = inlineLogo;
+                                    img.parentNode.replaceChild(fallbackSvg.firstChild, img); 
+                                } 
+                                proceed(); 
+                            }
+                        } else {
+                            proceed();
+                        }
                     }
 
                     function proceed() {
@@ -6452,12 +6524,24 @@
 
                             console.log('DEBUG IMPACTO PAYLOAD:', impactPayload);
 
-                            // Obtener logo del header
+                            // Obtener logo del header o usar base64 precargado
                             var logoSrc = '';
-                            try { 
-                                var logoEl = document.querySelector('.report-header .left img'); 
-                                if (logoEl) logoSrc = logoEl.getAttribute('src'); 
-                            } catch (e) { }
+                            if (window.logoBase64) {
+                                logoSrc = window.logoBase64;
+                            } else {
+                                try { 
+                                    var logoEl = document.querySelector('.report-header .left img'); 
+                                    if (logoEl) {
+                                        var src = logoEl.getAttribute('src');
+                                        if (src && !src.startsWith('http') && !src.startsWith('data:')) {
+                                            var baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+                                            logoSrc = baseUrl + '/' + src;
+                                        } else {
+                                            logoSrc = src;
+                                        }
+                                    }
+                                } catch (e) { }
+                            }
                             
                             // Fallback logo
                             var inlineLogo = '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="70" viewBox="0 0 180 70" style="display:block;margin:0 auto;">' +
@@ -6495,9 +6579,13 @@
                             }
                             impactoHtml += '</div>';
 
-                            // centro: logo sobre título (centrado) - usar SVG embebido para evitar CORS
+                            // centro: logo sobre título (centrado)
                             impactoHtml += '<div style="flex:1;text-align:center;padding:0 12px">';
-                            impactoHtml += inlineLogo;
+                            if (logoSrc) { 
+                                impactoHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">'; 
+                            } else { 
+                                impactoHtml += inlineLogo; 
+                            }
                             impactoHtml += '<h2 style="color:#0b66c3;margin:0;font-size:20px;">Reporte de Control de Fauna</h2>';
                             impactoHtml += '<div style="margin-top:6px;font-size:14px;color:#111;font-weight:700;">Impacto Faunístico</div>';
                             impactoHtml += '</div>';
@@ -6716,17 +6804,35 @@
                                             '<div style="flex:1;text-align:center;padding:0 12px">';
                                         
                                         var logoSrc = '';
-                                        try { var logoEl = document.querySelector('.report-header .left img'); if (logoEl) logoSrc = logoEl.getAttribute('src'); } catch (e) { }
-                                        // Usar SVG embebido para evitar problemas CORS
-                                        membreteHtml += '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="70" viewBox="0 0 180 70" style="display:block;margin:0 auto;">' +
-                                            '<rect width="100%" height="100%" fill="#0b66c3" rx="6" />' +
-                                            '<g transform="translate(12,10)">' +
-                                            '<circle cx="20" cy="20" r="16" fill="#fff" />' +
-                                            '<path d="M 20 8 L 28 20 L 24 20 L 24 28 L 16 28 L 16 20 L 12 20 Z" fill="#0b66c3"/>' +
-                                            '</g>' +
-                                            '<text x="95" y="28" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" font-weight="bold">Fauna</text>' +
-                                            '<text x="95" y="48" font-family="Arial, sans-serif" font-size="11" fill="#e8f1f8">Rescate</text>' +
-                                            '</svg>';
+                                        if (window.logoBase64) {
+                                            logoSrc = window.logoBase64;
+                                        } else {
+                                            try { 
+                                                var logoEl = document.querySelector('.report-header .left img'); 
+                                                if (logoEl) {
+                                                    var src = logoEl.getAttribute('src');
+                                                    if (src && !src.startsWith('http') && !src.startsWith('data:')) {
+                                                        var baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+                                                        logoSrc = baseUrl + '/' + src;
+                                                    } else {
+                                                        logoSrc = src;
+                                                    }
+                                                }
+                                            } catch (e) { }
+                                        }
+                                        if (logoSrc) {
+                                            membreteHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">';
+                                        } else {
+                                            membreteHtml += '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="70" viewBox="0 0 180 70" style="display:block;margin:0 auto;">' +
+                                                '<rect width="100%" height="100%" fill="#0b66c3" rx="6" />' +
+                                                '<g transform="translate(12,10)">' +
+                                                '<circle cx="20" cy="20" r="16" fill="#fff" />' +
+                                                '<path d="M 20 8 L 28 20 L 24 20 L 24 28 L 16 28 L 16 20 L 12 20 Z" fill="#0b66c3"/>' +
+                                                '</g>' +
+                                                '<text x="95" y="28" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" font-weight="bold">Fauna</text>' +
+                                                '<text x="95" y="48" font-family="Arial, sans-serif" font-size="11" fill="#e8f1f8">Rescate</text>' +
+                                                '</svg>';
+                                        }
                                         
                                         membreteHtml += '<h2 style="color:#0b66c3;margin:0;font-size:20px;">Reporte de Control de Fauna</h2>' +
                                             '<div style="margin-top:6px;font-size:14px;color:#111;font-weight:700;">Rescate y Reubicación</div>' +
@@ -7495,7 +7601,7 @@
                         impactQuery = impactQuery.lte('fecha_reporte', filters.fechaHasta);
                     }
 
-                    const { data: impactData, error: impactError } = await impactQuery.order('fecha_reporte', { ascending: false });
+                    const { data: impactData, error: impactError } = await impactQuery.order('created_at', { ascending: false });
                     console.log('DEBUG loadFaunaReports - impactData:', impactData);
                     console.log('DEBUG loadFaunaReports - impactError:', impactError);
 
@@ -7515,7 +7621,7 @@
                         rescateQuery = rescateQuery.eq('especie', filters.especie);
                     }
 
-                    const { data: rescateData, error: rescateError } = await rescateQuery.order('fecha_reporte', { ascending: false });
+                    const { data: rescateData, error: rescateError } = await rescateQuery.order('created_at', { ascending: false });
 
                     if (impactError || rescateError) {
                         console.error('Error loading fauna reports:', {impactError, rescateError});
@@ -7571,7 +7677,39 @@
                         } else {
                             reportsList.innerHTML = '';
                             allReports.forEach(function(report) {
-                                const fechaReporte = report.fecha_reporte ? new Date(report.fecha_reporte).toLocaleDateString('es-ES') : '-';
+                                let fechaReporte = report.fecha_reporte ? new Date(report.fecha_reporte).toLocaleDateString('es-ES') : '-';
+                                
+                                // Extraer hora: primero intentar del folio, luego de created_at
+                                let horaExtraida = null;
+                                
+                                // Intentar extraer hora del folio (formato: YYYYMMDD-HHMMSS)
+                                if (report.folio) {
+                                    const folioParts = report.folio.split('-');
+                                    if (folioParts.length === 2 && folioParts[1] && folioParts[1].length === 6) {
+                                        const hh = folioParts[1].substring(0, 2);
+                                        const mm = folioParts[1].substring(2, 4);
+                                        const ss = folioParts[1].substring(4, 6);
+                                        horaExtraida = hh + ':' + mm + ':' + ss;
+                                    }
+                                }
+                                
+                                // Si no hay hora del folio, intentar del created_at
+                                if (!horaExtraida && report.created_at) {
+                                    try {
+                                        const fecha = new Date(report.created_at);
+                                        const hh = fecha.getHours().toString().padStart(2, '0');
+                                        const mm = fecha.getMinutes().toString().padStart(2, '0');
+                                        const ss = fecha.getSeconds().toString().padStart(2, '0');
+                                        horaExtraida = hh + ':' + mm + ':' + ss;
+                                    } catch (e) {
+                                        horaExtraida = null;
+                                    }
+                                }
+                                
+                                if (horaExtraida) {
+                                    fechaReporte = fechaReporte + ' ' + horaExtraida;
+                                }
+                                
                                 const especie = report.especie || '-';
                                 const ubicacion = report.ubicacion || '-';
                                 const responsable = report.responsable || '-';
