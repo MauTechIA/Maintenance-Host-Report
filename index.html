@@ -3099,21 +3099,52 @@
             // Cargar logo a base64 para usar en PDFs
             var logoImg = document.querySelector('.report-header .left img');
             if (logoImg && logoImg.src) {
-                var canvas = document.createElement('canvas');
-                var ctx = canvas.getContext('2d');
                 var img = new Image();
                 img.crossOrigin = 'anonymous';
                 img.onload = function() {
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0);
-                    window.logoBase64 = canvas.toDataURL('image/png');
-                    console.log('Logo convertido a base64 correctamente');
+                    try {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = img.width || 200;
+                        canvas.height = img.height || 100;
+                        var ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        window.logoBase64 = canvas.toDataURL('image/png');
+                        console.log('✓ Logo convertido a base64 correctamente. Tamaño:', window.logoBase64.length, 'bytes');
+                    } catch (e) {
+                        console.warn('Error al convertir logo a canvas:', e);
+                    }
                 };
                 img.onerror = function() {
-                    console.warn('No se pudo cargar logo, se usará fallback');
+                    console.warn('⚠️ No se pudo cargar logo desde:', img.src);
                 };
+                // Asegurar que se carga desde la ruta correcta
                 img.src = logoImg.src;
+                
+                // Fallback: Si tarda mucho, intentar cargar directamente como blob
+                setTimeout(function() {
+                    if (!window.logoBase64) {
+                        console.warn('Intentando carga alternativa de logo...');
+                        var xhr = new XMLHttpRequest();
+                        xhr.responseType = 'blob';
+                        xhr.onload = function() {
+                            var reader = new FileReader();
+                            reader.onloadend = function() {
+                                window.logoBase64 = reader.result;
+                                console.log('✓ Logo cargado como blob base64');
+                            };
+                            reader.readAsDataURL(xhr.response);
+                        };
+                        xhr.onerror = function() {
+                            console.warn('No se pudo cargar logo como blob');
+                        };
+                        try {
+                            xhr.open('GET', logoImg.src, true);
+                            xhr.send();
+                        } catch (e) {
+                            console.warn('Error en XHR:', e);
+                        }
+                    }
+                }, 2000);
             }
 
             // Bloquear el campo Cargo al seleccionar una opción
