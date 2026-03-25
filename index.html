@@ -1687,7 +1687,7 @@
 
         <header class="report-header">
             <div class="left">
-                <img src="logo.png" alt="Logo">
+                <img src="logo.png" alt="Logo" crossorigin="anonymous">
             </div>
             <div class="header-center">
                 <h1 id="main-title">Formato de Revisión del Área de Movimiento</h1>
@@ -4836,8 +4836,14 @@
 
                 // centro: logo sobre título (centrado)
                 html += '<div style="flex:1;text-align:center;padding:0 12px">';
-                if (logoSrc) { html += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">'; }
-                else { html += inlineLogo; }
+                // Usar logo base64 si está disponible, sino usar ruta
+                if (logoSrc && logoSrc.startsWith('data:')) { 
+                    html += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px" crossorigin="anonymous">'; 
+                } else if (logoSrc) { 
+                    html += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px" crossorigin="anonymous">'; 
+                } else { 
+                    html += inlineLogo; 
+                }
                 html += '<h2 style="color:#0b66c3;margin:0;font-size:20px;">Reporte de Inspección en Área de Movimiento y Maniobras</h2>';
                 html += '<div style="margin-top:6px;font-size:14px;color:#111;font-weight:700;">RWY: ' + (pistaText || '-') + '</div>';
                 html += '</div>';
@@ -5011,7 +5017,7 @@
                     margin: 10,
                     filename: filename,
                     image: { type: 'jpeg', quality: 0.95 },
-                    html2canvas: { scale: 2, useCORS: false, allowTaint: true, logging: false },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
                 };
 
@@ -6613,7 +6619,7 @@
                             // centro: logo sobre título (centrado)
                             impactoHtml += '<div style="flex:1;text-align:center;padding:0 12px">';
                             if (logoSrc) { 
-                                impactoHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">'; 
+                                impactoHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px" crossorigin="anonymous">'; 
                             } else { 
                                 impactoHtml += inlineLogo; 
                             }
@@ -6672,7 +6678,7 @@
                                 margin: [5, 5, 5, 5],
                                 filename: filename,
                                 image: { type: 'jpeg', quality: 0.98 },
-                                html2canvas: { scale: 2, logging: false, useCORS: true, allowTaint: true },
+                                html2canvas: { scale: 2, logging: false, useCORS: true },
                                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
                             };
 
@@ -6852,7 +6858,7 @@
                                             } catch (e) { }
                                         }
                                         if (logoSrc) {
-                                            membreteHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px">';
+                                            membreteHtml += '<img src="' + logoSrc + '" style="height:120px;display:block;margin:0 auto 6px" crossorigin="anonymous">';
                                         } else {
                                             membreteHtml += '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="70" viewBox="0 0 180 70" style="display:block;margin:0 auto;">' +
                                                 '<rect width="100%" height="100%" fill="#0b66c3" rx="6" />' +
@@ -6927,7 +6933,7 @@
                             margin: [5, 5, 5, 5],
                             filename: filename,
                             image: { type: 'jpeg', quality: 0.98 },
-                            html2canvas: { scale: 2, logging: false, useCORS: true, allowTaint: true },
+                            html2canvas: { scale: 2, logging: false, useCORS: true },
                             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
                         };
 
