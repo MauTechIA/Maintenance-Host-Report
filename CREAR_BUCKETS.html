@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Crear Buckets de Fauna PDFs</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+        h1 {
+            color: #1f2937;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            font-size: 14px;
+            color: #92400e;
+        }
+        .step {
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        .step-title {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .step-text {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 30px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        .output {
+            margin-top: 30px;
+            padding: 16px;
+            background: #1f2937;
+            color: #10b981;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            min-height: 120px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        .output.show {
+            display: block;
+        }
+        .output-line {
+            margin-bottom: 4px;
+            word-break: break-all;
+        }
+        .success {
+            color: #10b981;
+        }
+        .error {
+            color: #ef4444;
+        }
+        .warning-text {
+            color: #f59e0b;
+        }
+        .info {
+            color: #3b82f6;
+        }
+        .loading {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+            margin-left: 8px;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .status-error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Crear Buckets de Fauna</h1>
+        <p class="subtitle">Sistema automático para crear storage de PDFs</p>
+        
+        <div class="warning">
+            ⚠️ <strong>Importante:</strong> Necesitas tener acceso al proyecto de Supabase en esta sesión. Si no, primero inicia sesión en Supabase.
+        </div>
+        
+        <div class="step">
+            <div class="step-title">📋 Qué va a pasar:</div>
+            <div class="step-text">
+                ✅ Se crearán 2 buckets:<br>
+                • fauna_impact_pdfs (para PDFs de impactos)<br>
+                • fauna_rescue_pdfs (para PDFs de rescates)<br>
+                <br>
+                ✅ Se verificará que existen en Supabase<br>
+                ✅ Se mostrará el resultado en la consola
+            </div>
+        </div>
+        
+        <div id="status" class="status-badge status-pending">⏳ Listo para ejecutar</div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="crearBucketsAutomatico()">
+                ▶️ CREAR BUCKETS
+            </button>
+            <button class="btn-secondary" onclick="verificarBucketsExistentes()">
+                🔍 Verificar
+            </button>
+        </div>
+        
+        <div id="output" class="output">
+            <div class="output-line info">🔵 Iniciando...</div>
+        </div>
+        
+        <div class="step" style="margin-top: 30px;">
+            <div class="step-title">📝 Próximo paso:</div>
+            <div class="step-text">
+                Después de crear los buckets, ve a:<br>
+                <strong>Supabase Dashboard → Storage → fauna_impact_pdfs → RLS Policies</strong><br>
+                <br>
+                Agrega 3 políticas (SELECT, INSERT, DELETE)<br>
+                Repite para fauna_rescue_pdfs<br>
+                <br>
+                <em>Ver instrucciones en CREATE_BUCKETS.sql</em>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const outputDiv = document.getElementById('output');
+        const statusDiv = document.getElementById('status');
+        
+        function addLog(message, type = 'info') {
+            const line = document.createElement('div');
+            line.className = `output-line ${type}`;
+            line.textContent = message;
+            outputDiv.appendChild(line);
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+        
+        function setStatus(message, type = 'pending') {
+            statusDiv.textContent = message;
+            statusDiv.className = `status-badge status-${type}`;
+        }
+        
+        function showOutput() {
+            outputDiv.classList.add('show');
+        }
+        
+        async function crearBucketsAutomatico() {
+            outputDiv.innerHTML = '';
+            showOutput();
+            setStatus('⏳ Creando buckets...', 'pending');
+            addLog('🔵 Iniciando creación de buckets...');
+            
+            try {
+                // Obtener el cliente de Supabase desde window
+                if (!window.supabaseClient) {
+                    addLog('❌ Error: Cliente de Supabase no encontrado', 'error');
+                    addLog('ℹ️  Asegúrate de que la página del formulario está cargada', 'warning-text');
+                    setStatus('❌ Error: Cliente no disponible', 'error');
+                    return;
+                }
+                
+                const supabaseClient = window.supabaseClient;
+                addLog('✅ Cliente de Supabase conectado');
+                
+                // CREAR BUCKET 1: fauna_impact_pdfs
+                addLog('\n🟡 Creando bucket 1: fauna_impact_pdfs...');
+                const { data: bucket1, error: error1 } = await supabaseClient
+                    .storage
+                    .createBucket('fauna_impact_pdfs', {
+                        public: false,
+                        fileSizeLimit: 52428800
+                    });
+                
+                if (error1) {
+                    if (error1.message.includes('already')) {
+                        addLog('⚠️  fauna_impact_pdfs ya existe', 'warning-text');
+                    } else {
+                        addLog(`❌ Error en fauna_impact_pdfs: ${error1.message}`, 'error');
+                    }
+                } else {
+                    addLog('✅ fauna_impact_pdfs creado exitosamente', 'success');
+                }
+                
+                // CREAR BUCKET 2: fauna_rescue_pdfs
+                addLog('\n🟡 Creando bucket 2: fauna_rescue_pdfs...');
+                const { data: bucket2, error: error2 } = await supabaseClient
+                    .storage
+                    .createBucket('fauna_rescue_pdfs', {
+                        public: false,
+                        fileSizeLimit: 52428800
+                    });
+                
+                if (error2) {
+                    if (error2.message.includes('already')) {
+                        addLog('⚠️  fauna_rescue_pdfs ya existe', 'warning-text');
+                    } else {
+                        addLog(`❌ Error en fauna_rescue_pdfs: ${error2.message}`, 'error');
+                    }
+                } else {
+                    addLog('✅ fauna_rescue_pdfs creado exitosamente', 'success');
+                }
+                
+                // VERIFICAR
+                addLog('\n🟡 Verificando buckets...');
+                const { data: buckets, error: errorList } = await supabaseClient
+                    .storage
+                    .listBuckets();
+                
+                if (errorList) {
+                    addLog(`❌ Error listando buckets: ${errorList.message}`, 'error');
+                    setStatus('❌ Error durante verificación', 'error');
+                    return;
+                }
+                
+                const bucketNames = buckets.map(b => b.name);
+                addLog(`📋 Buckets encontrados: ${bucketNames.join(', ')}`);
+                
+                const tieneImpact = buckets.some(b => b.name === 'fauna_impact_pdfs');
+                const tieneRescue = buckets.some(b => b.name === 'fauna_rescue_pdfs');
+                
+                if (tieneImpact && tieneRescue) {
+                    addLog('\n✅ ¡ÉXITO! Ambos buckets están listos', 'success');
+                    addLog('📝 Próximo paso: Agrega políticas en Supabase Storage', 'success');
+                    setStatus('✅ Buckets creados correctamente', 'success');
+                } else {
+                    addLog('\n⚠️  Faltan buckets por verificar', 'warning-text');
+                    setStatus('⚠️ Verificación incompleta', 'pending');
+                }
+                
+            } catch (error) {
+                addLog(`❌ Error inesperado: ${error.message}`, 'error');
+                setStatus(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function verificarBucketsExistentes() {
+            outputDiv.innerHTML = '';
+            showOutput();
+            setStatus('🔍 Verificando...');
+            addLog('🔵 Verificando buckets existentes...');
+            
+            try {
+                if (!window.supabaseClient) {
+                    addLog('❌ Cliente de Supabase no disponible', 'error');
+                    return;
+                }
+                
+                const { data: buckets, error } = await window.supabaseClient.storage.listBuckets();
+                
+                if (error) {
+                    addLog(`❌ Error: ${error.message}`, 'error');
+                    setStatus('❌ Error', 'error');
+                    return;
+                }
+                
+                addLog(`📋 Total de buckets: ${buckets.length}`);
+                
+                buckets.forEach(bucket => {
+                    const isTarget = ['fauna_impact_pdfs', 'fauna_rescue_pdfs'].includes(bucket.name);
+                    const icon = isTarget ? '✅' : 'ℹ️';
+                    const type = isTarget ? 'success' : 'info';
+                    addLog(`${icon} ${bucket.name} (${bucket.public ? 'PUBLIC' : 'PRIVATE'})`, type);
+                });
+                
+                const hasTarget = buckets.some(b => ['fauna_impact_pdfs', 'fauna_rescue_pdfs'].includes(b.name));
+                if (hasTarget) {
+                    setStatus('✅ Buckets encontrados');
+                } else {
+                    setStatus('⚠️ Buckets no encontrados', 'pending');
+                }
+                
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Log inicial
+        window.addEventListener('load', () => {
+            if (window.supabaseClient) {
+                setStatus('✅ Supabase conectado - Listo');
+            } else {
+                setStatus('⚠️ Cargando Supabase...', 'pending');
+                setTimeout(() => {
+                    if (!window.supabaseClient) {
+                        setStatus('❌ Supabase no encontrado', 'error');
+                    }
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
