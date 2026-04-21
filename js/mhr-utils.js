@@ -41,6 +41,17 @@
             turnoSection.dataset.mhrTurnoBound = '1';
         }
 
-        return { pad2: pad2, bindLockSelect: bindLockSelect, bindTurnoVisibility: bindTurnoVisibility };
+        function debounce(fn, waitMs) {
+            var timer = null;
+            var wait = Number(waitMs || 250);
+            return function () {
+                var ctx = this;
+                var args = arguments;
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(function () { fn.apply(ctx, args); }, wait);
+            };
+        }
+
+        return { pad2: pad2, bindLockSelect: bindLockSelect, bindTurnoVisibility: bindTurnoVisibility, debounce: debounce };
     })();
 })();

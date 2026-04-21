@@ -6462,6 +6462,9 @@
 
             // Filtros de Historial de Reportes
             var currentAdminFilters = {};
+            var debouncedLoadAdminReports = (window.MHRUtils && typeof window.MHRUtils.debounce === 'function')
+                ? window.MHRUtils.debounce(function (filters) { loadAdminReports(filters); }, 250)
+                : function (filters) { loadAdminReports(filters); };
             function getSelectValues(id) {
                 var sel = document.getElementById(id);
                 if (!sel || !sel.options) return [];
@@ -6488,7 +6491,7 @@
             if (applyFilterBtn) {
                 applyFilterBtn.addEventListener('click', function () {
                     currentAdminFilters = readAdminFilters();
-                    loadAdminReports(currentAdminFilters);
+                    debouncedLoadAdminReports(currentAdminFilters);
                 });
             }
 
@@ -6507,7 +6510,7 @@
                         }
                     });
                     currentAdminFilters = {};
-                    loadAdminReports();
+                    debouncedLoadAdminReports();
                 });
             }
 
@@ -6517,7 +6520,7 @@
                 if (sel) {
                     sel.addEventListener('change', function () {
                         currentAdminFilters = readAdminFilters();
-                        loadAdminReports(currentAdminFilters);
+                        debouncedLoadAdminReports(currentAdminFilters);
                         updateFilterToggleText(id);
                     });
                 }
@@ -6529,7 +6532,7 @@
                 if (inp) {
                     inp.addEventListener('change', function () {
                         currentAdminFilters = readAdminFilters();
-                        loadAdminReports(currentAdminFilters);
+                        debouncedLoadAdminReports(currentAdminFilters);
                     });
                 }
             });
@@ -6578,7 +6581,7 @@
             ['filter-responsable', 'filter-tipo', 'filter-turno', 'filter-pista'].forEach(updateFilterToggleText);
 
             var refreshBtn = document.getElementById('refresh-admin-btn');
-            if (refreshBtn) refreshBtn.addEventListener('click', function () { loadAdminReports(currentAdminFilters); });
+            if (refreshBtn) refreshBtn.addEventListener('click', function () { debouncedLoadAdminReports(currentAdminFilters); });
 
             if (loginBtn) {
                 loginBtn.addEventListener('click', async function () {
@@ -8441,6 +8444,9 @@
 
             // Configurar filtros de fauna
             var currentFaunaFilters = {};
+            var debouncedLoadFaunaReports = (window.MHRUtils && typeof window.MHRUtils.debounce === 'function')
+                ? window.MHRUtils.debounce(function (filters) { loadFaunaReports(filters); }, 250)
+                : function (filters) { loadFaunaReports(filters); };
 
             function readFaunaFilters() {
                 return {
@@ -8455,7 +8461,7 @@
             // Event listeners para filtros
             document.getElementById('fauna-filter-apply-btn')?.addEventListener('click', function() {
                 currentFaunaFilters = readFaunaFilters();
-                loadFaunaReports(currentFaunaFilters);
+                debouncedLoadFaunaReports(currentFaunaFilters);
             });
 
             document.getElementById('fauna-filter-clear-btn')?.addEventListener('click', function() {
@@ -8465,11 +8471,11 @@
                 document.getElementById('filter-fauna-especie').value = '';
                 document.getElementById('filter-fauna-tipo').value = '';
                 currentFaunaFilters = {};
-                loadFaunaReports({});
+                debouncedLoadFaunaReports({});
             });
 
             document.getElementById('fauna-refresh-btn')?.addEventListener('click', function() {
-                loadFaunaReports(currentFaunaFilters);
+                debouncedLoadFaunaReports(currentFaunaFilters);
             });
 
             // Event listener para el botón de actualizar estadísticas de fauna

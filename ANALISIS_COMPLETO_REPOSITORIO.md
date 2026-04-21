@@ -176,5 +176,10 @@ Aunque está en un solo archivo, funcionalmente se divide en estos módulos:
 
 ### Estado por fases del roadmap
 - **Fase 1:** aplicada (seguridad base + limpieza de duplicación crítica).
-- **Fase 2:** iniciada (extracción gradual de JS reutilizable a archivos separados).
+- **Fase 2:** en progreso (extracción gradual de JS reutilizable + optimizaciones de render/debounce).
 - **Fase 3:** pendiente (tooling de calidad + pruebas E2E/CI).
+
+### Bloques estimados restantes
+- **Bloque restante 1:** cerrar Fase 2 (extraer más módulos de `index.html` y reducir estilos inline prioritarios).
+- **Bloque restante 2:** ejecutar Fase 3 (lint/format + smoke/E2E + CI básica).
+- **Total estimado pendiente:** **2 bloques**.
