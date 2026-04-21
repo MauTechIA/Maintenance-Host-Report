@@ -154,3 +154,27 @@ Aunque está en un solo archivo, funcionalmente se divide en estos módulos:
 - Código más mantenible y fácil de evolucionar.
 - Mejor rendimiento percibido en formularios/historiales.
 - Menor tiempo de onboarding para nuevos desarrolladores.
+
+## 7) Desglose de lo ya realizado (iteraciones aplicadas)
+
+### Prioridad 0 — Seguridad (completado en esta etapa inicial)
+- Se eliminó el uso de `SUPABASE_SERVICE_KEY` en frontend.
+- Se dejó configuración runtime con `window.__MHR_CONFIG` + `APP_CONFIG`.
+- Se implementó `resolvePdfUrl` con estrategia por capas:
+  1) Edge Function,
+  2) `createSignedUrl` autenticado,
+  3) `getPublicUrl` como fallback.
+- Se agregó validación básica de rutas (`isSafeStoragePath`).
+
+### Prioridad 1 — Arquitectura/Mantenibilidad (en progreso)
+- Se centralizaron utilidades repetidas de UI en `MHRUtils` (`pad2`, `bindLockSelect`, `bindTurnoVisibility`).
+- **Nuevo paso de fase 2:** dichas utilidades se extrajeron a archivo externo `js/mhr-utils.js` para empezar a descomponer el monolito de `index.html` sin alterar funcionalidad.
+
+### Prioridad 2 — Rendimiento/UX (en progreso)
+- Se optimizó resolución de URLs PDF en historial admin en paralelo + caché por path.
+- Se cambió render de tablas (admin y fauna) para usar `DocumentFragment` y reducir reflows.
+
+### Estado por fases del roadmap
+- **Fase 1:** aplicada (seguridad base + limpieza de duplicación crítica).
+- **Fase 2:** iniciada (extracción gradual de JS reutilizable a archivos separados).
+- **Fase 3:** pendiente (tooling de calidad + pruebas E2E/CI).

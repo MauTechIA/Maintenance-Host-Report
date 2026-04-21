@@ -3083,6 +3083,8 @@
 
     </div> <!-- End main-content -->
 
+    <script src="./js/mhr-utils.js"></script>
+
     <!-- Scripts: fecha/hora, bloqueo Cargo y comportamiento Turno -->
     <script>
         // Variable global para almacenar logo en base64
@@ -3133,9 +3135,14 @@
         })();
         
         document.addEventListener('DOMContentLoaded', function () {
+            var utils = window.MHRUtils || {
+                pad2: function (n) { return n.toString().padStart(2, '0'); },
+                bindLockSelect: function () { },
+                bindTurnoVisibility: function () { }
+            };
             var d = new Date();
-            var date = window.MHRUtils.pad2(d.getDate()) + '/' + window.MHRUtils.pad2(d.getMonth() + 1) + '/' + d.getFullYear();
-            var time = window.MHRUtils.pad2(d.getHours()) + ':' + window.MHRUtils.pad2(d.getMinutes()) + ':' + window.MHRUtils.pad2(d.getSeconds());
+            var date = utils.pad2(d.getDate()) + '/' + utils.pad2(d.getMonth() + 1) + '/' + d.getFullYear();
+            var time = utils.pad2(d.getHours()) + ':' + utils.pad2(d.getMinutes()) + ':' + utils.pad2(d.getSeconds());
             // Mostrar fecha y hora local (sin zona entre paréntesis)
             var str = date + ' ' + time;
             var el = document.getElementById('report-date');
@@ -3147,11 +3154,11 @@
             
             // Mostrar horario UTC: hora en la primera línea y fecha UTC en la segunda (sin leyenda previa)
             try {
-                var utcHours = window.MHRUtils.pad2(d.getUTCHours());
-                var utcMins = window.MHRUtils.pad2(d.getUTCMinutes());
-                var utcSecs = window.MHRUtils.pad2(d.getUTCSeconds());
+                var utcHours = utils.pad2(d.getUTCHours());
+                var utcMins = utils.pad2(d.getUTCMinutes());
+                var utcSecs = utils.pad2(d.getUTCSeconds());
                 var utcStr = utcHours + ':' + utcMins + ':' + utcSecs;
-                var utcDateStr = window.MHRUtils.pad2(d.getUTCDate()) + '/' + window.MHRUtils.pad2(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear();
+                var utcDateStr = utils.pad2(d.getUTCDate()) + '/' + utils.pad2(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear();
                 var utcEl = document.getElementById('report-utc');
                 if (utcEl) utcEl.innerHTML = '<div><strong>' + utcStr + ' UTC</strong></div><div style="font-size:12px;color:#6b7280;margin-top:4px">' + utcDateStr + '</div>';
                 var utcElHistorial = document.getElementById('report-utc-historial');
@@ -3214,8 +3221,8 @@
             // Bloquear el campo Cargo al seleccionar una opción
             var cargoSelect = document.getElementById('report-role');
             var resetButton = document.getElementById('report-role-reset');
-            window.MHRUtils.bindLockSelect(cargoSelect, resetButton, { clearOnReset: false });
-            window.MHRUtils.bindTurnoVisibility('tipo_inspeccion', 'turno-section', 'turno');
+            utils.bindLockSelect(cargoSelect, resetButton, { clearOnReset: false });
+            utils.bindTurnoVisibility('tipo_inspeccion', 'turno-section', 'turno');
 
             // Mostrar/ocultar campo nombre representante de área
             var areaRepSelect = document.getElementById('report-area-rep');
