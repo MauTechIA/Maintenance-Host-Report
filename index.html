@@ -6409,13 +6409,28 @@
                 updateFilterToggleText('filter-turno');
                 updateFilterToggleText('filter-pista');
 
+                // Prioridad 2 (performance): resolver URLs de PDF en paralelo y reutilizar resultados.
+                var pdfUrlCache = {};
+                var uniquePdfPaths = Array.from(new Set(
+                    data.map(function (r) { return (r && r.pdf_url) ? String(r.pdf_url).trim() : ''; })
+                        .filter(Boolean)
+                ));
+                await Promise.all(uniquePdfPaths.map(async function (path) {
+                    try {
+                        pdfUrlCache[path] = await resolvePdfUrl('reports', path, APP_CONFIG.signedUrlExpiresIn);
+                    } catch (e) {
+                        pdfUrlCache[path] = null;
+                    }
+                }));
+
                 for (const r of data) {
                     var tr = document.createElement('tr');
                     var pdfLink = '<span style="color:#9ca3af">Sin PDF</span>';
 
                     if (r.pdf_url) {
                         try {
-                            var resolvedUrl = await resolvePdfUrl('reports', r.pdf_url, APP_CONFIG.signedUrlExpiresIn);
+                            var pathKey = String(r.pdf_url).trim();
+                            var resolvedUrl = pdfUrlCache[pathKey] || null;
                             if (resolvedUrl) {
                                 pdfLink = '<a href="' + resolvedUrl + '" target="_blank" class="admin-btn-view">📄 Ver PDF</a>';
                             } else {
