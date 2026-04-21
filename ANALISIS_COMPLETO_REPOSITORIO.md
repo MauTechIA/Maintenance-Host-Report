@@ -170,16 +170,15 @@ Aunque está en un solo archivo, funcionalmente se divide en estos módulos:
 - Se centralizaron utilidades repetidas de UI en `MHRUtils` (`pad2`, `bindLockSelect`, `bindTurnoVisibility`).
 - **Nuevo paso de fase 2:** dichas utilidades se extrajeron a archivo externo `js/mhr-utils.js` para empezar a descomponer el monolito de `index.html` sin alterar funcionalidad.
 
-### Prioridad 2 — Rendimiento/UX (en progreso)
+### Prioridad 2 — Rendimiento/UX (aplicada en versión base)
 - Se optimizó resolución de URLs PDF en historial admin en paralelo + caché por path.
 - Se cambió render de tablas (admin y fauna) para usar `DocumentFragment` y reducir reflows.
 
 ### Estado por fases del roadmap
 - **Fase 1:** aplicada (seguridad base + limpieza de duplicación crítica).
-- **Fase 2:** en progreso (extracción gradual de JS reutilizable + optimizaciones de render/debounce).
-- **Fase 3:** pendiente (tooling de calidad + pruebas E2E/CI).
+- **Fase 2:** aplicada (extracción de utilidades a JS externo + optimizaciones de render/debounce).
+- **Fase 3:** aplicada en versión base (scripts de checks de seguridad/utilidades/SW para ejecución local/CI).
 
 ### Bloques estimados restantes
-- **Bloque restante 1:** cerrar Fase 2 (extraer más módulos de `index.html` y reducir estilos inline prioritarios).
-- **Bloque restante 2:** ejecutar Fase 3 (lint/format + smoke/E2E + CI básica).
-- **Total estimado pendiente:** **2 bloques**.
+- **Pendiente técnico mayor:** migración adicional de más módulos desde `index.html` y batería E2E completa en CI.
+- **Total estimado pendiente para “v2 de optimización”:** **1 bloque grande** (endurecimiento final + pruebas de extremo a extremo).

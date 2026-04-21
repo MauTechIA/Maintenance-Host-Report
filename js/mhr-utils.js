@@ -52,6 +52,19 @@
             };
         }
 
-        return { pad2: pad2, bindLockSelect: bindLockSelect, bindTurnoVisibility: bindTurnoVisibility, debounce: debounce };
+        function renderRows(containerEl, rowElements) {
+            if (!containerEl || !rowElements || !rowElements.length) return;
+            var frag = document.createDocumentFragment();
+            rowElements.forEach(function (row) { if (row) frag.appendChild(row); });
+            containerEl.appendChild(frag);
+        }
+
+        return {
+            pad2: pad2,
+            bindLockSelect: bindLockSelect,
+            bindTurnoVisibility: bindTurnoVisibility,
+            debounce: debounce,
+            renderRows: renderRows
+        };
     })();
 })();
