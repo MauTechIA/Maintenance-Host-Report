@@ -6189,24 +6189,60 @@
     <!-- Supabase Logic -->
     <script>
         (function () {
-            // Configuración de Supabase
-            var SUPABASE_URL = 'https://pwvedjqknrwlebayeodd.supabase.co';
-            var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3dmVkanFrbnJ3bGViYXllb2RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTIwMDcsImV4cCI6MjA4MTY2ODAwN30.PDVUtOTYDdhQk25U9K-i6mZFJ2vIXHksEEQ9z2mMW5o';
-            // ⚠️ ADVERTENCIA: La Service Role Key es secreta y potente. NO la expongas en producción. Úsala solo para pruebas.
-            // Para producción, crea una Edge Function en Supabase para generar signed URLs de forma segura.
-            var SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3dmVkanFrbnJ3bGViYXllb2RkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjA5MjAwNywiZXhwIjoyMDgxNjY4MDA3fQ.j9iwH161MBhjJXlc0eKmvMtUaFHSRQqZXsu4b1SJom4'; // Tu Service Role Key
+            // Configuración de Supabase (solo cliente público, sin service role en frontend)
+            var RUNTIME_CONFIG = window.__MHR_CONFIG || {};
+            var APP_CONFIG = {
+                supabaseUrl: RUNTIME_CONFIG.supabaseUrl || 'https://pwvedjqknrwlebayeodd.supabase.co',
+                supabaseAnonKey: RUNTIME_CONFIG.supabaseAnonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3dmVkanFrbnJ3bGViYXllb2RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYwOTIwMDcsImV4cCI6MjA4MTY2ODAwN30.PDVUtOTYDdhQk25U9K-i6mZFJ2vIXHksEEQ9z2mMW5o',
+                // Opcional para producción: Edge Function que devuelva { signedUrl }
+                signedUrlFunction: RUNTIME_CONFIG.signedUrlFunction || 'mhr-signed-url',
+                signedUrlExpiresIn: Number(RUNTIME_CONFIG.signedUrlExpiresIn || 3600)
+            };
 
             var supabase = null;
-            var serviceSupabase = null; // Cliente con service key para operaciones administrativas
             try {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                supabase = window.supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseAnonKey);
                 window.supabaseClient = supabase; // Exponer cliente globalmente
-                if (SUPABASE_SERVICE_KEY && SUPABASE_SERVICE_KEY !== 'TU_SERVICE_ROLE_KEY_AQUI') {
-                    serviceSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-                }
             } catch (e) {
                 console.error('Error inicializando Supabase:', e);
                 return;
+            }
+
+            function isSafeStoragePath(path) {
+                if (!path || typeof path !== 'string') return false;
+                if (path.includes('..') || path.includes('\\') || path.startsWith('/')) return false;
+                return true;
+            }
+
+            async function resolvePdfUrl(bucketName, filePath, ttlSeconds) {
+                if (!filePath || !isSafeStoragePath(filePath)) return null;
+
+                var expiresIn = Number(ttlSeconds || APP_CONFIG.signedUrlExpiresIn || 3600);
+                if (!Number.isFinite(expiresIn) || expiresIn <= 0) expiresIn = 3600;
+
+                // 1) Estrategia recomendada: Edge Function (backend) para generar signed URLs.
+                try {
+                    if (APP_CONFIG.signedUrlFunction) {
+                        var fnResp = await supabase.functions.invoke(APP_CONFIG.signedUrlFunction, {
+                            body: { bucket: bucketName, path: filePath, expiresIn: expiresIn }
+                        });
+                        if (!fnResp.error && fnResp.data && fnResp.data.signedUrl) return fnResp.data.signedUrl;
+                    }
+                } catch (e) { }
+
+                // 2) Fallback: Signed URL con cliente autenticado (requiere políticas RLS adecuadas).
+                try {
+                    var signedResp = await supabase.storage.from(bucketName).createSignedUrl(filePath, expiresIn);
+                    if (!signedResp.error && signedResp.data && signedResp.data.signedUrl) return signedResp.data.signedUrl;
+                } catch (e) { }
+
+                // 3) Último fallback: URL pública si el bucket es público.
+                try {
+                    var publicResp = supabase.storage.from(bucketName).getPublicUrl(filePath);
+                    if (publicResp && publicResp.data && publicResp.data.publicUrl) return publicResp.data.publicUrl;
+                } catch (e) { }
+
+                return null;
             }
 
             var loginModal = document.getElementById('login-modal');
@@ -6379,33 +6415,18 @@
                     var tr = document.createElement('tr');
                     var pdfLink = '<span style="color:#9ca3af">Sin PDF</span>';
 
-                    if (r.pdf_url && serviceSupabase) {
+                    if (r.pdf_url) {
                         try {
-                            var { data: signedData, error: signedError } = await serviceSupabase
-                                .storage
-                                .from('reports')
-                                .createSignedUrl(r.pdf_url, 3600);
-
-                            if (signedError) {
-                                console.error('Error generando signed URL:', signedError);
-                                pdfLink = '<span style="color:#ef4444">Error generando enlace</span>';
-                            } else if (signedData && signedData.signedUrl) {
-                                pdfLink = '<a href="' + signedData.signedUrl + '" target="_blank" class="admin-btn-view">📄 Ver PDF</a>';
+                            var resolvedUrl = await resolvePdfUrl('reports', r.pdf_url, APP_CONFIG.signedUrlExpiresIn);
+                            if (resolvedUrl) {
+                                pdfLink = '<a href="' + resolvedUrl + '" target="_blank" class="admin-btn-view">📄 Ver PDF</a>';
                             } else {
                                 pdfLink = '<span style="color:#9ca3af">No disponible</span>';
                             }
                         } catch (e) {
-                            console.error('Excepción generando signed URL:', e);
+                            console.error('Excepción resolviendo URL de PDF:', e);
                             pdfLink = '<span style="color:#ef4444">Error</span>';
                         }
-                    } else if (r.pdf_url) {
-                        var { data: publicData } = supabase
-                            .storage
-                            .from('reports')
-                            .getPublicUrl(r.pdf_url);
-                        pdfLink = publicData && publicData.publicUrl
-                            ? '<a href="' + publicData.publicUrl + '" target="_blank" class="admin-btn-view">📄 Ver PDF</a>'
-                            : '<span style="color:#9ca3af">No disponible</span>';
                     }
 
                     tr.innerHTML = '<td>' + (r.fecha_local || (r.created_at ? r.created_at.slice(0,10).split('-').reverse().join('/') + ' ' + r.created_at.slice(11,19) : '-')) + '</td>' +
