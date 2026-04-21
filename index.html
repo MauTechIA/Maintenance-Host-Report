@@ -3087,12 +3087,55 @@
     <script>
         // Variable global para almacenar logo en base64
         window.logoBase64 = null;
+        window.MHRUtils = window.MHRUtils || (function () {
+            function toArray(nodes) { return Array.prototype.slice.call(nodes || []); }
+            function pad2(n) { return n.toString().padStart(2, '0'); }
+
+            function bindLockSelect(selectEl, resetBtn, opts) {
+                if (!selectEl || !resetBtn) return;
+                if (selectEl.dataset.mhrLockBound === '1') return;
+                var options = opts || {};
+                var clearOnReset = !!options.clearOnReset;
+
+                selectEl.addEventListener('change', function () {
+                    if (!selectEl.value) return;
+                    selectEl.disabled = true;
+                    resetBtn.style.display = 'inline-block';
+                });
+
+                resetBtn.addEventListener('click', function () {
+                    selectEl.disabled = false;
+                    if (clearOnReset) selectEl.value = '';
+                    resetBtn.style.display = 'none';
+                });
+                selectEl.dataset.mhrLockBound = '1';
+            }
+
+            function bindTurnoVisibility(tipoName, sectionId, turnoName) {
+                var tipoEls = toArray(document.getElementsByName(tipoName));
+                var turnoSection = document.getElementById(sectionId);
+                if (!tipoEls.length || !turnoSection) return;
+                if (turnoSection.dataset.mhrTurnoBound === '1') return;
+
+                function update() {
+                    var anyChecked = tipoEls.some(function (i) { return !!i.checked; });
+                    turnoSection.style.display = anyChecked ? 'block' : 'none';
+                    if (!anyChecked && turnoName) {
+                        toArray(document.getElementsByName(turnoName)).forEach(function (r) { r.checked = false; });
+                    }
+                }
+                tipoEls.forEach(function (el) { el.addEventListener('change', update); });
+                update();
+                turnoSection.dataset.mhrTurnoBound = '1';
+            }
+
+            return { pad2: pad2, bindLockSelect: bindLockSelect, bindTurnoVisibility: bindTurnoVisibility };
+        })();
         
         document.addEventListener('DOMContentLoaded', function () {
-            function pad(n) { return n.toString().padStart(2, '0'); }
             var d = new Date();
-            var date = pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
-            var time = pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+            var date = window.MHRUtils.pad2(d.getDate()) + '/' + window.MHRUtils.pad2(d.getMonth() + 1) + '/' + d.getFullYear();
+            var time = window.MHRUtils.pad2(d.getHours()) + ':' + window.MHRUtils.pad2(d.getMinutes()) + ':' + window.MHRUtils.pad2(d.getSeconds());
             // Mostrar fecha y hora local (sin zona entre paréntesis)
             var str = date + ' ' + time;
             var el = document.getElementById('report-date');
@@ -3104,11 +3147,11 @@
             
             // Mostrar horario UTC: hora en la primera línea y fecha UTC en la segunda (sin leyenda previa)
             try {
-                var utcHours = pad(d.getUTCHours());
-                var utcMins = pad(d.getUTCMinutes());
-                var utcSecs = pad(d.getUTCSeconds());
+                var utcHours = window.MHRUtils.pad2(d.getUTCHours());
+                var utcMins = window.MHRUtils.pad2(d.getUTCMinutes());
+                var utcSecs = window.MHRUtils.pad2(d.getUTCSeconds());
                 var utcStr = utcHours + ':' + utcMins + ':' + utcSecs;
-                var utcDateStr = pad(d.getUTCDate()) + '/' + pad(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear();
+                var utcDateStr = window.MHRUtils.pad2(d.getUTCDate()) + '/' + window.MHRUtils.pad2(d.getUTCMonth() + 1) + '/' + d.getUTCFullYear();
                 var utcEl = document.getElementById('report-utc');
                 if (utcEl) utcEl.innerHTML = '<div><strong>' + utcStr + ' UTC</strong></div><div style="font-size:12px;color:#6b7280;margin-top:4px">' + utcDateStr + '</div>';
                 var utcElHistorial = document.getElementById('report-utc-historial');
@@ -3171,32 +3214,8 @@
             // Bloquear el campo Cargo al seleccionar una opción
             var cargoSelect = document.getElementById('report-role');
             var resetButton = document.getElementById('report-role-reset');
-            if (cargoSelect && resetButton) {
-                cargoSelect.addEventListener('change', function () {
-                    cargoSelect.disabled = true;
-                    resetButton.style.display = 'inline-block';
-                });
-                resetButton.addEventListener('click', function () {
-                    cargoSelect.disabled = false;
-                    resetButton.style.display = 'none';
-                });
-            }
-
-            // Mostrar el selector Turno (Diurna/Nocturna) cuando se seleccione algún tipo de inspección
-            var tipoEls = document.getElementsByName('tipo_inspeccion');
-            var turnoSection = document.getElementById('turno-section');
-            if (tipoEls && turnoSection) {
-                function updateTurno() {
-                    var anyChecked = Array.prototype.slice.call(tipoEls).some(function (i) { return i.checked; });
-                    turnoSection.style.display = anyChecked ? 'block' : 'none';
-                    if (!anyChecked) {
-                        var t = document.getElementsByName('turno');
-                        Array.prototype.slice.call(t).forEach(function (r) { r.checked = false; });
-                    }
-                }
-                Array.prototype.slice.call(tipoEls).forEach(function (el) { el.addEventListener('change', updateTurno); });
-                updateTurno();
-            }
+            window.MHRUtils.bindLockSelect(cargoSelect, resetButton, { clearOnReset: false });
+            window.MHRUtils.bindTurnoVisibility('tipo_inspeccion', 'turno-section', 'turno');
 
             // Mostrar/ocultar campo nombre representante de área
             var areaRepSelect = document.getElementById('report-area-rep');
@@ -3232,38 +3251,17 @@
 
     <script>
         (function () {
-            // Mostrar el selector Turno (Diurna/Nocturna) cuando se seleccione algún tipo de inspección
-            var tipoEls = document.getElementsByName('tipo_inspeccion');
-            var turnoSection = document.getElementById('turno-section');
-            if (!tipoEls || !turnoSection) return;
-            function updateTurno() {
-                var anyChecked = Array.prototype.slice.call(tipoEls).some(function (i) { return i.checked; });
-                turnoSection.style.display = anyChecked ? 'block' : 'none';
-                if (!anyChecked) {
-                    // limpiar selección de turno si se oculta
-                    var t = document.getElementsByName('turno');
-                    Array.prototype.slice.call(t).forEach(function (r) { r.checked = false; });
-                }
+            // Helpers centralizados (preparación para modularización gradual)
+            var utils = window.MHRUtils || {};
+            if (typeof utils.bindTurnoVisibility === 'function') {
+                utils.bindTurnoVisibility('tipo_inspeccion', 'turno-section', 'turno');
             }
-            Array.prototype.slice.call(tipoEls).forEach(function (el) { el.addEventListener('change', updateTurno); });
-            // inicializar al cargar
-            updateTurno();
 
             // --- comportamiento para Responsable: usar select similar a Cargo ---
             var authorSelect = document.getElementById('report-authors-select');
             var resetBtn = document.getElementById('report-authors-reset');
-            if (authorSelect && resetBtn) {
-                authorSelect.addEventListener('change', function () {
-                    if (authorSelect.value) {
-                        authorSelect.disabled = true;
-                        resetBtn.style.display = 'inline-block';
-                    }
-                });
-                resetBtn.addEventListener('click', function () {
-                    authorSelect.disabled = false;
-                    authorSelect.value = '';
-                    resetBtn.style.display = 'none';
-                });
+            if (typeof utils.bindLockSelect === 'function') {
+                utils.bindLockSelect(authorSelect, resetBtn, { clearOnReset: true });
             }
             // --- comportamiento para mostrar/ocultar los detalles por cada item ---
             var itemIds = [
