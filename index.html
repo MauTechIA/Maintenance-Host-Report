@@ -6423,6 +6423,7 @@
                     }
                 }));
 
+                var adminRowsFragment = document.createDocumentFragment();
                 for (const r of data) {
                     var tr = document.createElement('tr');
                     var pdfLink = '<span style="color:#9ca3af">Sin PDF</span>';
@@ -6447,8 +6448,9 @@
                         '<td>' + (r.responsable || '-') + '</td>' +
                         '<td>' + (r.area_representante || '-') + '</td>' +
                         '<td>' + pdfLink + '</td>';
-                    list.appendChild(tr);
+                    adminRowsFragment.appendChild(tr);
                 }
+                list.appendChild(adminRowsFragment);
             }
 
             // Filtros de Historial de Reportes
@@ -8337,6 +8339,7 @@
                             reportsList.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#6b7280;">No hay reportes que coincidan con los filtros</td></tr>';
                         } else {
                             reportsList.innerHTML = '';
+                            var faunaRowsFragment = document.createDocumentFragment();
                             allReports.forEach(function(report) {
                                 let fechaReporte = report.fecha_reporte ? new Date(report.fecha_reporte).toLocaleDateString('es-ES') : '-';
                                 
@@ -8411,8 +8414,9 @@
                                                '<td style="padding:12px;"><span style="display:inline-block;padding:4px 8px;border-radius:4px;font-size:12px;font-weight:600;background:' + 
                                                (estado === 'pendiente' ? '#fef3c7;color:#92400e' : '#dbeafe;color:#1e40af') + ';">' + estado + '</span></td>' +
                                                '<td style="padding:12px;text-align:center;">' + pdfLink + '</td>';
-                                reportsList.appendChild(tr);
+                                faunaRowsFragment.appendChild(tr);
                             });
+                            reportsList.appendChild(faunaRowsFragment);
                         }
                     }
 
