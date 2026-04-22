@@ -4,6 +4,7 @@ const CACHE_NAME = 'mhr-cache-v1';
 const SHELL_FILES = [
     './',
     './index.html',
+    './js/mhr-utils.js',
     './logo.png',
     // CDN – se pre-cachean para que estén disponibles sin internet
     'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap',
