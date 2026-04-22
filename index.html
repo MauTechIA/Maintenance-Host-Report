@@ -1790,6 +1790,12 @@
 
                 <h3>�🔧📚📋 Item:</h3>
                 <!-- Per-item Done/Update buttons will appear next to each item -->
+                <div id="item-combo-manager" style="margin-bottom:14px;">
+                    <div id="item-combo-list" style="display:flex; flex-direction:column; gap:10px;"></div>
+                    <button type="button" id="add-item-combo-btn" class="btn btn-ghost" style="margin-top:8px;">➕ Agregar Item</button>
+                </div>
+                <div id="item-selected-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+                <div id="item-staging-container" style="display:none;"></div>
 
                 <input type="checkbox" id="tipo_area_movimiento" name="tipo_reporte" value="Área de Movimiento">
                 <label for="tipo_area_movimiento">Área de Movimiento</label>
@@ -3554,6 +3560,147 @@
             });
             // Exponer API mínima para duplicar desde fuera (necesario para restauración)
             try { window.mhr = window.mhr || {}; window.mhr.duplicateItem = duplicateItem; window.mhr.counters = counters; window.mhr.setupItemControlsFor = setupItemControlsFor; } catch (e) { }
+        })();
+    </script>
+
+    <script>
+        (function () {
+            var itemDefs = [
+                { id: 'tipo_area_movimiento', label: 'Área de Movimiento' },
+                { id: 'tipo_franjas', label: 'Franjas de seguridad' },
+                { id: 'tipo_iluminacion', label: 'Iluminación' },
+                { id: 'tipo_marcas', label: 'Marcas y Señales' },
+                { id: 'tipo_ayudas', label: 'Ayudas a la Navegación' },
+                { id: 'tipo_obstaculos', label: 'Obstáculos' },
+                { id: 'tipo_combustibles', label: 'Operaciones de Combustibles' },
+                { id: 'tipo_construccion', label: 'Construcción' },
+                { id: 'tipo_ssei', label: 'SSEI' },
+                { id: 'tipo_vehiculos', label: 'Vehículos' },
+                { id: 'tipo_fauna', label: 'Control de Fauna' },
+                { id: 'tipo_proteccion', label: 'Protección Civil' }
+            ];
+
+            var comboList = document.getElementById('item-combo-list');
+            var addBtn = document.getElementById('add-item-combo-btn');
+            var selectedContainer = document.getElementById('item-selected-container');
+            var stagingContainer = document.getElementById('item-staging-container');
+            if (!comboList || !addBtn || !selectedContainer || !stagingContainer) return;
+
+            var usedItems = {};
+
+            function byId(id) { return document.getElementById(id); }
+
+            function wrapItemBlock(itemId) {
+                var chk = byId(itemId);
+                var det = byId('details_' + itemId);
+                if (!chk || !det) return null;
+                var wrapperId = 'item_block_' + itemId;
+                var existing = byId(wrapperId);
+                if (existing) return existing;
+
+                var parent = chk.parentNode;
+                var wrapper = document.createElement('div');
+                wrapper.id = wrapperId;
+                wrapper.className = 'item-block-wrapper';
+                wrapper.dataset.itemId = itemId;
+                wrapper.style.display = 'none';
+                parent.insertBefore(wrapper, chk);
+
+                var label = document.querySelector('label[for="' + itemId + '"]');
+                var doneBtn = byId('done_' + itemId);
+                var updateBtn = byId('update_' + itemId);
+                var dupBtn = byId('dup_' + itemId);
+                var clearBtn = byId('clear_' + itemId);
+                var br = det.previousElementSibling && det.previousElementSibling.tagName === 'BR' ? det.previousElementSibling : null;
+
+                [chk, label, doneBtn, updateBtn, dupBtn, clearBtn, br, det].forEach(function (node) {
+                    if (node && node.parentNode) wrapper.appendChild(node);
+                });
+                stagingContainer.appendChild(wrapper);
+                return wrapper;
+            }
+
+            function renderComboOptions(select) {
+                var currentVal = select.value;
+                select.innerHTML = '<option value=\"\">-- Seleccionar item --</option>';
+                itemDefs.forEach(function (item) {
+                    if (usedItems[item.id] && item.id !== currentVal) return;
+                    var opt = document.createElement('option');
+                    opt.value = item.id;
+                    opt.textContent = item.label;
+                    if (item.id === currentVal) opt.selected = true;
+                    select.appendChild(opt);
+                });
+            }
+
+            function createComboRow() {
+                var row = document.createElement('div');
+                row.className = 'item-combo-row';
+                row.style.display = 'flex';
+                row.style.gap = '8px';
+                row.style.alignItems = 'center';
+                row.style.padding = '8px 10px';
+                row.style.border = '1px solid #d1dbe9';
+                row.style.borderRadius = '10px';
+                row.style.background = '#f8fbff';
+
+                var select = document.createElement('select');
+                select.style.flex = '1';
+                select.style.maxWidth = '420px';
+                select.style.padding = '8px';
+                select.style.borderRadius = '8px';
+                select.style.border = '1px solid #c8d8ee';
+                select.style.background = '#fff';
+                renderComboOptions(select);
+
+                var status = document.createElement('span');
+                status.style.fontSize = '12px';
+                status.style.color = '#64748b';
+                status.textContent = 'Selecciona un item';
+
+                select.addEventListener('change', function () {
+                    var itemId = select.value;
+                    if (!itemId || usedItems[itemId]) return;
+                    var block = wrapItemBlock(itemId);
+                    var chk = byId(itemId);
+                    if (block && chk) {
+                        usedItems[itemId] = true;
+                        chk.checked = true;
+                        chk.dispatchEvent(new Event('change'));
+                        block.style.display = 'block';
+                        selectedContainer.appendChild(block);
+                        select.disabled = true;
+                        status.textContent = '✔ ' + (itemDefs.find(function (i) { return i.id === itemId; }) || {}).label;
+                        status.style.color = '#0f766e';
+                        renderAllCombos();
+                    }
+                });
+
+                row.appendChild(select);
+                row.appendChild(status);
+                comboList.appendChild(row);
+            }
+
+            function renderAllCombos() {
+                comboList.querySelectorAll('select').forEach(function (sel) { renderComboOptions(sel); });
+            }
+
+            addBtn.addEventListener('click', function () {
+                var rows = comboList.querySelectorAll('.item-combo-row');
+                if (!rows.length) {
+                    createComboRow();
+                    return;
+                }
+                var lastRow = rows[rows.length - 1];
+                var lastSelect = lastRow.querySelector('select');
+                if (lastSelect && !lastSelect.value) return;
+                createComboRow();
+                renderAllCombos();
+            });
+
+            // Inicialización: crear wrappers y ocultar lista larga original
+            itemDefs.forEach(function (item) { wrapItemBlock(item.id); });
+            createComboRow();
         })();
     </script>
 
@@ -6456,6 +6603,13 @@
                         '<td>' + (r.area_representante || '-') + '</td>' +
                         '<td>' + pdfLink + '</td>';
                     adminRows.push(tr);
+                }
+                if (window.MHRUtils && typeof window.MHRUtils.renderRows === 'function') {
+                    window.MHRUtils.renderRows(list, adminRows);
+                } else {
+                    var adminRowsFragment = document.createDocumentFragment();
+                    adminRows.forEach(function (row) { adminRowsFragment.appendChild(row); });
+                    list.appendChild(adminRowsFragment);
                 }
                 if (window.MHRUtils && typeof window.MHRUtils.renderRows === 'function') {
                     window.MHRUtils.renderRows(list, adminRows);
