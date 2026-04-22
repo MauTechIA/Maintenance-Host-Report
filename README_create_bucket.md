@@ -56,8 +56,11 @@ using ( bucket_id = 'reports' );
 - Nunca incluyas la Service Role Key en `Maintenance Host Report.html` ni en código que se envíe al navegador.
 
 8) Para buckets privados (opcional)
-- Si quieres mantener el bucket privado, añade la Service Role Key al código HTML (línea ~2248, reemplaza 'TU_SERVICE_ROLE_KEY_AQUI' con tu clave real).
-- ⚠️ ADVERTENCIA: Esto expone la clave secreta al navegador. Úsala solo para pruebas. Para producción, crea una Edge Function en Supabase para generar signed URLs de forma segura.
-- Con la clave añadida, el admin podrá ver PDFs en buckets privados mediante signed URLs temporales (válidas 1 hora).
+- **No añadas Service Role Key al HTML ni al frontend.**
+- Opción recomendada: crear una **Edge Function** (server-side) que genere signed URLs y devuelva `{ signedUrl }`.
+- Configura la app vía `window.__MHR_CONFIG` con:
+  - `signedUrlFunction` (ej. `mhr-signed-url`)
+  - `signedUrlExpiresIn` (segundos)
+- Fallback actual: si el usuario autenticado tiene permisos RLS suficientes, la app intentará `createSignedUrl`; si no, usará `getPublicUrl` solo cuando el bucket sea público.
 
 Si quieres, ejecuto aquí mismo un script de creación (necesitaría que pegues la Service Role Key y URL —pero no es recomendable compartir claves secretas públicamente). En su lugar, ejecútalo localmente con las instrucciones anteriores y dime el resultado; yo te guío en los siguientes pasos.
