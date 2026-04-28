@@ -8773,6 +8773,25 @@
                     : 'Sin datos visibles para histórico.';
             }
 
+            function addPeriodSelection() {
+                if (!faunaPeriodPicker || !faunaPeriodValues) return;
+                var mode = faunaPeriodMode ? faunaPeriodMode.value : 'day';
+                var normalized = normalizePeriodValue(faunaPeriodPicker.value, mode);
+                if (!normalized) return;
+                var exists = Array.from(faunaPeriodValues.options).some(function (opt) { return opt.value === normalized; });
+                if (!exists) {
+                    var opt = document.createElement('option');
+                    opt.value = normalized;
+                    opt.textContent = normalized;
+                    opt.selected = true;
+                    faunaPeriodValues.appendChild(opt);
+                }
+                Array.from(faunaPeriodValues.options).forEach(function (opt) {
+                    if (opt.value === normalized) opt.selected = true;
+                });
+                faunaPeriodPicker.value = '';
+            }
+
             async function ensureFaunaSkeletonMap() {
                 if (faunaHallazgosMap) return;
                 faunaHallazgosMap = L.map('fauna-hallazgos-map', { zoomControl: true });
