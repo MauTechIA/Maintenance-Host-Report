@@ -1621,8 +1621,8 @@
             <p>Ingrese sus credenciales institucionales para continuar.</p>
 
             <div class="input-group">
-                <label>Correo Institucional</label>
-                <input type="email" id="login-email" placeholder="nombre@aeropuerto.com" autocomplete="email" />
+                <label>Usuario</label>
+                <input type="text" id="login-email" placeholder="Usuario o correo" autocomplete="username" />
             </div>
 
             <div class="input-group">
@@ -6486,407 +6486,202 @@
                 return null;
             }
 
-            var loginModal = document.getElementById('login-modal');
-            var loginBtn = document.getElementById('login-btn');
-            var emailInput = document.getElementById('login-email');
-            var passInput = document.getElementById('login-password');
-            var errorMsg = document.getElementById('login-error');
-            var userInfo = document.getElementById('user-info');
-            var userEmailSpan = document.getElementById('user-email');
-            var userRoleSpan = document.getElementById('user-role');
-            var logoutBtn = document.getElementById('logout-btn');
-            var reportForm = document.getElementById('report-form');
-            var reportHeader = document.querySelector('.report-header');
-            var mainTitle = document.getElementById('main-title');
-
-            // Ocultar formulario inicialmente
-            if (reportForm) reportForm.style.display = 'none';
-            if (reportHeader) reportHeader.style.display = 'none';
-            if (mainTitle) mainTitle.style.display = 'none';
-            document.body.classList.add('loading-auth');
-
-            async function checkSession() {
-                var { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    handleUser(session.user);
-                } else {
-                    showLogin();
-                }
-            }
-
-            function showLogin() {
-                if (loginModal) loginModal.style.display = 'flex';
-                if (userInfo) userInfo.style.display = 'none';
+                var loginModal = document.getElementById('login-modal');
+                var loginBtn = document.getElementById('login-btn');
+                var emailInput = document.getElementById('login-email');
+                var passInput = document.getElementById('login-password');
+                var errorMsg = document.getElementById('login-error');
+                var userInfo = document.getElementById('user-info');
+                var userEmailSpan = document.getElementById('user-email');
+                var userRoleSpan = document.getElementById('user-role');
+                var logoutBtn = document.getElementById('logout-btn');
+                var reportForm = document.getElementById('report-form');
+                var reportHeader = document.querySelector('.report-header');
+                var mainTitle = document.getElementById('main-title');
+                
+                var AUTH_STORAGE_KEY = 'mhr_current_user';
+                
                 if (reportForm) reportForm.style.display = 'none';
                 if (reportHeader) reportHeader.style.display = 'none';
                 if (mainTitle) mainTitle.style.display = 'none';
                 document.body.classList.add('loading-auth');
-            }
-
-            async function handleUser(user) {
-                if (loginModal) loginModal.style.display = 'none';
-                if (userInfo) userInfo.style.display = 'flex';
-                if (userEmailSpan) userEmailSpan.textContent = user.email;
-
-                // Mostrar contenido principal
-                if (reportHeader) reportHeader.style.display = 'flex';
-                if (mainTitle) mainTitle.style.display = 'block';
-                document.body.classList.remove('loading-auth');
-
-                // Obtener perfil y rol del usuario desde la estructura destino:
-                // auth.users = autenticación
-                // public.profiles = datos del usuario
-                // public.user_roles = rol y permisos
                 
-                var role = 'viewer';
-                var permissions = {};
-                
-                var { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('id, username, full_name, email, created_at')
-                    .eq('id', user.id)
-                    .maybeSingle();
-                
-                if (profileError) {
-                    console.error('Error cargando profile:', profileError);
+                function normalizeText(value) {
+                    return String(value || '').trim();
                 }
                 
-                var { data: roleData, error: roleError } = await supabase
-                    .from('user_roles')
-                    .select('role, permissions')
-                    .eq('user_id', user.id)
-                    .maybeSingle();
-                
-                if (roleError) {
-                    console.error('Error cargando user_roles:', roleError);
-                }
-                
-                if (roleData && roleData.role) {
-                    role = roleData.role;
-                    permissions = roleData.permissions || {};
-                }
-                
-                if (userRoleSpan) userRoleSpan.textContent = role;
-                
-                // Roles permitidos para capturar/editar reportes
-                var allowedRoles = [
-                    'admin',
-                    'editor',
-                    'superadmin',
-                    'operacion',
-                    'seguridad_op',
-                    'planeacion',
-                    'calidad',
-                    'afac'
-                ];
-                
-                if (allowedRoles.includes(role.toLowerCase())) {
-                    if (reportForm) reportForm.style.display = 'block';
-                } else {
-                    alert('Tu usuario (' + role + ') no tiene permisos para llenar reportes.');
-                }
-                
-                // Mostrar panel de admin si corresponde
-                if (role.toLowerCase() === 'admin' || role.toLowerCase() === 'superadmin') {
-                    var adminPanel = document.getElementById('admin-panel');
-                    if (adminPanel) {
-                        adminPanel.style.display = 'block';
-                        loadAdminReports();
+                function getUserField(user, names, fallback) {
+                    for (var i = 0; i < names.length; i++) {
+                        if (user && user[names[i]] !== undefined && user[names[i]] !== null && user[names[i]] !== '') {
+                            return user[names[i]];
+                        }
                     }
+                    return fallback || '';
                 }
-            }
-
-            async function loadAdminReports(filters) {
-                filters = filters || {};
-                var list = document.getElementById('admin-reports-list');
-                var selResponsable = document.getElementById('filter-responsable');
-                var selTipo = document.getElementById('filter-tipo');
-                var selTurno = document.getElementById('filter-turno');
-                var selPista = document.getElementById('filter-pista');
-                if (!list) return;
-                list.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
-
-                var query = supabase
-                    .from('reports')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(200);
-
-                // Aplicar filtros
-                if (filters.folio) query = query.ilike('folio', '%' + filters.folio + '%');
-                if (filters.fecha_desde) query = query.gte('created_at', filters.fecha_desde + 'T00:00:00.000Z');
-                if (filters.fecha_hasta) query = query.lte('created_at', filters.fecha_hasta + 'T23:59:59.999Z');
-                if (Array.isArray(filters.responsable) && filters.responsable.length) query = query.in('responsable', filters.responsable);
-                if (Array.isArray(filters.tipo_inspeccion) && filters.tipo_inspeccion.length) query = query.in('tipo_inspeccion', filters.tipo_inspeccion);
-                if (Array.isArray(filters.turno) && filters.turno.length) query = query.in('turno', filters.turno);
-                if (Array.isArray(filters.pista) && filters.pista.length) query = query.in('pista', filters.pista);
-
-                var { data, error } = await query;
-
-                if (error) {
-                    console.error('Error cargando reportes:', error);
-                    list.innerHTML = '<tr><td colspan="5" style="color:red">Error cargando reportes</td></tr>';
-                    return;
+                
+                function saveCurrentUser(user) {
+                    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(user));
+                    window.currentUser = user;
                 }
-
-                list.innerHTML = '';
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<tr><td colspan="5">No hay reportes registrados.</td></tr>';
-                    // Vaciar las opciones de los select si no hay reportes
-                    if (selResponsable) selResponsable.innerHTML = '';
-                    if (selTipo) selTipo.innerHTML = '';
-                    if (selTurno) selTurno.innerHTML = '';
-                    if (selPista) selPista.innerHTML = '';
-                    return;
-                }
-
-                // Actualizar opciones de filtros basadas en resultados (para rangos dependientes)
-                function updateSelectOptions(sel, values, currentSelected) {
-                    if (!sel) return;
-                    var current = (currentSelected || []).slice();
-                    // Eliminar duplicados y ordenar
-                    var unique = Array.from(new Set(values.filter(Boolean))).sort();
-                    sel.innerHTML = '';
-                    unique.forEach(function (v) {
-                        var opt = document.createElement('option');
-                        opt.value = v;
-                        opt.textContent = v;
-                        if (current.indexOf(v) !== -1) opt.selected = true;
-                        sel.appendChild(opt);
-                    });
-                }
-
-                var responsables = data.map(function (r) { return r.responsable; });
-                var tipos = data.map(function (r) { return r.tipo_inspeccion; });
-                var turnos = data.map(function (r) { return r.turno; });
-                var pistas = data.map(function (r) { return r.pista; });
-
-                updateSelectOptions(selResponsable, responsables, currentAdminFilters.responsable);
-                updateSelectOptions(selTipo, tipos, currentAdminFilters.tipo_inspeccion);
-                updateSelectOptions(selTurno, turnos, currentAdminFilters.turno);
-                updateSelectOptions(selPista, pistas, currentAdminFilters.pista);
-
-                // Actualizar textos de toggles luego de regenerar opciones
-                updateFilterToggleText('filter-responsable');
-                updateFilterToggleText('filter-tipo');
-                updateFilterToggleText('filter-turno');
-                updateFilterToggleText('filter-pista');
-
-                // Prioridad 2 (performance): resolver URLs de PDF en paralelo y reutilizar resultados.
-                var pdfUrlCache = {};
-                var uniquePdfPaths = Array.from(new Set(
-                    data.map(function (r) { return (r && r.pdf_url) ? String(r.pdf_url).trim() : ''; })
-                        .filter(Boolean)
-                ));
-                await Promise.all(uniquePdfPaths.map(async function (path) {
+                
+                function getCurrentUser() {
                     try {
-                        pdfUrlCache[path] = await resolvePdfUrl('reports', path, APP_CONFIG.signedUrlExpiresIn);
+                        var raw = localStorage.getItem(AUTH_STORAGE_KEY);
+                        return raw ? JSON.parse(raw) : null;
                     } catch (e) {
-                        pdfUrlCache[path] = null;
+                        return null;
                     }
-                }));
-
-                var adminRows = [];
-                for (const r of data) {
-                    var tr = document.createElement('tr');
-                    var pdfLink = '<span style="color:#9ca3af">Sin PDF</span>';
-
-                    if (r.pdf_url) {
-                        try {
-                            var pathKey = String(r.pdf_url).trim();
-                            var resolvedUrl = pdfUrlCache[pathKey] || null;
-                            if (resolvedUrl) {
-                                pdfLink = '<a href="' + resolvedUrl + '" target="_blank" class="admin-btn-view">📄 Ver PDF</a>';
-                            } else {
-                                pdfLink = '<span style="color:#9ca3af">No disponible</span>';
-                            }
-                        } catch (e) {
-                            console.error('Excepción resolviendo URL de PDF:', e);
-                            pdfLink = '<span style="color:#ef4444">Error</span>';
-                        }
+                }
+                
+                function clearCurrentUser() {
+                    localStorage.removeItem(AUTH_STORAGE_KEY);
+                    window.currentUser = null;
+                }
+                
+                function showLogin() {
+                    if (loginModal) loginModal.style.display = 'flex';
+                    if (userInfo) userInfo.style.display = 'none';
+                    if (reportForm) reportForm.style.display = 'none';
+                    if (reportHeader) reportHeader.style.display = 'none';
+                    if (mainTitle) mainTitle.style.display = 'none';
+                    document.body.classList.add('loading-auth');
+                }
+                
+                function handleUser(user) {
+                    if (!user) {
+                        showLogin();
+                        return;
                     }
-
-                    tr.innerHTML = '<td>' + (r.fecha_local || (r.created_at ? r.created_at.slice(0,10).split('-').reverse().join('/') + ' ' + r.created_at.slice(11,19) : '-')) + '</td>' +
-                        '<td>' + (r.folio || '-') + '</td>' +
-                        '<td>' + (r.responsable || '-') + '</td>' +
-                        '<td>' + (r.area_representante || '-') + '</td>' +
-                        '<td>' + pdfLink + '</td>';
-                    adminRows.push(tr);
-                }
-                if (window.MHRUtils && typeof window.MHRUtils.renderRows === 'function') {
-                    window.MHRUtils.renderRows(list, adminRows);
-                } else {
-                    var adminRowsFragment = document.createDocumentFragment();
-                    adminRows.forEach(function (row) { adminRowsFragment.appendChild(row); });
-                    list.appendChild(adminRowsFragment);
-                }
-                if (window.MHRUtils && typeof window.MHRUtils.renderRows === 'function') {
-                    window.MHRUtils.renderRows(list, adminRows);
-                } else {
-                    var adminRowsFragment = document.createDocumentFragment();
-                    adminRows.forEach(function (row) { adminRowsFragment.appendChild(row); });
-                    list.appendChild(adminRowsFragment);
-                }
-                list.appendChild(adminRowsFragment);
-            }
-
-            // Filtros de Historial de Reportes
-            var currentAdminFilters = {};
-            var debouncedLoadAdminReports = (window.MHRUtils && typeof window.MHRUtils.debounce === 'function')
-                ? window.MHRUtils.debounce(function (filters) { loadAdminReports(filters); }, 250)
-                : function (filters) { loadAdminReports(filters); };
-            function getSelectValues(id) {
-                var sel = document.getElementById(id);
-                if (!sel || !sel.options) return [];
-                return Array.prototype.slice.call(sel.options)
-                    .filter(function (opt) { return opt.selected && opt.value; })
-                    .map(function (opt) { return opt.value; });
-            }
-
-            function readAdminFilters() {
-                return {
-                    folio: (document.getElementById('filter-folio') || {}).value || '',
-                    fecha_desde: (document.getElementById('filter-fecha-desde') || {}).value || '',
-                    fecha_hasta: (document.getElementById('filter-fecha-hasta') || {}).value || '',
-                    responsable: getSelectValues('filter-responsable'),
-                    tipo_inspeccion: getSelectValues('filter-tipo'),
-                    turno: getSelectValues('filter-turno'),
-                    pista: getSelectValues('filter-pista')
-                };
-            }
-
-            var applyFilterBtn = document.getElementById('filter-apply-btn');
-            var clearFilterBtn = document.getElementById('filter-clear-btn');
-
-            if (applyFilterBtn) {
-                applyFilterBtn.addEventListener('click', function () {
-                    currentAdminFilters = readAdminFilters();
-                    debouncedLoadAdminReports(currentAdminFilters);
-                });
-            }
-
-            if (clearFilterBtn) {
-                clearFilterBtn.addEventListener('click', function () {
-                    var input = document.getElementById('filter-folio');
-                    if (input) input.value = '';
-                    var desde = document.getElementById('filter-fecha-desde');
-                    if (desde) desde.value = '';
-                    var hasta = document.getElementById('filter-fecha-hasta');
-                    if (hasta) hasta.value = '';
-                    ['filter-responsable', 'filter-tipo', 'filter-turno', 'filter-pista'].forEach(function (id) {
-                        var sel = document.getElementById(id);
-                        if (sel && sel.options) {
-                            Array.prototype.slice.call(sel.options).forEach(function (opt) { opt.selected = false; });
-                        }
-                    });
-                    currentAdminFilters = {};
-                    debouncedLoadAdminReports();
-                });
-            }
-
-            // Actualizar resultados al cambiar selección de filtros (multi-select y fechas)
-            ['filter-responsable', 'filter-tipo', 'filter-turno', 'filter-pista'].forEach(function (id) {
-                var sel = document.getElementById(id);
-                if (sel) {
-                    sel.addEventListener('change', function () {
-                        currentAdminFilters = readAdminFilters();
-                        debouncedLoadAdminReports(currentAdminFilters);
-                        updateFilterToggleText(id);
-                    });
-                }
-            });
-
-            // Para inputs de fecha
-            ['filter-fecha-desde', 'filter-fecha-hasta'].forEach(function (id) {
-                var inp = document.getElementById(id);
-                if (inp) {
-                    inp.addEventListener('change', function () {
-                        currentAdminFilters = readAdminFilters();
-                        debouncedLoadAdminReports(currentAdminFilters);
-                    });
-                }
-            });
-
-            // Mostrar / ocultar multi-selects al presionar el toggle
-            document.querySelectorAll('.filter-multi-toggle').forEach(function (toggle) {
-                toggle.addEventListener('click', function () {
-                    var targetId = toggle.getAttribute('data-target');
-                    var wrapper = toggle.closest('.filter-multi');
-                    if (!wrapper) return;
-                    var isOpen = wrapper.classList.contains('open');
-                    // Cerrar todos primero
-                    document.querySelectorAll('.filter-multi.open').forEach(function (w) { w.classList.remove('open'); });
-                    if (!isOpen) {
-                        wrapper.classList.add('open');
-                    }
-                });
-            });
-
-            // Cerrar selects al hacer click fuera
-            document.addEventListener('click', function (e) {
-                if (e.target.closest('.filter-multi')) return;
-                document.querySelectorAll('.filter-multi.open').forEach(function (w) { w.classList.remove('open'); });
-            });
-
-            // Mostrar texto actualizado en el toggle (número seleccionado)
-            function updateFilterToggleText(selectId) {
-                var sel = document.getElementById(selectId);
-                if (!sel) return;
-                var selected = Array.prototype.slice.call(sel.selectedOptions).map(function (o) { return o.textContent; });
-                var toggle = document.querySelector('.filter-multi-toggle[data-target="' + selectId + '"]');
-                if (!toggle) return;
-                if (selected.length === 0) {
-                    toggle.textContent = toggle.getAttribute('data-target') === 'filter-pista' ? 'Seleccionar RWY' : 'Seleccionar';
-                    if (selectId === 'filter-responsable') toggle.textContent = 'Seleccionar responsable';
-                    if (selectId === 'filter-tipo') toggle.textContent = 'Seleccionar tipo';
-                    if (selectId === 'filter-turno') toggle.textContent = 'Seleccionar turno';
-                } else if (selected.length === 1) {
-                    toggle.textContent = selected[0];
-                } else {
-                    toggle.textContent = selected.length + ' seleccionados';
-                }
-            }
-
-            // Inicializar texto de toggles (vacíos)
-            ['filter-responsable', 'filter-tipo', 'filter-turno', 'filter-pista'].forEach(updateFilterToggleText);
-
-            var refreshBtn = document.getElementById('refresh-admin-btn');
-            if (refreshBtn) refreshBtn.addEventListener('click', function () { debouncedLoadAdminReports(currentAdminFilters); });
-
-            if (loginBtn) {
-                loginBtn.addEventListener('click', async function () {
-                    var email = emailInput.value;
-                    var password = passInput.value;
-                    errorMsg.style.display = 'none';
-                    loginBtn.disabled = true;
-                    loginBtn.textContent = 'Entrando...';
-
-                    var { data, error } = await supabase.auth.signInWithPassword({
-                        email: email,
-                        password: password
-                    });
-
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'Entrar';
-
-                    if (error) {
-                        errorMsg.textContent = 'Error: ' + error.message;
-                        errorMsg.style.display = 'block';
+                
+                    var username = user.username || user.email || 'Usuario';
+                    var fullName = user.full_name || username;
+                    var role = user.role || 'viewer';
+                
+                    if (loginModal) loginModal.style.display = 'none';
+                    if (userInfo) userInfo.style.display = 'flex';
+                    if (userEmailSpan) userEmailSpan.textContent = fullName || username;
+                    if (userRoleSpan) userRoleSpan.textContent = role;
+                
+                    if (reportHeader) reportHeader.style.display = 'flex';
+                    if (mainTitle) mainTitle.style.display = 'block';
+                    document.body.classList.remove('loading-auth');
+                
+                    var allowedRoles = [
+                        'admin',
+                        'editor',
+                        'inspector',
+                        'superuser',
+                        'control_fauna',
+                        'servicio_medico',
+                        'colab_editor'
+                    ];
+                
+                    if (allowedRoles.includes(String(role).toLowerCase())) {
+                        if (reportForm) reportForm.style.display = 'block';
                     } else {
-                        handleUser(data.user);
+                        if (reportForm) reportForm.style.display = 'none';
+                        alert('Tu usuario (' + role + ') no tiene permisos para llenar reportes.');
                     }
-                });
-            }
-
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', async function () {
-                    await supabase.auth.signOut();
-                    location.reload();
-                });
-            }
-
-            // Iniciar chequeo
-            checkSession();
+                
+                    var adminPanel = document.getElementById('admin-panel');
+                    if (adminPanel && ['admin', 'superuser'].includes(String(role).toLowerCase())) {
+                        adminPanel.style.display = 'block';
+                        if (typeof loadAdminReports === 'function') {
+                            loadAdminReports();
+                        }
+                    }
+                }
+                
+                async function checkSession() {
+                    var savedUser = getCurrentUser();
+                
+                    if (savedUser) {
+                        handleUser(savedUser);
+                    } else {
+                        showLogin();
+                    }
+                }
+                
+                async function loginWithUsuariosTable(usernameOrEmail, password) {
+                    var userValue = String(usernameOrEmail || '').trim();
+                    var passValue = String(password || '').trim();
+                
+                    if (!userValue || !passValue) {
+                        throw new Error('Captura usuario y contraseña.');
+                    }
+                
+                    var { data, error } = await supabase
+                        .from('usuarios_app')
+                        .select('*')
+                        .or('username.eq.' + userValue + ',email.eq.' + userValue)
+                        .limit(1);
+                
+                    if (error) {
+                        throw error;
+                    }
+                
+                    if (!data || data.length === 0) {
+                        throw new Error('Usuario no encontrado.');
+                    }
+                
+                    var user = data[0];
+                
+                    if (user.estatus && String(user.estatus).toLowerCase() === 'baja') {
+                        throw new Error('El usuario está dado de baja.');
+                    }
+                
+                    if (String(user.password || '') !== String(passValue)) {
+                        throw new Error('Credenciales incorrectas.');
+                    }
+                
+                    sessionStorage.setItem('user_role', user.role || 'viewer');
+                    sessionStorage.setItem('username', user.username || '');
+                    sessionStorage.setItem('user_email', user.email || '');
+                    sessionStorage.setItem('user_full_name', user.full_name || user.username || '');
+                
+                    return user;
+                }
+                
+                if (loginBtn) {
+                    loginBtn.addEventListener('click', async function () {
+                        try {
+                            var usernameOrEmail = emailInput ? emailInput.value : '';
+                            var password = passInput ? passInput.value : '';
+                
+                            if (errorMsg) {
+                                errorMsg.style.display = 'none';
+                                errorMsg.textContent = '';
+                            }
+                
+                            loginBtn.disabled = true;
+                            loginBtn.textContent = 'Entrando...';
+                
+                            var user = await loginWithUsuariosTable(usernameOrEmail, password);
+                
+                            saveCurrentUser(user);
+                            handleUser(user);
+                
+                        } catch (error) {
+                            if (errorMsg) {
+                                errorMsg.textContent = 'Error: ' + (error.message || String(error));
+                                errorMsg.style.display = 'block';
+                            }
+                        } finally {
+                            loginBtn.disabled = false;
+                            loginBtn.textContent = 'Iniciar Sesión';
+                        }
+                    });
+                }
+                
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', function () {
+                        clearCurrentUser();
+                        location.reload();
+                    });
+                }
+                
+                checkSession();
+        
 
             // Tab switching functionality
             (function () {
