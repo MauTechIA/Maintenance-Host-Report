@@ -6975,6 +6975,17 @@
                             return;
                         }
 
+                        function parseCoordsFromText(rawText) {
+                            if (!rawText || typeof rawText !== 'string') return { lat: null, lng: null };
+                            var txt = rawText.trim();
+                            var match = txt.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+                            if (!match) return { lat: null, lng: null };
+                            var lat = parseFloat(match[1]);
+                            var lng = parseFloat(match[2]);
+                            if (isNaN(lat) || isNaN(lng)) return { lat: null, lng: null };
+                            return { lat: lat, lng: lng };
+                        }
+
                         // ═════════════════════════════════════════════════════════
                         // GUARDAR IMPACTO
                         // ═════════════════════════════════════════════════════════
@@ -6987,7 +6998,7 @@
                             var cargoSelect = document.getElementById('fauna_report-role');
                             var cargo = cargoSelect ? cargoSelect.value : '';
                             var aerolinea = faunaForm.querySelector('select[name="fauna_report_aerolinea"]')?.value || '';
-                            var ubicacion = faunaForm.querySelector('select[name="fauna_report_ubicacion"]')?.value || '';
+                            var zona = faunaForm.querySelector('select[name="fauna_report_ubicacion"]')?.value || '';
 
                             var impactPayload = {
                                 folio: folio,
@@ -6998,7 +7009,11 @@
                                 responsable: responsable,
                                 cargo: cargo,
                                 aerolinea: aerolinea,
-                                ubicacion: ubicacion,
+                                zona: zona,
+                                ubicacion_texto: null,
+                                ubicacion_lat: null,
+                                ubicacion_lng: null,
+                                detalle_items: [],
                                 estado: 'completado',
                                 tipo_reporte: evento || 'Impacto',
                                 pdf_url: null
@@ -7107,7 +7122,7 @@
                                 '</tr>';
                             impactoHtml += '<tr>' +
                                 '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff;font-weight:600;background:#f5f8fc">Ubicación</td>' +
-                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff">' + (ubicacion || '-') + '</td>' +
+                                '<td style="vertical-align:top;padding:10px;border-bottom:1px solid #f0f6ff">' + (zona || '-') + '</td>' +
                                 '</tr>';
                             impactoHtml += '</tbody></table>';
 
@@ -7232,6 +7247,20 @@
 
                             // Mostrar items en tabla
                             if (faunaItems.length > 0) {
+                                impactPayload.detalle_items = faunaItems;
+                                for (var i = 0; i < faunaItems.length; i++) {
+                                    var fields = faunaItems[i].fields || [];
+                                    for (var j = 0; j < fields.length; j++) {
+                                        if (fields[j].key === 'Ubicación' && fields[j].value) {
+                                            impactPayload.ubicacion_texto = fields[j].value;
+                                            var parsedImpactCoords = parseCoordsFromText(fields[j].value);
+                                            impactPayload.ubicacion_lat = parsedImpactCoords.lat;
+                                            impactPayload.ubicacion_lng = parsedImpactCoords.lng;
+                                            break;
+                                        }
+                                    }
+                                    if (impactPayload.ubicacion_texto) break;
+                                }
                                 impactoHtml += '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;">';
                                 impactoHtml += '<tbody>';
                                 
@@ -7469,71 +7498,53 @@
                                         }
                                     }
                                     
-                                    // Upload PDF a bucket fauna/reports
-                                    var pdfPath = Date.now() + '_' + folio + '.pdf';
-                                    console.log('📤 Intentando subir PDF a fauna/reports con ruta:', pdfPath);
+                                    // Upload PDF a bucket fauna-reports (si falla, continuar sin PDF)
+                                    var pdfPath = 'fauna/' + Date.now() + '-' + folio + '.pdf';
+                                    console.log('📤 Intentando subir PDF a fauna-reports con ruta:', pdfPath);
                                     var { data: uploadData, error: uploadError } = await client.storage
-                                        .from('fauna/reports')
+                                        .from('fauna-reports')
                                         .upload(pdfPath, pdfBlob, { contentType: 'application/pdf' });
                                     
+                                    var pdfUrl = null;
                                     if (uploadError) {
-                                        console.error('❌ ERROR al subir PDF a fauna/reports:', uploadError);
-                                        if (uploadError.message.indexOf('bucket not found') !== -1 || uploadError.status === 404) {
-                                            alert('❌ Error: El bucket "fauna/reports" no existe o no tienes permisos.\n\nDetalles:\n' + uploadError.message);
-                                        } else {
-                                            alert('❌ Error al subir PDF:\n' + (uploadError.message || 'Error desconocido'));
+                                        console.warn('⚠️ No se pudo subir PDF (continuará guardado en BD sin URL):', uploadError);
+                                        if ((uploadError.message || '').toLowerCase().indexOf('row-level security') !== -1) {
+                                            alert('⚠️ El PDF no se pudo subir por políticas RLS de Storage, pero el reporte SÍ se guardará en la base de datos sin PDF adjunto.');
                                         }
-                                        submitBtn.disabled = false;
-                                        submitBtn.value = 'Generar reporte';
-                                        return;
+                                    } else {
+                                        console.log('✅ PDF subido exitosamente al storage. Datos:', uploadData);
                                     }
                                     
-                                    console.log('✅ PDF subido exitosamente al storage. Datos:', uploadData);
-                                    
-                                    var pdfUrl = null;
                                     if (uploadData && !uploadError) {
                                         console.log('🔗 Generando URL firmada para:', pdfPath);
                                         try {
                                             var { data: signedUrlData, error: signedUrlError } = await client.storage
-                                                .from('fauna/reports')
+                                                .from('fauna-reports')
                                                 .createSignedUrl(pdfPath, 7 * 24 * 60 * 60);
                                             
                                             if (signedUrlError) {
-                                                console.error('❌ Error generando Signed URL:', signedUrlError);
-                                                console.error('Tipo de error:', signedUrlError.message || 'Desconocido');
-                                                alert('❌ Error al generar Signed URL:\n' + (signedUrlError.message || 'Error desconocido') + '\n\nVerifica que el bucket "fauna/reports" tenga RLS Policies configuradas.');
-                                                submitBtn.disabled = false;
-                                                submitBtn.value = 'Generar reporte';
-                                                return;
+                                                console.warn('⚠️ Error generando Signed URL. Se guardará sin pdf_url:', signedUrlError);
                                             } else if (signedUrlData && signedUrlData.signedUrl) {
                                                 pdfUrl = signedUrlData.signedUrl;
                                                 console.log('✅ URL firmada generada correctamente');
                                                 console.log('URL:', pdfUrl.substring(0, 100) + '...');
                                             } else {
-                                                console.error('❌ signedUrlData sin signedUrl:', signedUrlData);
-                                                alert('❌ No se pudo generar la URL del PDF. Verifica la configuración del bucket.');
-                                                submitBtn.disabled = false;
-                                                submitBtn.value = 'Generar reporte';
-                                                return;
+                                                console.warn('⚠️ signedUrlData sin signedUrl. Se guardará sin pdf_url:', signedUrlData);
                                             }
                                         } catch (e) {
-                                            console.error('❌ Excepción al generar URL:', e);
-                                            alert('❌ Excepción al generar URL: ' + e.message);
-                                            submitBtn.disabled = false;
-                                            submitBtn.value = 'Generar reporte';
-                                            return;
+                                            console.warn('⚠️ Excepción al generar URL. Se guardará sin pdf_url:', e);
                                         }
-                                        console.log('✅ PDF listo para guardar con URL');
+                                        console.log('✅ Proceso de PDF finalizado; continuando guardado en BD');
                                     } else {
-                                        console.error('❌ No se pudo proceder con URL - uploadData:', uploadData, 'uploadError:', uploadError);
+                                        console.warn('⚠️ Sin uploadData; continuando guardado en BD sin URL de PDF.');
                                     }
                                     
                                     // Actualizar payload con PDF URL
                                     impactPayload.pdf_url = pdfUrl;
-                                    console.log('💾 Guardando reporte en fauna_impact_reports con pdf_url:', pdfUrl);
+                                    console.log('💾 Guardando reporte en fauna_reports con pdf_url:', pdfUrl);
 
                                     var { data: impactData, error: impactError } = await client
-                                        .from('fauna_impact_reports')
+                                        .from('fauna_reports')
                                         .insert([impactPayload])
                                         .select();
 
@@ -7814,12 +7825,16 @@
                                 }
 
                                 // Guardar reporte de rescate
+                                var rescateCoords = parseCoordsFromText(sitioRescate);
                                 var rescatePayload = {
                                     fecha_reporte: new Date().toISOString().split('T')[0],
+                                    folio: folio,
                                     responsable: responsable,
                                     cargo: cargo,
                                     institucion_responsable: institucion,
-                                    sitio_rescate: sitioRescate,
+                                    ubicacion_texto: sitioRescate,
+                                    ubicacion_lat: rescateCoords.lat,
+                                    ubicacion_lng: rescateCoords.lng,
                                     clase: clase,
                                     especie: especie,
                                     sitio_reubicacion: sitioReubicacion,
@@ -7830,7 +7845,7 @@
                                 };
 
                                 var { data: rescateData, error: rescateError } = await client
-                                    .from('fauna_rescue_reports')
+                                    .from('fauna_reports')
                                     .insert([rescatePayload])
                                     .select();
 
@@ -8380,35 +8395,43 @@
                 });
 
                 try {
-                    // Consultar total de impactos
-                    const { data: impactData, error: impactError } = await client
-                        .from('fauna_impact_reports')
+                    const { data: faunaData, error: faunaError } = await client
+                        .from('fauna_reports')
                         .select('*');
 
-                    // Consultar total de rescates
-                    const { data: rescateData, error: rescateError } = await client
-                        .from('fauna_rescue_reports')
-                        .select('*');
-
-                    // Consultar vista de impactos por tipo
-                    const { data: impactosTipo, error: impactosTipoError } = await client
-                        .from('vw_fauna_impact_summary')
-                        .select('*');
-
-                    // Consultar vista de especies rescatadas
-                    const { data: especiesRescatadas, error: especiesError } = await client
-                        .from('vw_fauna_rescue_summary')
-                        .select('*');
-
-                    // Consultar vista de estadísticas diarias
-                    const { data: estadisticasDiarias, error: estadisticasError } = await client
-                        .from('vw_fauna_daily_stats')
-                        .select('*');
-
-                    if (impactError || rescateError || impactosTipoError || especiesError || estadisticasError) {
-                        console.error('Error loading fauna statistics:', {impactError, rescateError, impactosTipoError, especiesError, estadisticasError});
+                    if (faunaError) {
+                        console.error('Error loading fauna statistics:', { faunaError });
                         return;
                     }
+
+                    var impactData = (faunaData || []).filter(function(r){ return r.tipo_reporte !== 'Rescate'; });
+                    var rescateData = (faunaData || []).filter(function(r){ return r.tipo_reporte === 'Rescate'; });
+                    var impactosTipoCount = {};
+                    impactData.forEach(function(r){
+                        var key = (r.evento || r.tipo_reporte || 'Impacto');
+                        impactosTipoCount[key] = (impactosTipoCount[key] || 0) + 1;
+                    });
+                    var impactosTipo = Object.keys(impactosTipoCount).map(function(k){
+                        return { tipo_item: k, total: impactosTipoCount[k] };
+                    }).sort(function(a, b){ return b.total - a.total; });
+
+                    var especiesIndex = {};
+                    rescateData.forEach(function(r){
+                        var key = (r.clase || 'N/A') + '||' + (r.especie || 'N/A');
+                        especiesIndex[key] = especiesIndex[key] || { clase: r.clase || 'N/A', especie: r.especie || 'N/A', total_rescates: 0 };
+                        especiesIndex[key].total_rescates += 1;
+                    });
+                    var especiesRescatadas = Object.values(especiesIndex).sort(function(a, b){ return b.total_rescates - a.total_rescates; });
+
+                    var dailyIndex = {};
+                    (faunaData || []).forEach(function(r){
+                        var key = r.fecha_reporte || null;
+                        if (!key) return;
+                        dailyIndex[key] = (dailyIndex[key] || 0) + (r.estado === 'pendiente' ? 1 : 0);
+                    });
+                    var estadisticasDiarias = Object.keys(dailyIndex).sort().map(function(fecha){
+                        return { fecha_reporte: fecha, reportes_pendientes: dailyIndex[fecha] };
+                    });
 
                     // Actualizar tarjetas de resumen
                     var totalImpactos = impactData ? impactData.length : 0;
@@ -8514,40 +8537,16 @@
                 }
 
                 try {
-                    // Consultar impactos
-                    let impactQuery = client.from('fauna_impact_reports').select('*');
-                    
-                    if (filters.fechaDesde) {
-                        impactQuery = impactQuery.gte('fecha_reporte', filters.fechaDesde);
-                    }
-                    if (filters.fechaHasta) {
-                        impactQuery = impactQuery.lte('fecha_reporte', filters.fechaHasta);
-                    }
+                    let faunaQuery = client.from('fauna_reports').select('*');
+                    if (filters.fechaDesde) faunaQuery = faunaQuery.gte('fecha_reporte', filters.fechaDesde);
+                    if (filters.fechaHasta) faunaQuery = faunaQuery.lte('fecha_reporte', filters.fechaHasta);
+                    if (filters.clase && filters.clase !== '') faunaQuery = faunaQuery.eq('clase', filters.clase);
+                    if (filters.especie && filters.especie !== '') faunaQuery = faunaQuery.eq('especie', filters.especie);
 
-                    const { data: impactData, error: impactError } = await impactQuery.order('created_at', { ascending: false });
-                    console.log('DEBUG loadFaunaReports - impactData:', impactData);
-                    console.log('DEBUG loadFaunaReports - impactError:', impactError);
+                    const { data: faunaData, error: faunaError } = await faunaQuery.order('created_at', { ascending: false });
 
-                    // Consultar rescates
-                    let rescateQuery = client.from('fauna_rescue_reports').select('*');
-                    
-                    if (filters.fechaDesde) {
-                        rescateQuery = rescateQuery.gte('fecha_reporte', filters.fechaDesde);
-                    }
-                    if (filters.fechaHasta) {
-                        rescateQuery = rescateQuery.lte('fecha_reporte', filters.fechaHasta);
-                    }
-                    if (filters.clase && filters.clase !== '') {
-                        rescateQuery = rescateQuery.eq('clase', filters.clase);
-                    }
-                    if (filters.especie && filters.especie !== '') {
-                        rescateQuery = rescateQuery.eq('especie', filters.especie);
-                    }
-
-                    const { data: rescateData, error: rescateError } = await rescateQuery.order('created_at', { ascending: false });
-
-                    if (impactError || rescateError) {
-                        console.error('Error loading fauna reports:', {impactError, rescateError});
+                    if (faunaError) {
+                        console.error('Error loading fauna reports:', { faunaError });
                         if (reportsList) {
                             reportsList.innerHTML = '<tr><td colspan="7" style="padding:20px;text-align:center;color:#ef4444;">Error al cargar reportes</td></tr>';
                         }
@@ -8555,41 +8554,11 @@
                     }
 
                     // Combinar reportes según filtro de tipo
-                    let allReports = [];
-                    
-                    if (!filters.tipo || filters.tipo === 'impacto') {
-                        if (impactData && impactData.length > 0) {
-                            console.log('DEBUG: Creating impacto records from fauna_impact_reports');
-                            impactData.forEach(function(report) {
-                                var tipoDeReporte = report.evento || 'Impacto';
-                                var reportWithType = {
-                                    ...report,
-                                    tipoReporte: tipoDeReporte,
-                                    fuente_tabla: 'fauna_impact_reports',
-                                    especie: report.evento || '-',
-                                    ubicacion: report.ubicacion || '-'
-                                };
-                                console.log('Added IMPACTO with tipoReporte=' + tipoDeReporte + ', evento=' + report.evento);
-                                allReports.push(reportWithType);
-                            });
-                        }
-                    }
-
-                    if (!filters.tipo || filters.tipo === 'rescate') {
-                        if (rescateData && rescateData.length > 0) {
-                            console.log('DEBUG: Creating rescate records from fauna_rescue_reports');
-                            rescateData.forEach(function(report) {
-                                var reportWithType = {
-                                    ...report,
-                                    tipoReporte: 'Rescate',
-                                    fuente_tabla: 'fauna_rescue_reports',
-                                    ubicacion: report.sitio_rescate || '-'
-                                };
-                                console.log('Added RESCATE with tipoReporte=Rescate');
-                                allReports.push(reportWithType);
-                            });
-                        }
-                    }
+                    let allReports = (faunaData || []).filter(function(report) {
+                        if (filters.tipo === 'impacto') return report.tipo_reporte !== 'Rescate';
+                        if (filters.tipo === 'rescate') return report.tipo_reporte === 'Rescate';
+                        return true;
+                    });
 
                     console.log('DEBUG: Final allReports - Total count:', allReports.length, 'Records:', allReports);
 
@@ -8635,18 +8604,18 @@
                                 }
                                 
                                 const especie = report.especie || '-';
-                                const ubicacion = report.ubicacion || '-';
+                                const ubicacion = report.ubicacion_texto || report.zona || '-';
                                 const responsable = report.responsable || '-';
                                 const estado = report.estado || 'pendiente';
                                 
                                 // Usar tipo_reporte del campo de base de datos directamente
                                 let tipoReporte = report.tipo_reporte || report.tipoReporte || '-';
                                 
-                                // Fallback a detección por fuente_tabla si no hay tipo_reporte
+                                // Fallback por datos disponibles si no hay tipo_reporte
                                 if (tipoReporte === '-' || !tipoReporte) {
-                                    if (report.fuente_tabla === 'fauna_impact_reports' || report.evento) {
+                                    if (report.evento) {
                                         tipoReporte = report.evento || 'Impacto';
-                                    } else if (report.fuente_tabla === 'fauna_rescue_reports' || report.sitio_rescate) {
+                                    } else if (report.clase || report.sitio_reubicacion) {
                                         tipoReporte = 'Rescate';
                                     }
                                 }
