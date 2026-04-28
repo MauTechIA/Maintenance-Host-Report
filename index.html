@@ -6533,50 +6533,61 @@
                 if (mainTitle) mainTitle.style.display = 'block';
                 document.body.classList.remove('loading-auth');
 
-                // Obtener rol del usuario
-                // Intentamos obtenerlo de 'user_metadata' primero, o de una tabla 'profiles'
-                var role = 'viewer'; // default
-
-                // 1. Check metadata
-                if (user.user_metadata && user.user_metadata.role) {
-                    role = user.user_metadata.role;
-                } else {
-                    // 2. Check profiles table with related user roles
-                    var { data: profile, error: profileError } = await supabase
-                        .from('profiles')
-                        .select(`
-                            id,
-                            username,
-                            full_name,
-                            created_at,
-                            user_roles (
-                                role,
-                                permissions
-                            )
-                        `)
-                        .eq('id', user.id)
-                        .single();
-
-                    if (!profileError && profile && Array.isArray(profile.user_roles) && profile.user_roles.length > 0 && profile.user_roles[0].role) {
-                        role = profile.user_roles[0].role;
-                    }
+                // Obtener perfil y rol del usuario desde la estructura destino:
+                // auth.users = autenticación
+                // public.profiles = datos del usuario
+                // public.user_roles = rol y permisos
+                
+                var role = 'viewer';
+                var permissions = {};
+                
+                var { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('id, username, full_name, email, created_at')
+                    .eq('id', user.id)
+                    .maybeSingle();
+                
+                if (profileError) {
+                    console.error('Error cargando profile:', profileError);
                 }
-
+                
+                var { data: roleData, error: roleError } = await supabase
+                    .from('user_roles')
+                    .select('role, permissions')
+                    .eq('user_id', user.id)
+                    .maybeSingle();
+                
+                if (roleError) {
+                    console.error('Error cargando user_roles:', roleError);
+                }
+                
+                if (roleData && roleData.role) {
+                    role = roleData.role;
+                    permissions = roleData.permissions || {};
+                }
+                
                 if (userRoleSpan) userRoleSpan.textContent = role;
-
-                // Lógica de permisos basada en rol
-                // Roles permitidos para editar: 'admin', 'editor', 'inspector'
-                var allowedRoles = ['admin', 'editor', 'inspector', 'superuser'];
-
+                
+                // Roles permitidos para capturar/editar reportes
+                var allowedRoles = [
+                    'admin',
+                    'editor',
+                    'superadmin',
+                    'operacion',
+                    'seguridad_op',
+                    'planeacion',
+                    'calidad',
+                    'afac'
+                ];
+                
                 if (allowedRoles.includes(role.toLowerCase())) {
                     if (reportForm) reportForm.style.display = 'block';
                 } else {
                     alert('Tu usuario (' + role + ') no tiene permisos para llenar reportes.');
-                    // Opcional: mostrar solo vista de lectura o mensaje
                 }
-
+                
                 // Mostrar panel de admin si corresponde
-                if (role.toLowerCase() === 'admin' || role.toLowerCase() === 'superuser') {
+                if (role.toLowerCase() === 'admin' || role.toLowerCase() === 'superadmin') {
                     var adminPanel = document.getElementById('admin-panel');
                     if (adminPanel) {
                         adminPanel.style.display = 'block';
