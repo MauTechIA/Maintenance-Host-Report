@@ -6541,15 +6541,24 @@
                 if (user.user_metadata && user.user_metadata.role) {
                     role = user.user_metadata.role;
                 } else {
-                    // 2. Check profiles table (asumiendo tabla 'profiles' con columna 'role')
-                    var { data, error } = await supabase
+                    // 2. Check profiles table with related user roles
+                    var { data: profile, error: profileError } = await supabase
                         .from('profiles')
-                        .select('role')
+                        .select(`
+                            id,
+                            username,
+                            full_name,
+                            created_at,
+                            user_roles (
+                                role,
+                                permissions
+                            )
+                        `)
                         .eq('id', user.id)
                         .single();
 
-                    if (data && data.role) {
-                        role = data.role;
+                    if (!profileError && profile && Array.isArray(profile.user_roles) && profile.user_roles.length > 0 && profile.user_roles[0].role) {
+                        role = profile.user_roles[0].role;
                     }
                 }
 
