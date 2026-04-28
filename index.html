@@ -7498,63 +7498,45 @@
                                         }
                                     }
                                     
-                                    // Upload PDF a bucket fauna/reports
-                                    var pdfPath = Date.now() + '_' + folio + '.pdf';
-                                    console.log('📤 Intentando subir PDF a fauna/reports con ruta:', pdfPath);
+                                    // Upload PDF a bucket fauna-reports (si falla, continuar sin PDF)
+                                    var pdfPath = 'fauna/' + Date.now() + '-' + folio + '.pdf';
+                                    console.log('📤 Intentando subir PDF a fauna-reports con ruta:', pdfPath);
                                     var { data: uploadData, error: uploadError } = await client.storage
-                                        .from('fauna/reports')
+                                        .from('fauna-reports')
                                         .upload(pdfPath, pdfBlob, { contentType: 'application/pdf' });
                                     
+                                    var pdfUrl = null;
                                     if (uploadError) {
-                                        console.error('❌ ERROR al subir PDF a fauna/reports:', uploadError);
-                                        if (uploadError.message.indexOf('bucket not found') !== -1 || uploadError.status === 404) {
-                                            alert('❌ Error: El bucket "fauna/reports" no existe o no tienes permisos.\n\nDetalles:\n' + uploadError.message);
-                                        } else {
-                                            alert('❌ Error al subir PDF:\n' + (uploadError.message || 'Error desconocido'));
+                                        console.warn('⚠️ No se pudo subir PDF (continuará guardado en BD sin URL):', uploadError);
+                                        if ((uploadError.message || '').toLowerCase().indexOf('row-level security') !== -1) {
+                                            alert('⚠️ El PDF no se pudo subir por políticas RLS de Storage, pero el reporte SÍ se guardará en la base de datos sin PDF adjunto.');
                                         }
-                                        submitBtn.disabled = false;
-                                        submitBtn.value = 'Generar reporte';
-                                        return;
+                                    } else {
+                                        console.log('✅ PDF subido exitosamente al storage. Datos:', uploadData);
                                     }
                                     
-                                    console.log('✅ PDF subido exitosamente al storage. Datos:', uploadData);
-                                    
-                                    var pdfUrl = null;
                                     if (uploadData && !uploadError) {
                                         console.log('🔗 Generando URL firmada para:', pdfPath);
                                         try {
                                             var { data: signedUrlData, error: signedUrlError } = await client.storage
-                                                .from('fauna/reports')
+                                                .from('fauna-reports')
                                                 .createSignedUrl(pdfPath, 7 * 24 * 60 * 60);
                                             
                                             if (signedUrlError) {
-                                                console.error('❌ Error generando Signed URL:', signedUrlError);
-                                                console.error('Tipo de error:', signedUrlError.message || 'Desconocido');
-                                                alert('❌ Error al generar Signed URL:\n' + (signedUrlError.message || 'Error desconocido') + '\n\nVerifica que el bucket "fauna/reports" tenga RLS Policies configuradas.');
-                                                submitBtn.disabled = false;
-                                                submitBtn.value = 'Generar reporte';
-                                                return;
+                                                console.warn('⚠️ Error generando Signed URL. Se guardará sin pdf_url:', signedUrlError);
                                             } else if (signedUrlData && signedUrlData.signedUrl) {
                                                 pdfUrl = signedUrlData.signedUrl;
                                                 console.log('✅ URL firmada generada correctamente');
                                                 console.log('URL:', pdfUrl.substring(0, 100) + '...');
                                             } else {
-                                                console.error('❌ signedUrlData sin signedUrl:', signedUrlData);
-                                                alert('❌ No se pudo generar la URL del PDF. Verifica la configuración del bucket.');
-                                                submitBtn.disabled = false;
-                                                submitBtn.value = 'Generar reporte';
-                                                return;
+                                                console.warn('⚠️ signedUrlData sin signedUrl. Se guardará sin pdf_url:', signedUrlData);
                                             }
                                         } catch (e) {
-                                            console.error('❌ Excepción al generar URL:', e);
-                                            alert('❌ Excepción al generar URL: ' + e.message);
-                                            submitBtn.disabled = false;
-                                            submitBtn.value = 'Generar reporte';
-                                            return;
+                                            console.warn('⚠️ Excepción al generar URL. Se guardará sin pdf_url:', e);
                                         }
-                                        console.log('✅ PDF listo para guardar con URL');
+                                        console.log('✅ Proceso de PDF finalizado; continuando guardado en BD');
                                     } else {
-                                        console.error('❌ No se pudo proceder con URL - uploadData:', uploadData, 'uploadError:', uploadError);
+                                        console.warn('⚠️ Sin uploadData; continuando guardado en BD sin URL de PDF.');
                                     }
                                     
                                     // Actualizar payload con PDF URL
