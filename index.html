@@ -3006,26 +3006,10 @@
                         <button type="button" id="close-fauna-hallazgos-map-btn" class="btn btn-ghost">Cerrar</button>
                     </div>
                     <div id="fauna-map-export-area" style="padding:16px;">
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-bottom:12px;">
-                            <div>
-                                <label style="font-size:12px; font-weight:700;">Especie (selección múltiple)</label>
-                                <select id="fauna-hallazgos-species-select" multiple size="6" style="width:100%; margin-top:6px; padding:8px; border:1px solid #cbd5e1; border-radius:8px;"></select>
-                            </div>
-                            <div>
-                                <label style="font-size:12px; font-weight:700;">Histórico</label>
-                                <select id="fauna-hallazgos-period-mode" style="width:100%; margin-top:6px; padding:8px; border:1px solid #cbd5e1; border-radius:8px;">
-                                    <option value="day">Día</option>
-                                    <option value="week">Semana</option>
-                                    <option value="month">Mes</option>
-                                    <option value="year">Año</option>
-                                </select>
-                                <label style="font-size:12px; font-weight:700; margin-top:10px; display:block;">Calendario múltiple</label>
-                                <div style="display:flex; gap:8px; margin-top:6px;">
-                                    <input id="fauna-hallazgos-period-picker" type="date" style="flex:1; padding:8px; border:1px solid #cbd5e1; border-radius:8px;">
-                                    <button type="button" id="fauna-hallazgos-period-add-btn" class="btn btn-ghost">Agregar</button>
-                                </div>
-                                <select id="fauna-hallazgos-period-values" multiple size="6" style="width:100%; margin-top:8px; padding:8px; border:1px solid #cbd5e1; border-radius:8px;"></select>
-                                <button type="button" id="fauna-hallazgos-period-clear-btn" class="btn btn-ghost" style="margin-top:8px;">Limpiar selección histórica</button>
+                        <div style="margin-bottom:12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px;">
+                            <h4 style="margin:0 0 8px 0; font-size:14px;">Histórico visible en panel</h4>
+                            <div id="fauna-hallazgos-historico-resumen" style="font-size:13px; color:#334155; line-height:1.5;">
+                                Cargando resumen...
                             </div>
                         </div>
                         <div id="fauna-hallazgos-map" style="height:420px; border:1px solid #cbd5e1; border-radius:10px;"></div>
@@ -8754,103 +8738,39 @@
             var faunaMapModal = document.getElementById('fauna-hallazgos-map-modal');
             var openFaunaMapBtn = document.getElementById('open-fauna-hallazgos-map-btn');
             var closeFaunaMapBtn = document.getElementById('close-fauna-hallazgos-map-btn');
-            var faunaSpeciesSelect = document.getElementById('fauna-hallazgos-species-select');
-            var faunaPeriodMode = document.getElementById('fauna-hallazgos-period-mode');
-            var faunaPeriodPicker = document.getElementById('fauna-hallazgos-period-picker');
-            var faunaPeriodAddBtn = document.getElementById('fauna-hallazgos-period-add-btn');
-            var faunaPeriodClearBtn = document.getElementById('fauna-hallazgos-period-clear-btn');
-            var faunaPeriodValues = document.getElementById('fauna-hallazgos-period-values');
+            var faunaHistoricoResumen = document.getElementById('fauna-hallazgos-historico-resumen');
             var faunaExportPdfBtn = document.getElementById('export-fauna-hallazgos-pdf-btn');
             var faunaHallazgosMap = null;
             var faunaSkeletonLayer = null;
-            var faunaSpeciesLoaded = false;
             var faunaMapBusy = false;
 
-            function uniqueSorted(arr) {
-                return Array.from(new Set((arr || []).filter(Boolean).map(function (v) { return String(v).trim(); }).filter(Boolean))).sort();
+            function getRowsText(selector, colA, colB, limit) {
+                var rows = Array.from(document.querySelectorAll(selector + ' tr'));
+                var clean = rows.map(function (tr) {
+                    var cells = tr.querySelectorAll('td');
+                    if (!cells.length) return '';
+                    var a = (cells[colA] && cells[colA].textContent || '').trim();
+                    var b = (cells[colB] && cells[colB].textContent || '').trim();
+                    if (!a && !b) return '';
+                    return b ? (a + ': ' + b) : a;
+                }).filter(Boolean);
+                return clean.slice(0, limit || 8);
             }
 
-            function collectSpeciesFromFormCatalog() {
-                var selectors = [
-                    'select[name="fauna_report[especie]"] option',
-                    'select[name="fauna_rescate[especie]"] option'
-                ];
-                var values = [];
-                selectors.forEach(function (sel) {
-                    document.querySelectorAll(sel).forEach(function (opt) {
-                        var value = (opt.value || '').trim();
-                        if (!value || /^--\s*seleccionar/i.test(value)) return;
-                        if (/^otra$/i.test(value)) return;
-                        values.push(value);
-                    });
-                });
-                return uniqueSorted(values);
-            }
+            function renderFaunaHistoricoFromVisibleData() {
+                if (!faunaHistoricoResumen) return;
+                var diario = getRowsText('#estadisticas-diarias-table-body', 0, 1, 6);
+                var tipos = getRowsText('#impactos-tipo-table-body', 0, 1, 6);
+                var especies = getRowsText('#especies-rescatadas-table-body', 1, 2, 6);
 
-            async function loadSpeciesForHallazgos() {
-                if (faunaSpeciesLoaded || !faunaSpeciesSelect) return;
-                var species = collectSpeciesFromFormCatalog();
-                if (!species.length && window.supabaseClient) {
-                    try {
-                        var client = window.supabaseClient;
-                        var impactResp = await client.from('fauna_impact_reports').select('especie,evento').limit(300);
-                        var rescueResp = await client.from('fauna_rescue_reports').select('especie').limit(300);
-                        var impactData = impactResp.data || [];
-                        var rescueData = rescueResp.data || [];
-                        species = uniqueSorted(
-                            impactData.map(function (r) { return r.especie || r.evento; })
-                                .concat(rescueData.map(function (r) { return r.especie; }))
-                        );
-                    } catch (e) {
-                        console.warn('No se pudieron cargar especies para mapa de hallazgos:', e);
-                    }
-                }
-                faunaSpeciesSelect.innerHTML = '';
-                species.forEach(function (sp) {
-                    var opt = document.createElement('option');
-                    opt.value = sp;
-                    opt.textContent = sp;
-                    faunaSpeciesSelect.appendChild(opt);
-                });
-                faunaSpeciesLoaded = true;
-            }
+                var bloques = [];
+                if (diario.length) bloques.push('<strong>Histórico diario:</strong><br>' + diario.join('<br>'));
+                if (tipos.length) bloques.push('<strong>Impactos por tipo:</strong><br>' + tipos.join('<br>'));
+                if (especies.length) bloques.push('<strong>Especies rescatadas:</strong><br>' + especies.join('<br>'));
 
-            function normalizePeriodValue(rawValue, mode) {
-                if (!rawValue) return '';
-                if (mode === 'year') {
-                    var year = String(rawValue).trim();
-                    return /^\d{4}$/.test(year) ? year : '';
-                }
-                if (mode === 'month') {
-                    return /^\d{4}-\d{2}$/.test(rawValue) ? rawValue : '';
-                }
-                if (mode === 'week') {
-                    return /^\d{4}-W\d{2}$/.test(rawValue) ? rawValue : '';
-                }
-                return /^\d{4}-\d{2}-\d{2}$/.test(rawValue) ? rawValue : '';
-            }
-
-            function setPickerByPeriodMode() {
-                if (!faunaPeriodPicker) return;
-                var mode = faunaPeriodMode ? faunaPeriodMode.value : 'day';
-                faunaPeriodPicker.value = '';
-                faunaPeriodPicker.placeholder = '';
-                faunaPeriodPicker.min = '';
-                faunaPeriodPicker.max = '';
-                faunaPeriodPicker.step = '';
-                if (mode === 'week') {
-                    faunaPeriodPicker.type = 'week';
-                } else if (mode === 'month') {
-                    faunaPeriodPicker.type = 'month';
-                } else if (mode === 'year') {
-                    faunaPeriodPicker.type = 'number';
-                    faunaPeriodPicker.placeholder = 'Ej. 2026';
-                    faunaPeriodPicker.min = '2000';
-                    faunaPeriodPicker.max = '2100';
-                    faunaPeriodPicker.step = '1';
-                } else {
-                    faunaPeriodPicker.type = 'date';
-                }
+                faunaHistoricoResumen.innerHTML = bloques.length
+                    ? bloques.join('<br><br>')
+                    : 'Sin datos visibles para histórico.';
             }
 
             function addPeriodSelection() {
@@ -8900,9 +8820,9 @@
                 if (faunaMapBusy) return;
                 faunaMapBusy = true;
                 faunaMapModal.style.display = 'block';
+                renderFaunaHistoricoFromVisibleData();
                 setTimeout(async function () {
                     try {
-                        await loadSpeciesForHallazgos();
                         await ensureFaunaSkeletonMap();
                         if (faunaHallazgosMap) faunaHallazgosMap.invalidateSize();
                     } finally {
@@ -8918,19 +8838,6 @@
             faunaMapModal?.addEventListener('click', function (e) {
                 if (e.target === faunaMapModal) faunaMapModal.style.display = 'none';
             });
-
-            faunaPeriodMode?.addEventListener('change', setPickerByPeriodMode);
-            faunaPeriodAddBtn?.addEventListener('click', addPeriodSelection);
-            faunaPeriodPicker?.addEventListener('keydown', function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addPeriodSelection();
-                }
-            });
-            faunaPeriodClearBtn?.addEventListener('click', function () {
-                if (faunaPeriodValues) faunaPeriodValues.innerHTML = '';
-            });
-            setPickerByPeriodMode();
 
             faunaExportPdfBtn?.addEventListener('click', function () {
                 if (typeof html2pdf === 'undefined') {
