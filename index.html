@@ -8762,8 +8762,58 @@
             var faunaPeriodValues = document.getElementById('fauna-hallazgos-period-values');
             var faunaExportPdfBtn = document.getElementById('export-fauna-hallazgos-pdf-btn');
             var faunaHallazgosMap = null;
-            var faunaHallazgosData = [];
             var faunaSkeletonLayer = null;
+            var faunaSpeciesLoaded = false;
+            var faunaMapBusy = false;
+
+            function uniqueSorted(arr) {
+                return Array.from(new Set((arr || []).filter(Boolean).map(function (v) { return String(v).trim(); }).filter(Boolean))).sort();
+            }
+
+            function collectSpeciesFromFormCatalog() {
+                var selectors = [
+                    'select[name="fauna_report[especie]"] option',
+                    'select[name="fauna_rescate[especie]"] option'
+                ];
+                var values = [];
+                selectors.forEach(function (sel) {
+                    document.querySelectorAll(sel).forEach(function (opt) {
+                        var value = (opt.value || '').trim();
+                        if (!value || /^--\s*seleccionar/i.test(value)) return;
+                        if (/^otra$/i.test(value)) return;
+                        values.push(value);
+                    });
+                });
+                return uniqueSorted(values);
+            }
+
+            async function loadSpeciesForHallazgos() {
+                if (faunaSpeciesLoaded || !faunaSpeciesSelect) return;
+                var species = collectSpeciesFromFormCatalog();
+                if (!species.length && window.supabaseClient) {
+                    try {
+                        var client = window.supabaseClient;
+                        var impactResp = await client.from('fauna_impact_reports').select('especie,evento').limit(300);
+                        var rescueResp = await client.from('fauna_rescue_reports').select('especie').limit(300);
+                        var impactData = impactResp.data || [];
+                        var rescueData = rescueResp.data || [];
+                        species = uniqueSorted(
+                            impactData.map(function (r) { return r.especie || r.evento; })
+                                .concat(rescueData.map(function (r) { return r.especie; }))
+                        );
+                    } catch (e) {
+                        console.warn('No se pudieron cargar especies para mapa de hallazgos:', e);
+                    }
+                }
+                faunaSpeciesSelect.innerHTML = '';
+                species.forEach(function (sp) {
+                    var opt = document.createElement('option');
+                    opt.value = sp;
+                    opt.textContent = sp;
+                    faunaSpeciesSelect.appendChild(opt);
+                });
+                faunaSpeciesLoaded = true;
+            }
 
             function normalizePeriodValue(rawValue, mode) {
                 if (!rawValue) return '';
@@ -8822,31 +8872,6 @@
                 faunaPeriodPicker.value = '';
             }
 
-            async function loadFaunaHallazgosData() {
-                var client = window.supabaseClient;
-                if (!client) return;
-                try {
-                    var impactResp = await client.from('fauna_impact_reports').select('especie,evento,fecha_reporte,created_at').order('created_at', { ascending: false });
-                    var rescueResp = await client.from('fauna_rescue_reports').select('especie,fecha_reporte,created_at').order('created_at', { ascending: false });
-                    var impactData = impactResp.data || [];
-                    var rescueData = rescueResp.data || [];
-                    faunaHallazgosData = impactData.concat(rescueData);
-
-                    if (faunaSpeciesSelect) {
-                        var species = Array.from(new Set(faunaHallazgosData.map(function (r) { return r.especie || r.evento; }).filter(Boolean))).sort();
-                        faunaSpeciesSelect.innerHTML = '';
-                        species.forEach(function (sp) {
-                            var opt = document.createElement('option');
-                            opt.value = sp;
-                            opt.textContent = sp;
-                            faunaSpeciesSelect.appendChild(opt);
-                        });
-                    }
-                } catch (e) {
-                    console.error('Error cargando datos para mapa de hallazgos:', e);
-                }
-            }
-
             async function ensureFaunaSkeletonMap() {
                 if (faunaHallazgosMap) return;
                 faunaHallazgosMap = L.map('fauna-hallazgos-map', { zoomControl: true });
@@ -8872,10 +8897,18 @@
 
             openFaunaMapBtn?.addEventListener('click', async function () {
                 if (!faunaMapModal) return;
+                if (faunaMapBusy) return;
+                faunaMapBusy = true;
                 faunaMapModal.style.display = 'block';
-                await loadFaunaHallazgosData();
-                await ensureFaunaSkeletonMap();
-                setTimeout(function () { if (faunaHallazgosMap) faunaHallazgosMap.invalidateSize(); }, 120);
+                setTimeout(async function () {
+                    try {
+                        await loadSpeciesForHallazgos();
+                        await ensureFaunaSkeletonMap();
+                        if (faunaHallazgosMap) faunaHallazgosMap.invalidateSize();
+                    } finally {
+                        faunaMapBusy = false;
+                    }
+                }, 0);
             });
 
             closeFaunaMapBtn?.addEventListener('click', function () {
