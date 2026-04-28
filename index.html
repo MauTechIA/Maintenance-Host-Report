@@ -8741,7 +8741,6 @@
             var faunaHistoricoResumen = document.getElementById('fauna-hallazgos-historico-resumen');
             var faunaExportPdfBtn = document.getElementById('export-fauna-hallazgos-pdf-btn');
             var faunaHallazgosMap = null;
-            var faunaSkeletonLayer = null;
             var faunaMapBusy = false;
 
             function getRowsText(selector, colA, colB, limit) {
@@ -8773,46 +8772,24 @@
                     : 'Sin datos visibles para histórico.';
             }
 
-            function addPeriodSelection() {
-                if (!faunaPeriodPicker || !faunaPeriodValues) return;
-                var mode = faunaPeriodMode ? faunaPeriodMode.value : 'day';
-                var normalized = normalizePeriodValue(faunaPeriodPicker.value, mode);
-                if (!normalized) return;
-                var exists = Array.from(faunaPeriodValues.options).some(function (opt) { return opt.value === normalized; });
-                if (!exists) {
-                    var opt = document.createElement('option');
-                    opt.value = normalized;
-                    opt.textContent = normalized;
-                    opt.selected = true;
-                    faunaPeriodValues.appendChild(opt);
-                }
-                Array.from(faunaPeriodValues.options).forEach(function (opt) {
-                    if (opt.value === normalized) opt.selected = true;
-                });
-                faunaPeriodPicker.value = '';
-            }
-
             async function ensureFaunaSkeletonMap() {
                 if (faunaHallazgosMap) return;
-                faunaHallazgosMap = L.map('fauna-hallazgos-map', { zoomControl: true });
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
+                faunaHallazgosMap = L.map('fauna-hallazgos-map', {
+                    center: [19.7470, -99.0125],
+                    zoom: 15,
+                    scrollWheelZoom: true
+                });
+                // Igual que el mapa picker principal: satélite ESRI + etiquetas.
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: 'Tiles &copy; Esri',
+                    maxZoom: 20
+                }).addTo(faunaHallazgosMap);
+                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '',
+                    maxZoom: 20,
+                    opacity: 0.9
                 }).addTo(faunaHallazgosMap);
                 faunaHallazgosMap.setView([19.7470, -99.0125], 15);
-
-                try {
-                    var kmlText = await fetch('Mauro 06 T.kml').then(function (r) { return r.text(); });
-                    var parser = new DOMParser();
-                    var kmlDoc = parser.parseFromString(kmlText, 'text/xml');
-                    var gj = toGeoJSON.kml(kmlDoc);
-                    faunaSkeletonLayer = L.geoJSON(gj, {
-                        style: function () { return { color: '#1d4ed8', weight: 2, opacity: 0.9, fillOpacity: 0.05 }; }
-                    }).addTo(faunaHallazgosMap);
-                    var bounds = faunaSkeletonLayer.getBounds();
-                    if (bounds && bounds.isValid()) faunaHallazgosMap.fitBounds(bounds.pad(0.08));
-                } catch (e) {
-                    console.warn('No se pudo cargar esqueleto KML en mapa de hallazgos:', e);
-                }
             }
 
             openFaunaMapBtn?.addEventListener('click', async function () {
@@ -8824,6 +8801,12 @@
                 setTimeout(async function () {
                     try {
                         await ensureFaunaSkeletonMap();
+                        faunaHallazgosMap.eachLayer(function (layer) {
+                            if (layer instanceof L.Marker) {
+                                try { faunaHallazgosMap.removeLayer(layer); } catch (e) { }
+                            }
+                        });
+                        faunaHallazgosMap.setView([19.7470, -99.0125], 15);
                         if (faunaHallazgosMap) faunaHallazgosMap.invalidateSize();
                     } finally {
                         faunaMapBusy = false;
