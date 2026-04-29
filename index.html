@@ -2985,11 +2985,9 @@
                                     </select>
                                 </div>
                             </div>
-                            <div id="fauna-hallazgos-historico-resumen" style="font-size:13px; color:#334155; line-height:1.5;">
-                                Cargando histórico...
-                            </div>
+                            <div id="fauna-hallazgos-historico-resumen" style="display:none;"></div>
                         </div>
-                        <div id="fauna-hallazgos-map" style="height:420px; border:1px solid #cbd5e1; border-radius:10px;"></div>
+                        <div id="fauna-hallazgos-map" style="height:620px; border:1px solid #cbd5e1; border-radius:10px;"></div>
                     </div>
                     <div style="display:flex; justify-content:flex-end; gap:8px; padding:14px 16px; border-top:1px solid #e2e8f0;">
                         <button type="button" id="export-fauna-hallazgos-pdf-btn" class="btn btn-primary">📄 Exportar a PDF</button>
@@ -8825,10 +8823,11 @@
                         '<strong>Clase:</strong> ' + clase + '<br>' +
                         '<strong>Especie:</strong> ' + especie + '<br>' +
                         '<strong>Ubicación:</strong> ' + (row.ubicacion_texto || 'N/D')
+                    ).bindTooltip(
+                        '<strong>Especie:</strong> ' + especie + '<br><strong>Fecha:</strong> ' + (row.fecha_reporte || '-'),
+                        { direction: 'top', offset: [0, -8], opacity: 0.95 }
                     ).addTo(faunaHallazgosMarkersLayer);
                 });
-
-                faunaHistoricoResumen.innerHTML = '<strong>Histórico de ubicaciones (Clase / Especie):</strong><br>' + formatFaunaHistorico(resumen);
                 if (bounds.length) {
                     faunaHallazgosMap.fitBounds(bounds, { padding: [24, 24] });
                 } else {
