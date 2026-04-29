@@ -6644,32 +6644,75 @@
                 
                 if (loginBtn) {
                     loginBtn.addEventListener('click', async function () {
-                        try {
-                            var usernameOrEmail = emailInput ? emailInput.value : '';
-                            var password = passInput ? passInput.value : '';
                 
-                            if (errorMsg) {
-                                errorMsg.style.display = 'none';
-                                errorMsg.textContent = '';
+                        const originalUsername = (emailInput.value || '').trim();
+                        let email = originalUsername;
+                        const password = passInput.value || '';
+                
+                        errorMsg.style.display = 'none';
+                        loginBtn.disabled = true;
+                        loginBtn.textContent = 'Entrando...';
+                
+                        try {
+                
+                            if (email && !email.includes('@')) {
+                                const normalized = email
+                                    .trim()
+                                    .toLowerCase()
+                                    .normalize("NFD")
+                                    .replace(/[\u0300-\u036f]/g, "")
+                                    .replace(/\s+/g, '.');
+                
+                                email = `${normalized}@aifa.operaciones`;
                             }
                 
-                            loginBtn.disabled = true;
-                            loginBtn.textContent = 'Entrando...';
+                            var { data, error } = await supabase.auth.signInWithPassword({
+                                email: email,
+                                password: password
+                            });
                 
-                            var user = await loginWithUsuariosTable(usernameOrEmail, password);
+                            if (error) throw error;
                 
-                            saveCurrentUser(user);
-                            handleUser(user);
+                            sessionStorage.setItem('user', JSON.stringify(data.user));
+                            sessionStorage.setItem('token', data.session.access_token);
+                
+                            let role = 'viewer';
+                
+                            try {
+                                const { data: roleData } = await supabase
+                                    .from('user_roles')
+                                    .select('role')
+                                    .eq('user_id', data.user.id)
+                                    .single();
+                
+                                if (roleData && roleData.role) {
+                                    role = roleData.role;
+                                }
+                
+                            } catch (_) {}
+                
+                            sessionStorage.setItem('user_role', role);
+                
+                            handleUser({
+                                ...data.user,
+                                user_metadata: {
+                                    ...(data.user.user_metadata || {}),
+                                    role: role
+                                }
+                            });
                 
                         } catch (error) {
-                            if (errorMsg) {
-                                errorMsg.textContent = 'Error: ' + (error.message || String(error));
-                                errorMsg.style.display = 'block';
-                            }
+                
+                            errorMsg.textContent = 'Error: ' + error.message;
+                            errorMsg.style.display = 'block';
+                
                         } finally {
+                
                             loginBtn.disabled = false;
                             loginBtn.textContent = 'Iniciar Sesión';
+                
                         }
+                
                     });
                 }
                 
