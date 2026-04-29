@@ -8032,10 +8032,17 @@
                     window.faunaCatalogosCache[cacheKey] = catalogo;
                 }
 
+                var vistos = new Set();
                 catalogo.forEach(function(item) {
+                    var nombre = (item && item.nombre ? item.nombre : '').toString().trim();
+                    if (!nombre) return;
+                    var key = normalizarTextoCatalogo(nombre);
+                    if (vistos.has(key)) return;
+                    vistos.add(key);
+
                     var option = document.createElement('option');
-                    option.value = item.nombre; // Compatibilidad: guardar texto, no id
-                    option.textContent = item.nombre;
+                    option.value = nombre; // Compatibilidad: guardar texto, no id
+                    option.textContent = nombre;
                     selectElement.appendChild(option);
                 });
 
