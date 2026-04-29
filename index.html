@@ -7964,18 +7964,30 @@
                 });
             })();
 
-            async function getCatalogoActivo(tabla) {
+            window.faunaCatalogosCache = window.faunaCatalogosCache || {};
+
+            async function getCatalogoActivo(tabla, filtros) {
                 const client = window.supabaseClient;
                 if (!client) {
                     console.error('Supabase client not ready for catalog lookup:', tabla);
                     return [];
                 }
 
-                const { data, error } = await client
+                var query = client
                     .from(tabla)
                     .select('id, nombre')
                     .eq('activo', true)
                     .order('orden', { ascending: true });
+
+                if (filtros && typeof filtros === 'object') {
+                    Object.keys(filtros).forEach(function(campo){
+                        if (filtros[campo] !== undefined && filtros[campo] !== null && filtros[campo] !== '') {
+                            query = query.eq(campo, filtros[campo]);
+                        }
+                    });
+                }
+
+                const { data, error } = await query;
 
                 if (error) {
                     console.error('Error loading catalog from Supabase:', { tabla: tabla, error: error });
@@ -7985,7 +7997,16 @@
                 return data || [];
             }
 
-            async function cargarCatalogoSelect(tabla, selectElement, placeholder) {
+            function getCatalogoCacheKey(tabla, filtros) {
+                var key = tabla;
+                if (filtros && typeof filtros === 'object') {
+                    var parts = Object.keys(filtros).sort().map(function(k){ return k + ':' + filtros[k]; });
+                    if (parts.length) key += '|' + parts.join('|');
+                }
+                return key;
+            }
+
+            async function cargarCatalogoSelect(tabla, selectElement, placeholder, filtros) {
                 if (!selectElement) return;
 
                 var valorActual = selectElement.value;
@@ -7995,7 +8016,13 @@
                 placeholderOption.textContent = placeholder;
                 selectElement.appendChild(placeholderOption);
 
-                var catalogo = await getCatalogoActivo(tabla);
+                var cacheKey = getCatalogoCacheKey(tabla, filtros);
+                var catalogo = window.faunaCatalogosCache[cacheKey];
+                if (!catalogo) {
+                    catalogo = await getCatalogoActivo(tabla, filtros);
+                    window.faunaCatalogosCache[cacheKey] = catalogo;
+                }
+
                 catalogo.forEach(function(item) {
                     var option = document.createElement('option');
                     option.value = item.nombre; // Compatibilidad: guardar texto, no id
@@ -8008,14 +8035,50 @@
                 }
             }
 
+            async function cargarEspeciesPorClase(selectClase, selectEspecie, placeholder) {
+                if (!selectEspecie) return;
+
+                var claseNombre = selectClase && selectClase.value ? selectClase.value : '';
+                if (!claseNombre) {
+                    await cargarCatalogoSelect('catalogo_especie', selectEspecie, placeholder);
+                    return;
+                }
+
+                var clases = window.faunaCatalogosCache['catalogo_clase'] || await getCatalogoActivo('catalogo_clase');
+                window.faunaCatalogosCache['catalogo_clase'] = clases;
+
+                var clase = clases.find(function(item){ return item.nombre === claseNombre; });
+                if (!clase || !clase.id) {
+                    await cargarCatalogoSelect('catalogo_especie', selectEspecie, placeholder);
+                    return;
+                }
+
+                await cargarCatalogoSelect('catalogo_especie', selectEspecie, placeholder, { clase_id: clase.id });
+            }
+
+            function wireFaunaClaseEspecie(selectClaseId, selectEspecieId, placeholderEspecie) {
+                var claseSelect = document.getElementById(selectClaseId);
+                var especieSelect = document.getElementById(selectEspecieId);
+                if (!claseSelect || !especieSelect || claseSelect.dataset.catalogoWired === '1') return;
+                claseSelect.dataset.catalogoWired = '1';
+                claseSelect.addEventListener('change', function () {
+                    cargarEspeciesPorClase(claseSelect, especieSelect, placeholderEspecie);
+                });
+            }
+
             async function cargarCatalogosFauna() {
                 await Promise.all([
                     cargarCatalogoSelect('catalogo_clase', document.getElementById('fauna_rescate_clase'), '-- Seleccionar Clase --'),
-                    cargarCatalogoSelect('catalogo_especie', document.getElementById('fauna_rescate_especie'), '-- Seleccionar Especie --'),
                     cargarCatalogoSelect('catalogo_destino', document.getElementById('fauna_rescate_sitio_reubicacion'), '-- Seleccionar Sitio de Reubicación --'),
                     cargarCatalogoSelect('catalogo_clase', document.getElementById('filter-fauna-clase'), 'Todas las clases'),
                     cargarCatalogoSelect('catalogo_especie', document.getElementById('filter-fauna-especie'), 'Todas las especies')
                 ]);
+                await Promise.all([
+                    cargarEspeciesPorClase(document.getElementById('fauna_rescate_clase'), document.getElementById('fauna_rescate_especie'), '-- Seleccionar Especie --'),
+                    cargarEspeciesPorClase(document.getElementById('filter-fauna-clase'), document.getElementById('filter-fauna-especie'), 'Todas las especies')
+                ]);
+                wireFaunaClaseEspecie('fauna_rescate_clase', 'fauna_rescate_especie', '-- Seleccionar Especie --');
+                wireFaunaClaseEspecie('filter-fauna-clase', 'filter-fauna-especie', 'Todas las especies');
             }
 
             // Función para cargar estadísticas
