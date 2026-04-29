@@ -2961,9 +2961,32 @@
                     </div>
                     <div id="fauna-map-export-area" style="padding:16px;">
                         <div style="margin-bottom:12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; padding:12px;">
-                            <h4 style="margin:0 0 8px 0; font-size:14px;">Histórico visible en panel</h4>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:10px;">
+                                <div>
+                                    <label for="fauna-hallazgos-year" style="display:block; margin-bottom:4px; font-size:12px; color:#475569;">Año</label>
+                                    <select id="fauna-hallazgos-year" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; background:#fff;"></select>
+                                </div>
+                                <div>
+                                    <label for="fauna-hallazgos-month" style="display:block; margin-bottom:4px; font-size:12px; color:#475569;">Mes</label>
+                                    <select id="fauna-hallazgos-month" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; background:#fff;"></select>
+                                </div>
+                            </div>
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:10px;">
+                                <div>
+                                    <label for="fauna-hallazgos-clase" style="display:block; margin-bottom:4px; font-size:12px; color:#475569;">Clase</label>
+                                    <select id="fauna-hallazgos-clase" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; background:#fff;">
+                                        <option value="">Todas las clases</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="fauna-hallazgos-especie" style="display:block; margin-bottom:4px; font-size:12px; color:#475569;">Especie</label>
+                                    <select id="fauna-hallazgos-especie" style="width:100%; padding:8px; border:1px solid #cbd5e1; border-radius:8px; background:#fff;">
+                                        <option value="">Todas las especies</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div id="fauna-hallazgos-historico-resumen" style="font-size:13px; color:#334155; line-height:1.5;">
-                                Cargando resumen...
+                                Cargando histórico...
                             </div>
                         </div>
                         <div id="fauna-hallazgos-map" style="height:420px; border:1px solid #cbd5e1; border-radius:10px;"></div>
@@ -8032,10 +8055,17 @@
                     window.faunaCatalogosCache[cacheKey] = catalogo;
                 }
 
+                var vistos = new Set();
                 catalogo.forEach(function(item) {
+                    var nombre = (item && item.nombre ? item.nombre : '').toString().trim();
+                    if (!nombre) return;
+                    var key = normalizarTextoCatalogo(nombre);
+                    if (vistos.has(key)) return;
+                    vistos.add(key);
+
                     var option = document.createElement('option');
-                    option.value = item.nombre; // Compatibilidad: guardar texto, no id
-                    option.textContent = item.nombre;
+                    option.value = nombre; // Compatibilidad: guardar texto, no id
+                    option.textContent = nombre;
                     selectElement.appendChild(option);
                 });
 
@@ -8672,36 +8702,138 @@
             var closeFaunaMapBtn = document.getElementById('close-fauna-hallazgos-map-btn');
             var faunaHistoricoResumen = document.getElementById('fauna-hallazgos-historico-resumen');
             var faunaExportPdfBtn = document.getElementById('export-fauna-hallazgos-pdf-btn');
+            var faunaYearSelect = document.getElementById('fauna-hallazgos-year');
+            var faunaMonthSelect = document.getElementById('fauna-hallazgos-month');
+            var faunaClaseSelect = document.getElementById('fauna-hallazgos-clase');
+            var faunaEspecieSelect = document.getElementById('fauna-hallazgos-especie');
             var faunaHallazgosMap = null;
+            var faunaHallazgosMarkersLayer = null;
+            var faunaHallazgosYears = [];
             var faunaMapBusy = false;
+            var faunaMonthNames = ['Todos los meses', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-            function getRowsText(selector, colA, colB, limit) {
-                var rows = Array.from(document.querySelectorAll(selector + ' tr'));
-                var clean = rows.map(function (tr) {
-                    var cells = tr.querySelectorAll('td');
-                    if (!cells.length) return '';
-                    var a = (cells[colA] && cells[colA].textContent || '').trim();
-                    var b = (cells[colB] && cells[colB].textContent || '').trim();
-                    if (!a && !b) return '';
-                    return b ? (a + ': ' + b) : a;
-                }).filter(Boolean);
-                return clean.slice(0, limit || 8);
+            function renderMonthOptions() {
+                if (!faunaMonthSelect) return;
+                var prev = faunaMonthSelect.value || '';
+                faunaMonthSelect.innerHTML = '';
+                for (var i = 0; i <= 12; i++) {
+                    var op = document.createElement('option');
+                    op.value = i === 0 ? '' : String(i).padStart(2, '0');
+                    op.textContent = faunaMonthNames[i];
+                    faunaMonthSelect.appendChild(op);
+                }
+                faunaMonthSelect.value = prev;
             }
 
-            function renderFaunaHistoricoFromVisibleData() {
-                if (!faunaHistoricoResumen) return;
-                var diario = getRowsText('#estadisticas-diarias-table-body', 0, 1, 6);
-                var tipos = getRowsText('#impactos-tipo-table-body', 0, 1, 6);
-                var especies = getRowsText('#especies-rescatadas-table-body', 1, 2, 6);
+            async function loadFaunaHallazgosYears() {
+                if (!window.supabaseClient || !faunaYearSelect) return;
+                var { data, error } = await window.supabaseClient
+                    .from('fauna_reports')
+                    .select('fecha_reporte')
+                    .eq('tipo_reporte', 'Rescate')
+                    .not('ubicacion_lat', 'is', null)
+                    .not('ubicacion_lng', 'is', null)
+                    .order('fecha_reporte', { ascending: false });
+                if (error) throw error;
+                var years = Array.from(new Set((data || []).map(function (r) {
+                    return (r.fecha_reporte || '').toString().slice(0, 4);
+                }).filter(Boolean)));
+                faunaHallazgosYears = years;
+                faunaYearSelect.innerHTML = '';
+                var allOption = document.createElement('option');
+                allOption.value = '';
+                allOption.textContent = 'Todos los años';
+                faunaYearSelect.appendChild(allOption);
+                years.forEach(function (y) {
+                    var op = document.createElement('option');
+                    op.value = y;
+                    op.textContent = y;
+                    faunaYearSelect.appendChild(op);
+                });
+            }
 
-                var bloques = [];
-                if (diario.length) bloques.push('<strong>Histórico diario:</strong><br>' + diario.join('<br>'));
-                if (tipos.length) bloques.push('<strong>Impactos por tipo:</strong><br>' + tipos.join('<br>'));
-                if (especies.length) bloques.push('<strong>Especies rescatadas:</strong><br>' + especies.join('<br>'));
+            async function loadFaunaHallazgosClaseEspecieCombos() {
+                await cargarCatalogoSelect('catalogo_clase', faunaClaseSelect, 'Todas las clases');
+                await cargarEspeciesPorClase(faunaClaseSelect, faunaEspecieSelect, 'Todas las especies');
+            }
 
-                faunaHistoricoResumen.innerHTML = bloques.length
-                    ? bloques.join('<br><br>')
-                    : 'Sin datos visibles para histórico.';
+            function formatFaunaHistorico(resumenMap) {
+                var entries = Object.entries(resumenMap || {});
+                if (!entries.length) return 'Sin datos de rescates con coordenadas para el período seleccionado.';
+                return entries
+                    .sort(function (a, b) { return b[1] - a[1]; })
+                    .map(function (entry) { return '• ' + entry[0] + ': ' + entry[1]; })
+                    .join('<br>');
+            }
+
+            function getFaunaClaseMarkerColor(claseNombre) {
+                var claseNorm = normalizarTextoCatalogo(claseNombre);
+                if (claseNorm === 'reptil') return '#16a34a'; // verde
+                if (claseNorm === 'mamifero') return '#8b5a2b'; // cafe
+                if (claseNorm === 'ave') return '#2563eb'; // azul
+                return '#64748b'; // default gris-azulado
+            }
+
+            async function loadFaunaHallazgosMapData() {
+                if (!window.supabaseClient || !faunaHistoricoResumen || !faunaHallazgosMap) return;
+                var selectedYear = faunaYearSelect ? faunaYearSelect.value : '';
+                var selectedMonth = faunaMonthSelect ? faunaMonthSelect.value : '';
+                var selectedClase = faunaClaseSelect ? faunaClaseSelect.value : '';
+                var selectedEspecie = faunaEspecieSelect ? faunaEspecieSelect.value : '';
+
+                var query = window.supabaseClient
+                    .from('fauna_reports')
+                    .select('id, folio, fecha_reporte, clase, especie, tipo_reporte, ubicacion_lat, ubicacion_lng, ubicacion_texto')
+                    .eq('tipo_reporte', 'Rescate')
+                    .not('ubicacion_lat', 'is', null)
+                    .not('ubicacion_lng', 'is', null)
+                    .order('fecha_reporte', { ascending: false });
+                if (selectedYear) query = query.gte('fecha_reporte', selectedYear + '-01-01').lte('fecha_reporte', selectedYear + '-12-31');
+                if (selectedMonth && selectedYear) {
+                    var start = selectedYear + '-' + selectedMonth + '-01';
+                    var end = selectedYear + '-' + selectedMonth + '-31';
+                    query = query.gte('fecha_reporte', start).lte('fecha_reporte', end);
+                }
+                if (selectedClase) query = query.eq('clase', selectedClase);
+                if (selectedEspecie) query = query.eq('especie', selectedEspecie);
+                var { data, error } = await query;
+                if (error) throw error;
+
+                if (!faunaHallazgosMarkersLayer) faunaHallazgosMarkersLayer = L.layerGroup().addTo(faunaHallazgosMap);
+                faunaHallazgosMarkersLayer.clearLayers();
+                var bounds = [];
+                var resumen = {};
+                (data || []).forEach(function (row) {
+                    var lat = Number(row.ubicacion_lat);
+                    var lng = Number(row.ubicacion_lng);
+                    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+                    bounds.push([lat, lng]);
+                    var clase = row.clase || 'Sin clase';
+                    var especie = row.especie || 'Sin especie';
+                    var key = clase + ' / ' + especie;
+                    resumen[key] = (resumen[key] || 0) + 1;
+                    var markerColor = getFaunaClaseMarkerColor(clase);
+                    L.circleMarker([lat, lng], {
+                        radius: 8,
+                        color: '#ffffff',
+                        weight: 2,
+                        fillColor: markerColor,
+                        fillOpacity: 0.95
+                    }).bindPopup(
+                        '<strong>Folio:</strong> ' + (row.folio || '-') + '<br>' +
+                        '<strong>Fecha:</strong> ' + (row.fecha_reporte || '-') + '<br>' +
+                        '<strong>Clase:</strong> ' + clase + '<br>' +
+                        '<strong>Especie:</strong> ' + especie + '<br>' +
+                        '<strong>Ubicación:</strong> ' + (row.ubicacion_texto || 'N/D')
+                    ).addTo(faunaHallazgosMarkersLayer);
+                });
+
+                faunaHistoricoResumen.innerHTML = '<strong>Histórico de ubicaciones (Clase / Especie):</strong><br>' + formatFaunaHistorico(resumen);
+                if (bounds.length) {
+                    faunaHallazgosMap.fitBounds(bounds, { padding: [24, 24] });
+                } else {
+                    faunaHallazgosMap.setView([19.7470, -99.0125], 15);
+                }
             }
 
             async function ensureFaunaSkeletonMap() {
@@ -8711,15 +8843,9 @@
                     zoom: 15,
                     scrollWheelZoom: true
                 });
-                // Igual que el mapa picker principal: satélite ESRI + etiquetas.
-                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-                    attribution: 'Tiles &copy; Esri',
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors',
                     maxZoom: 20
-                }).addTo(faunaHallazgosMap);
-                L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-                    attribution: '',
-                    maxZoom: 20,
-                    opacity: 0.9
                 }).addTo(faunaHallazgosMap);
                 faunaHallazgosMap.setView([19.7470, -99.0125], 15);
             }
@@ -8729,22 +8855,31 @@
                 if (faunaMapBusy) return;
                 faunaMapBusy = true;
                 faunaMapModal.style.display = 'block';
-                renderFaunaHistoricoFromVisibleData();
                 setTimeout(async function () {
                     try {
                         await ensureFaunaSkeletonMap();
-                        faunaHallazgosMap.eachLayer(function (layer) {
-                            if (layer instanceof L.Marker) {
-                                try { faunaHallazgosMap.removeLayer(layer); } catch (e) { }
-                            }
-                        });
-                        faunaHallazgosMap.setView([19.7470, -99.0125], 15);
+                        renderMonthOptions();
+                        await loadFaunaHallazgosClaseEspecieCombos();
+                        await loadFaunaHallazgosYears();
+                        if (faunaYearSelect && faunaHallazgosYears.length) faunaYearSelect.value = faunaHallazgosYears[0];
+                        await loadFaunaHallazgosMapData();
                         if (faunaHallazgosMap) faunaHallazgosMap.invalidateSize();
+                    } catch (mapErr) {
+                        console.error('Error cargando mapa de hallazgos fauna:', mapErr);
+                        if (faunaHistoricoResumen) faunaHistoricoResumen.innerHTML = 'No se pudo cargar el histórico de ubicaciones.';
                     } finally {
                         faunaMapBusy = false;
                     }
                 }, 0);
             });
+
+            faunaYearSelect?.addEventListener('change', function () { loadFaunaHallazgosMapData(); });
+            faunaMonthSelect?.addEventListener('change', function () { loadFaunaHallazgosMapData(); });
+            faunaClaseSelect?.addEventListener('change', async function () {
+                await cargarEspeciesPorClase(faunaClaseSelect, faunaEspecieSelect, 'Todas las especies');
+                loadFaunaHallazgosMapData();
+            });
+            faunaEspecieSelect?.addEventListener('change', function () { loadFaunaHallazgosMapData(); });
 
             closeFaunaMapBtn?.addEventListener('click', function () {
                 if (faunaMapModal) faunaMapModal.style.display = 'none';
