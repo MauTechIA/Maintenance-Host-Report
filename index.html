@@ -2634,62 +2634,19 @@
                     <label>🦁 Clase: 
                         <select id="fauna_rescate_clase" name="fauna_rescate[clase]" style="display:block; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
                             <option value="">-- Seleccionar Clase --</option>
-                            <option value="Ave">Ave</option>
-                            <option value="Mamifero">Mamifero</option>
-                            <option value="Reptil">Reptil</option>
-                            <option value="Otro">Otro</option>
                         </select>
                     </label>
                     <input type="text" id="fauna_rescate_clase_otro" name="fauna_rescate_clase_otro" placeholder="Especifique otra clase" style="display:none; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;" /><br>
 
                     <label>🔬 Especie: 
-                        <select name="fauna_rescate[especie]" style="display:block; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
+                        <select id="fauna_rescate_especie" name="fauna_rescate[especie]" style="display:block; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
                             <option value="">-- Seleccionar Especie --</option>
-                            <option value="Aguililla de Harris (Parabuteo unicinctus)">Aguililla de Harris (Parabuteo unicinctus)</option>
-                            <option value="Alicante (Pituophis deppei)">Alicante (Pituophis deppei)</option>
-                            <option value="Besucona asiática (Hemidactylus frenatus)">Besucona asiática (Hemidactylus frenatus)</option>
-                            <option value="Caracara quebrantahuesos (Caracara plancus)">Caracara quebrantahuesos (Caracara plancus)</option>
-                            <option value="Cernicalo americano (Falco sparverius)">Cernicalo americano (Falco sparverius)</option>
-                            <option value="Colibri pico ancho (Cynanthus latirostris)">Colibri pico ancho (Cynanthus latirostris)</option>
-                            <option value="Colorín sietecolores (Passerina ciris)">Colorín sietecolores (Passerina ciris)</option>
-                            <option value="Conejo serrano (Sylvilagus floridanus)">Conejo serrano (Sylvilagus floridanus)</option>
-                            <option value="Cuicacoche picocurvo (Toxostoma curvirostre)">Cuicacoche picocurvo (Toxostoma curvirostre)</option>
-                            <option value="Culebra chata mexicana (Salvadora bairdi)">Culebra chata mexicana (Salvadora bairdi)</option>
-                            <option value="Culebra toluquense (Conopsis lineata)">Culebra toluquense (Conopsis lineata)</option>
-                            <option value="Gavilán de Cooper (Astur cooperii)">Gavilán de Cooper (Astur cooperii)</option>
-                            <option value="Gorrión sabanero (Passerculus sandwichensis)">Gorrión sabanero (Passerculus sandwichensis)</option>
-                            <option value="Halcon peregrino (Falco peregrinus)">Halcon peregrino (Falco peregrinus)</option>
-                            <option value="Lagartija espinosa mexicana (Sceloporus spinosus)">Lagartija espinosa mexicana (Sceloporus spinosus)</option>
-                            <option value="Lagarto alicante de las montañas (Barisia imbricata)">Lagarto alicante de las montañas (Barisia imbricata)</option>
-                            <option value="Lechuza de campanario (Tyto furcata)">Lechuza de campanario (Tyto furcata)</option>
-                            <option value="Liebre cola negra (Lepus californicus)">Liebre cola negra (Lepus californicus)</option>
-                            <option value="Loro corona lila (Amazona finschi)">Loro corona lila (Amazona finschi)</option>
-                            <option value="Murcielago de cola libre (Tadadira brasilensis)">Murcielago de cola libre (Tadadira brasilensis)</option>
-                            <option value="Murciélago ratón de California (Myotis californicus)">Murciélago ratón de California (Myotis californicus)</option>
-                            <option value="Periquito africano de fischer (Agapornis roseicollis)">Periquito africano de fischer (Agapornis roseicollis)</option>
-                            <option value="Periquito australiano (Melopsittacus undulatus)">Periquito australiano (Melopsittacus undulatus)</option>
-                            <option value="Pijije canelo (Dendrocygna bicolor)">Pijije canelo (Dendrocygna bicolor)</option>
-                            <option value="Pradero tortillaconchile (Sturnella magna)">Pradero tortillaconchile (Sturnella magna)</option>
-                            <option value="Rascador viejita (Melozone fusca)">Rascador viejita (Melozone fusca)</option>
-                            <option value="Tapacaminos cuerporruín mexicano (Antrostomus arizonae)">Tapacaminos cuerporruín mexicano (Antrostomus arizonae)</option>
-                            <option value="Tecolote del Oeste (Megascops kennicottii)">Tecolote del Oeste (Megascops kennicottii)</option>
-                            <option value="Tecolote llanero (Athene cunicularia)">Tecolote llanero (Athene cunicularia)</option>
-                            <option value="Tlacuache norteño (Didelphis virginiana)">Tlacuache norteño (Didelphis virginiana)</option>
-                            <option value="Tuza del eje neovolcánico (Cratogeomys fumosus)">Tuza del eje neovolcánico (Cratogeomys fumosus)</option>
-                            <option value="Verdugo americano (Lanius ludovicianus)">Verdugo americano (Lanius ludovicianus)</option>
-                            <option value="Zopilote aura (Cathartes aura)">Zopilote aura (Cathartes aura)</option>
                         </select>
                     </label><br>
 
                     <label>📍 Sitio de Reubicación: 
-                        <select name="fauna_rescate[sitio_reubicacion]" style="display:block; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
+                        <select id="fauna_rescate_sitio_reubicacion" name="fauna_rescate[sitio_reubicacion]" style="display:block; margin-top:6px; max-width:420px; width:100%; padding:10px; border-radius:8px; border:1.5px solid #c8d8ee; background:#f5f8fc;">
                             <option value="">-- Seleccionar Sitio de Reubicación --</option>
-                            <option value="Parque Estatal Sierra Hermosa">Parque Estatal Sierra Hermosa</option>
-                            <option value="Parque Estatal Sierra de Tepotzotlán">Parque Estatal Sierra de Tepotzotlán</option>
-                            <option value="Parque Estatal Sierra de Guadalupe">Parque Estatal Sierra de Guadalupe</option>
-                            <option value="Parque Estatal Cerro Gordo">Parque Estatal Cerro Gordo</option>
-                            <option value="Unidad de Rehabilitación de Fauna Silvestre de Pachuca">Unidad de Rehabilitación de Fauna Silvestre de Pachuca</option>
-                            <option value="Adopción">Adopción</option>
                         </select>
                     </label><br>
 
@@ -2854,9 +2811,6 @@
                     </div>
                 </div>
 
-                <div style="margin-top:18px; text-align:right;">
-                    <button id="open-reportes-hallazgos-map-btn" class="btn btn-primary" style="padding:10px 16px;">🗺️ Mapa de hallazgos</button>
-                </div>
 
                 <!-- Gráficos y detalles -->
                 <div style="margin-top: 30px;">
@@ -6773,16 +6727,19 @@
                                     mainTitle.textContent = 'Formato de Revisión del Área de Movimiento';
                                 } else if (targetTab === 'fauna') {
                                     mainTitle.textContent = 'Registro de Impacto o Posible Impacto';
+                                    cargarCatalogosFauna();
                                 } else if (targetTab === 'historial') {
                                     mainTitle.textContent = 'Historial de Reportes';
                                 } else if (targetTab === 'estadistica') {
                                     mainTitle.textContent = 'Estadísticas';
                                 } else if (targetTab === 'estadistica-fauna') {
                                     mainTitle.textContent = 'Estadística Fauna';
+                                    cargarCatalogosFauna();
                                     // Cargar estadísticas de fauna cuando se abre la pestaña
                                     loadFaunaStatistics();
                                 } else if (targetTab === 'historial-fauna') {
                                     mainTitle.textContent = 'Historial de Reportes de Fauna';
+                                    cargarCatalogosFauna();
                                     // Cargar historial de fauna cuando se abre la pestaña
                                     loadFaunaReports({});
                                 }
@@ -8006,6 +7963,123 @@
                     }
                 });
             })();
+
+            window.faunaCatalogosCache = window.faunaCatalogosCache || {};
+
+            async function getCatalogoActivo(tabla, filtros) {
+                const client = window.supabaseClient;
+                if (!client) {
+                    console.error('Supabase client not ready for catalog lookup:', tabla);
+                    return [];
+                }
+
+                var query = client
+                    .from(tabla)
+                    .select('id, nombre')
+                    .eq('activo', true)
+                    .order('orden', { ascending: true });
+
+                if (filtros && typeof filtros === 'object') {
+                    Object.keys(filtros).forEach(function(campo){
+                        if (filtros[campo] !== undefined && filtros[campo] !== null && filtros[campo] !== '') {
+                            query = query.eq(campo, filtros[campo]);
+                        }
+                    });
+                }
+
+                const { data, error } = await query;
+
+                if (error) {
+                    console.error('Error loading catalog from Supabase:', { tabla: tabla, error: error });
+                    return [];
+                }
+
+                return data || [];
+            }
+
+            function getCatalogoCacheKey(tabla, filtros) {
+                var key = tabla;
+                if (filtros && typeof filtros === 'object') {
+                    var parts = Object.keys(filtros).sort().map(function(k){ return k + ':' + filtros[k]; });
+                    if (parts.length) key += '|' + parts.join('|');
+                }
+                return key;
+            }
+
+            async function cargarCatalogoSelect(tabla, selectElement, placeholder, filtros) {
+                if (!selectElement) return;
+
+                var valorActual = selectElement.value;
+                selectElement.innerHTML = '';
+                var placeholderOption = document.createElement('option');
+                placeholderOption.value = '';
+                placeholderOption.textContent = placeholder;
+                selectElement.appendChild(placeholderOption);
+
+                var cacheKey = getCatalogoCacheKey(tabla, filtros);
+                var catalogo = window.faunaCatalogosCache[cacheKey];
+                if (!catalogo) {
+                    catalogo = await getCatalogoActivo(tabla, filtros);
+                    window.faunaCatalogosCache[cacheKey] = catalogo;
+                }
+
+                catalogo.forEach(function(item) {
+                    var option = document.createElement('option');
+                    option.value = item.nombre; // Compatibilidad: guardar texto, no id
+                    option.textContent = item.nombre;
+                    selectElement.appendChild(option);
+                });
+
+                if (valorActual && Array.prototype.some.call(selectElement.options, function(opt) { return opt.value === valorActual; })) {
+                    selectElement.value = valorActual;
+                }
+            }
+
+            async function cargarEspeciesPorClase(selectClase, selectEspecie, placeholder) {
+                if (!selectEspecie) return;
+
+                var claseNombre = selectClase && selectClase.value ? selectClase.value : '';
+                if (!claseNombre) {
+                    await cargarCatalogoSelect('catalogo_especie', selectEspecie, placeholder);
+                    return;
+                }
+
+                var clases = window.faunaCatalogosCache['catalogo_clase'] || await getCatalogoActivo('catalogo_clase');
+                window.faunaCatalogosCache['catalogo_clase'] = clases;
+
+                var clase = clases.find(function(item){ return item.nombre === claseNombre; });
+                if (!clase || !clase.id) {
+                    await cargarCatalogoSelect('catalogo_especie', selectEspecie, placeholder);
+                    return;
+                }
+
+                await cargarCatalogoSelect('catalogo_especie', selectEspecie, placeholder, { clase_id: clase.id });
+            }
+
+            function wireFaunaClaseEspecie(selectClaseId, selectEspecieId, placeholderEspecie) {
+                var claseSelect = document.getElementById(selectClaseId);
+                var especieSelect = document.getElementById(selectEspecieId);
+                if (!claseSelect || !especieSelect || claseSelect.dataset.catalogoWired === '1') return;
+                claseSelect.dataset.catalogoWired = '1';
+                claseSelect.addEventListener('change', function () {
+                    cargarEspeciesPorClase(claseSelect, especieSelect, placeholderEspecie);
+                });
+            }
+
+            async function cargarCatalogosFauna() {
+                await Promise.all([
+                    cargarCatalogoSelect('catalogo_clase', document.getElementById('fauna_rescate_clase'), '-- Seleccionar Clase --'),
+                    cargarCatalogoSelect('catalogo_destino', document.getElementById('fauna_rescate_sitio_reubicacion'), '-- Seleccionar Sitio de Reubicación --'),
+                    cargarCatalogoSelect('catalogo_clase', document.getElementById('filter-fauna-clase'), 'Todas las clases'),
+                    cargarCatalogoSelect('catalogo_especie', document.getElementById('filter-fauna-especie'), 'Todas las especies')
+                ]);
+                await Promise.all([
+                    cargarEspeciesPorClase(document.getElementById('fauna_rescate_clase'), document.getElementById('fauna_rescate_especie'), '-- Seleccionar Especie --'),
+                    cargarEspeciesPorClase(document.getElementById('filter-fauna-clase'), document.getElementById('filter-fauna-especie'), 'Todas las especies')
+                ]);
+                wireFaunaClaseEspecie('fauna_rescate_clase', 'fauna_rescate_especie', '-- Seleccionar Especie --');
+                wireFaunaClaseEspecie('filter-fauna-clase', 'filter-fauna-especie', 'Todas las especies');
+            }
 
             // Función para cargar estadísticas
             async function loadEstadisticas() {
