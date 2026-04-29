@@ -8766,6 +8766,14 @@
                     .join('<br>');
             }
 
+            function getFaunaClaseMarkerColor(claseNombre) {
+                var claseNorm = normalizarTextoCatalogo(claseNombre);
+                if (claseNorm === 'reptil') return '#16a34a'; // verde
+                if (claseNorm === 'mamifero') return '#8b5a2b'; // cafe
+                if (claseNorm === 'ave') return '#2563eb'; // azul
+                return '#64748b'; // default gris-azulado
+            }
+
             async function loadFaunaHallazgosMapData() {
                 if (!window.supabaseClient || !faunaHistoricoResumen || !faunaHallazgosMap) return;
                 var selectedYear = faunaYearSelect ? faunaYearSelect.value : '';
@@ -8804,7 +8812,14 @@
                     var especie = row.especie || 'Sin especie';
                     var key = clase + ' / ' + especie;
                     resumen[key] = (resumen[key] || 0) + 1;
-                    L.marker([lat, lng]).bindPopup(
+                    var markerColor = getFaunaClaseMarkerColor(clase);
+                    L.circleMarker([lat, lng], {
+                        radius: 8,
+                        color: '#ffffff',
+                        weight: 2,
+                        fillColor: markerColor,
+                        fillOpacity: 0.95
+                    }).bindPopup(
                         '<strong>Folio:</strong> ' + (row.folio || '-') + '<br>' +
                         '<strong>Fecha:</strong> ' + (row.fecha_reporte || '-') + '<br>' +
                         '<strong>Clase:</strong> ' + clase + '<br>' +
