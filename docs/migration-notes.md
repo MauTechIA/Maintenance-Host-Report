@@ -19,3 +19,9 @@
 - **Destino:** `js/ui/signature-manager.js`.
 - **Compatibilidad mantenida:** se conservan funciones globales requeridas por HTML inline (`window.guardarFirma`, `window.limpiarFirma`, `window.obtenerFirmas`, `window.obtenerFirmasFauna`, `window.toggleFirmas`, `window.toggleFirmasFauna`).
 - **No modificado intencionalmente:** reglas de negocio, payloads de reportes, consultas Supabase y estructura de formularios.
+
+## Fase 3 - Centralización inicial de Supabase
+- **Movido:** bootstrap de cliente Supabase y helpers de URL segura para PDF.
+- **Origen:** bloque inline `Supabase Logic` en `index.html`.
+- **Destino:** `js/supabase-client.js`.
+- **Compatibilidad mantenida:** se conserva `window.supabaseClient`; se exponen helpers en `window.MHRSupabaseHelpers` para mantener el flujo actual sin reescribir lógica de negocio.
